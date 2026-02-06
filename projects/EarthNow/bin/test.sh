@@ -22,9 +22,9 @@ python plotall.py \
     --product max_reflectivity \
     --nproc 1 \
     --fdate 20260202_00z \
+    --pdate 20260202_1600 \
     --map-type conus \
     --base-path /discover/nobackup/$USER/EarthNow/plots \
     --map-type goes_east_full_disk \
     --style satellite
 exit 0
-#   --pdate 20260202_1600 \
