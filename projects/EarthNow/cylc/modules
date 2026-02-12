@@ -1,0 +1,9 @@
+
+source /usr/share/lmod/lmod/init/bash
+module load python/GEOSpyD
+module load ffmpeg
+
+export PYTHONPATH="$INSTALL_PATH/src:$INSTALL_PATH/cylc/src"
+export PATH="$INSTALL_PATH/bin:$INSTALL_PATH/cylc/bin:$PATH"
+
+umask 022

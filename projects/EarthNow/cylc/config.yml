@@ -1,0 +1,43 @@
+plot_path: /discover/nobackup/dao_ops/jardizzo/EarthNow/plots
+NPROC: 28
+
+plot_surface_from_geos_cycled_replay:
+
+  products: [T2M,Radar]
+  data_readers: [geos_cycled_replay]
+  regions: [global, conus]
+  nproc: $NPROC 
+
+plot_upper_from_geos_cycled_replay:
+
+  products: [VORT500]
+  data_readers: [geos_cycled_replay]
+  regions: [global, conus]
+  nproc: $NPROC 
+
+products:
+  SLP:
+    product: sea_level_pressure
+    style: light
+    driver: 'plotall.py'
+    plot_path: $plot_path
+  Radar:
+    product: max_reflectivity
+    style: light
+    driver: 'plotall.py'
+    plot_path: $plot_path
+  T2M:
+    product: temperature_2m
+    style: light
+    driver: 'plotall.py'
+    plot_path: $plot_path
+  VORT500:
+    product: vorticity_heights_500mb
+    style: light
+    driver: 'plotall.py'
+    plot_path: $plot_path
+
+data_readers:
+  geos_cycled_replay:
+    data_reader: geos_cycled_replays
+    fdate: PT0H

@@ -1,0 +1,49 @@
+[cylc]
+    UTC mode = True
+[scheduling]
+    initial cycle point = 2026-02-02T00
+    final cycle point = 2026-02-02T00
+    max active cycle points = 1
+    [[xtriggers]]
+        clock = wall_clock(offset=PT12H)
+    [[dependencies]]
+        [[[T00]]] # validity (hours)
+            graph = """
+                @clock => plot_upper_from_geos_cycled_replay
+            """
+[runtime]
+    [[root]] # suite defaults
+
+        [[[environment]]]
+
+            datetime  = $CYLC_TASK_CYCLE_POINT
+            taskname = $CYLC_TASK_NAME
+            config = $CYLC_SUITE_DEF_PATH/cylc/config.yml
+            PLOT_PATH = /discover/nobackup/dao_ops/jardizzo/EarthNow/plots
+            INSTALL_PATH = $CYLC_SUITE_DEF_PATH
+            
+        [[[events]]]
+            mail to = joseph.v.ardizzone@nasa.gov
+            mail events = failed
+
+    [[plotTask]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/cylc/modules"
+        script = "earthnow.py $datetime $config --task $taskname"
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT30M
+        [[[directives]]]
+            --account = g2538
+            --qos = daohi
+            --constraint = mil
+            --ntasks = 28
+            --job-name = EarthNow
+
+    [[plot_radar_from_geos_cycled_replay]]
+        inherit = plotTask
+
+    [[plot_surface_from_geos_cycled_replay]]
+        inherit = plotTask
+
+    [[plot_upper_from_geos_cycled_replay]]
+        inherit = plotTask
