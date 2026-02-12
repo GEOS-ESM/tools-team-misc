@@ -11,34 +11,11 @@ class ProductGenerator(object):
     Default products generator.
     """
     
-    def __init__(self,
-                 cmd,
-                 driver=None,
-                 nproc=1,
-                 product=None,
-                 data_reader=None,
-                 region=None,
-                 style=None,
-                 fdate=None,
-                 pdate=None,
-                 start_pdate=None,
-                 end_pdate=None,
-                 plot_path=None):
+    def __init__(self, cmd, options, **kwargs):
 
         self.driver = cmd
-        self.options = {}
-
-        self.options['driver'] = None # Remove from options.
-        self.options['product'] = product
-        self.options['data-reader'] = data_reader
-        self.options['nproc'] = nproc
-        self.options['style'] = style
-        self.options['map-type'] = region
-        self.options['fdate'] = fdate
-        self.options['pdate'] = pdate
-        self.options['start-pdate'] = start_pdate
-        self.options['end-pdate'] = end_pdate
-        self.options['base-path'] = plot_path
+        self.options = dict(options)
+        self.options.update(kwargs)
 
     def exe(self):
 
@@ -47,4 +24,4 @@ class ProductGenerator(object):
 
         cmd = ' '.join(cmd)
         print(self.driver + ' ' + cmd)
-        os.system(self.driver + ' ' + cmd)
+ #      os.system(self.driver + ' ' + cmd)

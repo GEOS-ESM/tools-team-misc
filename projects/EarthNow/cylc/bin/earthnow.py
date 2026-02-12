@@ -29,11 +29,10 @@ products = config[task]['products']
 data_readers = config[task]['data_readers']
 regions = config[task].get('regions', [None])
 nproc = config[task].get('nproc', None)
-print(nproc)
 
 for region in regions:
 
-    options = {'region' : region, 'nproc' : nproc}
+    options = {'map-type' : region, 'nproc' : nproc}
 
     for product in products:
 
@@ -44,17 +43,12 @@ for region in regions:
 
             options.update(cfg_readers[data_reader])
 
-            fdate = options.get('fdate', None)
-            pdate = options.get('pdate', None)
-            start_pdate = options.get('start_pdate', None)
-            end_pdate = options.get('end_pdate', None)
-
-            for t_opt in ['fdate','pdate','start_pdate','end_pdate']:
+            for t_opt in ['fdate','pdate','start-pdate','end-pdate']:
 
                 delta_t = options.get(t_opt, None)
                 if delta_t:
                     t_dt = time_dt + parse_duration(delta_t)
                     options[t_opt] = t_dt.strftime('%Y%m%d_%Hz')
         
-            plot = ProductGenerator(driver, **options)
+            plot = ProductGenerator(driver, options)
             plot.exe()
