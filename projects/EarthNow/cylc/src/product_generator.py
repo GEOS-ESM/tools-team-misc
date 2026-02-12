@@ -24,4 +24,4 @@ class ProductGenerator(object):
 
         cmd = ' '.join(cmd)
         print(self.driver + ' ' + cmd)
- #      os.system(self.driver + ' ' + cmd)
+        os.system(self.driver + ' ' + cmd)
