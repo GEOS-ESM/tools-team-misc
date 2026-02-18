@@ -1,5 +1,5 @@
 from .registry import register
-from myutils import dict_merge
+from myutils import dict_merge, str_replace
 from conditional import Conditional
 
 class theme(object):
@@ -21,13 +21,24 @@ class theme(object):
         dict_merge(layer, kwargs)
         self.layers[name] = layer
 
-    def expand(self, name, request):
+    def expand(self, attributes, request):
 
-        for k,v in self.layers[name].items():
+        defs = { k:str(v) for k,v in request.items() }
+        d = dict(attributes)
 
+        for k,v in attributes.items():
             if isinstance(v, Conditional):
                 result = v.get(request)
-                print(f'{k} is a conditional with value {result}')
+                defs[k] = str(result)
+                d[k] = result
+            else:
+                defs[k] = str(v)
+
+        for k,v in d.items():
+            if isinstance(v, str):
+                d[k] = str_replace(v, **defs)
+
+        return d
 
     def __str__(self):
 

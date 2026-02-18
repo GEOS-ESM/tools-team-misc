@@ -1,7 +1,10 @@
 from themes.registry import THEMES
-from themes.themes import *
+#import themes
 
 print(THEMES)
 
 p = THEMES['wxmapsclassicpub']()
-print(p)
+
+request = dict(level=800)
+print (p.expand(p.plots['vort'], request))
+print (p.expand(p.layers['vorticity'], request))
