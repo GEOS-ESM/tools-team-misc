@@ -1,0 +1,711 @@
+AOT_alpha: &AOT_ALPHA
+  alpha: 
+    - 0.00 0.0 0.0
+    - 0.10 0.0 0.0
+    - 0.50 1.0 1.0
+    - 1.00 1.0 1.0
+
+PM_alpha: &PM_ALPHA
+  alpha: 
+    - 0.00 0.0 0.0
+    - 0.05 0.0 0.0
+    - 0.20 0.3 0.3
+    - 1.00 0.3 0.3
+
+theme:
+
+  plot:
+
+    precip: &PRECIP
+      long_name: PRECIP
+      levels: [0]
+      layers: [olr, precip]
+      title: 'Precip [mm]'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        layers: [map-precip]
+      olr:
+        cmin: 140
+        cmax: 360
+        cint: 20
+
+#   tpw: &TPW
+#     long_name: TPW SLP
+#     levels: [0]
+#     layers: [tpw, olr]
+#     title: 'TPW [kg m-2]'
+#     parea: 0 11 0 8.5
+#     map:
+#       frame: 'off'
+#       layers: [map-tpw]
+
+    q2m:
+      long_name: Specific Humidity at 2-meters
+      levels: [0]
+      layers: [q2m]
+      title: '2-meter Specific Humidity'
+      map:
+        frame: 'off'
+        layers: [map-q2m]
+
+    rh2m: &RH
+      long_name: RH
+      levels: [0]
+      layers: [rh]
+      title: 'RH (Percent)'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        layers: [map-rh]
+
+    wspd10m: &WSPD
+      long_name: 10m Wind Speed
+      levels: [0]
+      layers: [wspd]
+      title: '10m Wind Speed (m/s)'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        layers: [map-wspd]
+
+    nox: &NOX
+      long_name: NO Total
+      title: 'Nitrogen Monoxide Emission'
+      levels: [0]
+      layers: [nox_total]
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        layers: [map-nox]
+
+    t2m: &T2M
+      long_name: T2M
+      levels: [0] 
+      layers: [t2m]
+      title: '2-Meter Temperature (C)'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        layers: [clearmap]
+
+    o3sfc: &O3SFC
+      long_name: O3 Surface
+      levels: [0]
+      layers: [o3sfc]
+      title: 'Surface Ozone'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        line_width: 10
+        line_color: 0 0 0 0
+        layers: [map-o3sfc]
+
+    cosfc: &COSFC
+      long_name: CO Surface
+      levels: [0]
+      layers: [cosfc]
+      title: 'Surface Carbon Monoxide'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        line_width: 10
+        line_color: 0 0 0 0
+        layers: [map-cosfc]
+
+    pm25sfc: &PM25SFC
+      long_name: PM2.5
+      levels: [0]
+      layers: [pm25sfc]
+      title: 'PM2.5'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        layers: [map-pm25sfc]
+
+  layer:
+
+    precip:
+      gxout: shaded
+      expr: _prectot*3600
+      cbar: Precip
+      cmin: 0
+      cmax: 20
+      cint: 2
+      nsub: 10
+      skip: 10
+      scale: exp_scale
+      alpha:
+        - 0.00 0.00 0.00
+        - 0.03 0.00 0.00
+        - 0.08 1.00 1.00
+        - 1.00 1.00 1.00
+
+    olr:
+      gxout: shaded
+      expr: _lwtup
+      cbar: OLRgray
+      cbunits: 'Outgoing Longwave Radiation [W/m`a2`n]'
+      nsub: 5
+      skip: 5
+      cmin: 140
+      cmax: 320
+      cint: 20
+#     clevs:
+      alpha:
+        - 0.00 1.00 1.00
+      # - 0.50 0.80 0.80
+        - 0.75 0.00 0.00
+        - 1.00 0.00 0.00
+
+    q2m:
+      gxout: shaded
+      expr: (_qv2m*1000)
+      cbar: colormap_11
+      cbunits: g kg-1
+      nsub: 10
+      skip: 10
+      clevs:
+      cmin: 0
+      cmax: 22
+      cint: 2
+
+    tpw:
+      gxout: shaded
+      expr: _tqv
+      cbar: TPWSVS
+    # cbunits: 'Total Precipitable Water [kg m-2]'
+      cbunits:
+      nsub: 8
+      skip: 8
+      cmin: 10
+      cmax: 70
+      cint: 5
+    # clevs: 5 9 13 17 21 25 28 30 32 34 36 38 42 46 50 54 58
+    # clevs: 0.04 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 1.1 1.2 1.4 1.6 1.8 2 2.15 2.3 2.45 2.6 2.75 2.9 3.05 3.2 3.35 3.5
+    # clevs: 1 5 9 13 17 21 25 28 30 32 34 36 38 42 46 50 54 58
+      clevs:
+      scale:
+      alpha:
+        - 0.000 0.000 0.000
+        - 0.030 0.000 0.000
+        - 0.100 1.000 1.000
+        - 1.000 1.000 1.000
+
+    t2m:
+      gxout: shaded
+      expr: _t2m-273.15
+      cbar: Temperature
+    # cbunits: 'Temperature [C]'
+      cbunits:
+      clevs:
+      cmin: -40
+      cmax: 40
+      cint: 5.0
+      nsub: 8
+      skip: 8
+
+    o3sfc:
+      gxout: shaded
+      expr: 1.0e+9 * _o3sfc
+      cbar: O3Surface
+    # cbunits: '[PPBV]'
+      cbunits:
+      clevs:
+      cmin: 5
+      cmax: 60
+      cint: 5
+      nsub: 10
+      skip: 10
+    # scale: exp_scale
+      alpha:
+        - 0.0 0.0 0.0
+        - 0.1 0.0 0.0
+        - 0.5 1.0 1.0
+        - 1.0 1.0 1.0
+
+    ssexttau:
+      gxout: shaded
+      expr: _ssexttau
+      cbar: SSEXTTAU
+      cbunits:
+      clevs:
+      cmin: 0
+      cmax: 0.5
+      cint: 0.05
+      nsub: 5 
+      skip: 5 
+      scale: exp_scale
+      <<: *AOT_ALPHA
+
+    duexttau:
+      gxout: shaded
+      expr: _duexttau
+      cbar: DUEXTTAU
+      cbunits: 
+      clevs:
+      cmin: 0
+      cmax: 0.5
+      cint: 0.05
+      nsub: 5 
+      skip: 5 
+      scale: exp_scale
+      <<: *AOT_ALPHA
+
+    suexttau:
+      gxout: shaded
+      expr: _suexttau
+      cbar: SUEXTTAU
+      cbunits:
+      clevs:
+      cmin: 0
+      cmax: 0.5
+      cint: 0.05
+      nsub: 5 
+      skip: 5 
+      scale: exp_scale
+      <<: *AOT_ALPHA
+
+    ocexttau:
+      gxout: shaded
+      expr: _ocexttau
+      cbar: OCEXTTAU
+      cbunits:
+      clevs:
+      cmin: 0
+      cmax: 0.5
+      cint: 0.05
+      nsub: 5 
+      skip: 5 
+      scale: exp_scale
+      <<: *AOT_ALPHA
+
+    bcexttau:
+      gxout: shaded
+      expr: _bcexttau
+      cbar: BCEXTTAU
+      cbunits:
+      clevs:
+      cmin: 0 
+      cmax: 0.5
+      cint: 0.05
+      nsub: 5 
+      skip: 5 
+      scale: exp_scale
+      <<: *AOT_ALPHA
+
+    niexttau:
+      gxout: shaded
+      expr: _niexttau
+      cbar: NIEXTTAU
+      cbunits:
+      clevs:
+      cmin: 0
+      cmax: 0.5
+      cint: 0.05
+      nsub: 5 
+      skip: 5 
+      scale: exp_scale
+      <<: *AOT_ALPHA
+
+    coclbbna:
+  #   gxout: grid
+  #   expr: maskout(maskout(_coclbbna*2150,_coclbbna*2150-0.05),RANDOM-0.99)
+  #   cmark: 3
+  #   digsiz: 0.05
+  #   ccolor: 255 0 0
+  #   cthick: 2
+
+      gxout: shaded
+      expr: _coclbbna*2150
+      cbar: OrangeSmoke
+      cmin: 0.0
+      cmax: 2.0
+      cint: 0.2
+      nsub: 10
+      skip: 10
+      scale: exp_scale
+      alpha:
+        - 0.00 0.0 0.0
+        - 0.05 0.0 0.0
+        - 0.10 0.5 0.5
+        - 1.00 1.0 1.0
+
+    coclbbae:
+  #   gxout: grid
+  #   expr: maskout(maskout(_coclbbae*2150,_coclbbae*2150-0.05),RANDOM-0.99)
+  #   cmark: 3
+  #   digsiz: 0.05
+  #   ccolor: 0 255 0
+  #   cthick: 2
+
+      gxout: shaded
+      expr: _coclbbae*2150
+      cbar: MagentaSmoke
+      cmin: 0.0
+      cmax: 2.0
+      cint: 0.2
+      nsub: 10
+      skip: 10
+      scale: exp_scale
+      alpha:
+        - 0.00 0.0 0.0
+        - 0.05 0.0 0.0
+        - 0.10 0.5 0.5
+        - 1.00 1.0 1.0
+
+    coclbbla:
+#     gxout: grid
+#     expr: maskout(maskout(_coclbbla*2150,_coclbbla*2150-0.05),RANDOM-0.99)
+#     cmark: 3
+#     digsiz: 0.05
+#     ccolor: 255 255 0
+#     cthick: 2
+
+      gxout: shaded
+      expr: _coclbbla*2150
+      cbar: GreenSmoke
+      cmin: 0.0
+      cmax: 2.0
+      cint: 0.2
+      nsub: 10
+      skip: 10
+      scale: exp_scale
+      alpha:
+        - 0.00 0.0 0.0
+        - 0.05 0.0 0.0
+        - 0.10 0.5 0.5
+        - 1.00 1.0 1.0
+
+    coclbbaf:
+#     gxout: grid
+#     expr: maskout(maskout(_coclbbaf*2150,_coclbbaf*2150-0.05),RANDOM-0.99)
+#     cmark: 3
+#     digsiz: 0.05
+#     ccolor: 236 152 83
+#     cthick: 2
+
+      gxout: shaded
+      expr: _coclbbaf*2150
+      cbar: RedSmoke
+      cmin: 0.0
+      cmax: 2.0
+      cint: 0.2
+      nsub: 10
+      skip: 10
+      scale: exp_scale
+      alpha:
+        - 0.00 0.0 0.0
+        - 0.05 0.0 0.0
+        - 0.10 0.5 0.5
+        - 1.00 1.0 1.0
+
+    coclbbgl:
+      gxout: shaded
+      expr: _coclbbgl*2150
+      cbar: smoke_gray
+      clevs:
+      cmin: 0
+      cmax: 2.2 
+      cint: 0.2
+      nsub: 5
+      skip: 5
+      scale:
+      alpha:
+        - 0.00 0.0 0.0
+        - 0.03 0.0 0.0
+        - 0.20 0.5 0.5
+        - 1.00 0.8 0.8
+
+    nox_total_emis:
+      gxout: shaded
+      expr: _emis_no*1.0e+9
+      cbar: green01 
+    # cbunits: '[Gg]'
+      cbunits: '--auto'
+      cmin: 0
+      cmax: 0.2
+      cint: 0.02
+      clevs: 0 0.005 0.01 0.02 0.03 0.05 0.1 0.2 0.5 1 2 5 10 15
+      nsub: 10
+      skip: 10
+      alpha:
+        - 0.000 0.000 0.000
+        - 0.015 0.000 0.000
+        - 0.050 1.000 1.000
+        - 1.000 1.000 1.000
+
+    nox_total: 
+      gxout: shaded
+      expr: (_no+_no2)*1.0e+9
+      cbar: green01 
+    # cbunits: '[PPBV]'
+      cbunits: '--auto'
+      cmin: 0
+      cmax: 0.2
+      cint: 0.02
+      clevs: 0.001 0.002 0.004 0.006 0.01 0.02 0.03 0.05 0.1 0.2 0.5 1 2 5 10 15
+      nsub: 10
+      skip: 10
+      alpha:
+        - 0.000 0.000 0.000
+        - 0.005 0.000 0.000
+        - 0.050 1.000 1.000
+        - 1.000 1.000 1.000
+
+    nox_light_night:
+      gxout: shaded
+    # define: nox sun
+    # nox: 're(_emis_no_lght*1e+9,0.25,0.25,"bl")'
+    # sun: 're(_swgnt,0.25,0.25,"bl")'
+    # expr: maskout(maskout($nox,-$sun+1),$nox-0.007)
+    # expr: maskout($nox,$nox-0.007)
+      expr: maskout(_emis_no_lght*1e+9,_emis_no_lght*1e+9-0.007)
+      cbar: plasma
+      cbunits: '--auto'
+      cmin: 0
+      cmax: 0.060
+      cint: 0.005
+      nsub: 10
+      skip: 10
+
+    flashrate:
+      gxout: grfill
+    # define: flash sun
+    # flash: 're(_flashrate*1440,0.25,0.25,"bl")'
+    # sun: 're(_swgnt,0.25,0.25,"bl")'
+    # expr: maskout(maskout($flash,$flash-0.144),-$sun+1)
+      expr: maskout(maskout(_flashrate*1440,_flashrate*1440-0.144),RANDOM-0.8)
+      cbunits: 'day-1 km-2'
+      cbar: Lightning
+      cmin: 0
+      cmax: 0.5
+      cint: 0.1
+      nsub: 10
+      skip: 10
+      alpha_off:
+        - 0.000 0.000 0.000
+        - 0.050 1.000 1.000
+        - 1.000 1.000 1.000
+
+    daynight:
+      gxout: grfill
+    # expr: const(const(maskout(_swgnt,_swgnt-10),1),0,"-u")
+      expr: smth9(smth9(_swgnt))
+    # expr: _swgnt
+      cbar: DayNight
+      cbunits: '--auto'
+      cmin: 5
+      cmax: 620
+      cint: 100
+      nsub: 2
+      skip: 2
+      alpha:
+        - 0.000 0.500 0.500
+        - 0.010 0.500 0.000
+        - 1.000 0.000 0.000
+
+    daynight_boundary:
+      gxout: contour
+      expr: smth9(smth9(smth9(_swgnt)))
+      cmin: 1
+      cmax: 1
+      cint: 1
+      csmooth: 'on'
+      ccolor: 150 150 150
+      cthick: 8
+      clab: 'off'
+
+    cosfc_masked:
+      gxout: shaded
+      expr: maskout(1.0e+9*_cosfc,1.0e+9*_cosfc-41)
+      cbar: hot01
+      cbunits: '[PPBV]'
+      cmin: 25
+      cmax: 300
+      cint: 25
+      clevs: 42 50 70 90 100 110 120 130 140 150 200 300 400 500
+      scale: 
+      nsub: 5
+      skip: 5
+      scale: exp_scale
+      alpha:
+        - 0.00 0.00 0.00
+        - 0.20 1.00 1.00
+        - 1.00 1.00 1.00
+
+    cosfc:
+      gxout: shaded
+      expr: 1.0e+9*_cosfc
+      cbar: hot01
+      cbunits: '[PPBV]'
+      cmin: 25
+      cmax: 300
+      cint: 25
+      clevs: 40 50 70 90 100 110 120 130 140 150 200 300 400 500
+      scale:
+      nsub: 10
+      skip: 10
+      scale: exp_scale
+
+    pm25sfc:
+      gxout: shaded
+      expr: _pm25sfc
+      cbar: YlOrBr
+      cbunits: '[`3m`f13g/m`a3`n]'
+    # clevs: 0 10 20 30 40 50 60 70 80 100 200 300 400 500
+      clevs: .4 .8 1.6 3.2 6.4 12.8 25.6 51.2 102.4 204.8 409.6
+      cmin: 0.2
+      cmax: 500
+      cint: 50
+      scale: exp_scale
+      nsub: 10
+      skip: 10
+      alpha: 
+        - 0.000 0.000 0.000
+        - 0.050 0.000 0.000
+        - 0.100 1.000 1.000
+        - 1.000 1.000 1.000
+
+    pm25bb:
+      gxout: shaded
+      expr: ((_pm25oc+_pm25bc)/_pm25tot)*100
+      cbar: myYlOrBr
+      cbunits: Percent
+      cmin: 0
+      cmax: 100
+      cint: 10
+      nsub: 10
+      skip: 10
+      scale:
+      alpha:
+        - 0.000 0.000 0.000
+        - 0.100 0.000 0.000
+        - 0.400 1.000 1.000
+        - 1.000 1.000 1.000
+
+    pm25all: &PM25ALL
+      gxout: shaded
+      cbunits: '[`3m`f13g/m`a3`n]'
+    # clevs: 0 10 20 30 40 50 60 70 80 100 200 300 400 500
+      clevs: .2 .4 .8 1.6 3.2 6.4 12.8 25.6 51.2 102.4 204.8 409.6
+      scale: exp_scale
+      nsub: 5
+      skip: 5
+      <<: *PM_ALPHA
+
+    pm25du:
+      <<: *PM25ALL
+      cbar: DUEXTTAU
+      expr: _pm25du
+
+    pm25ss:
+      <<: *PM25ALL
+      cbar: SSEXTTAU
+      expr: _pm25ss
+      alpha: 
+        - 0.00 0.0 0.0
+        - 0.05 0.0 0.0
+        - 0.20 0.8 0.8
+        - 1.00 0.8 0.8
+
+
+    pm25oc:
+      <<: *PM25ALL
+      cbar: OCEXTTAU
+      expr: _pm25oc
+
+    pm25bc:
+      <<: *PM25ALL
+      cbar: BCEXTTAU
+      expr: _pm25bc
+
+    pm25su:
+      <<: *PM25ALL
+      cbar: SUEXTTAU
+      expr: _pm25su
+
+    pm25ni:
+      <<: *PM25ALL
+      cbar: NIEXTTAU
+      expr: _pm25ni
+
+    w10m:
+      gxout: shaded
+      expr: _w10m
+      cbar: WindFinder
+      cmin: 0
+      cmax: 50
+      cint: 5
+    # clevs: 0 3 8 13 17 22 26 31 36 40 45 49 54 59 61
+      nsub: 5
+      skip: 5
+      scale: exp_scale
+      alpha_off:
+        - 0.00 0.0 0.0
+        - 0.05 0.0 0.0
+        - 0.10 0.5 0.5
+        - 1.00 1.0 1.0
+
+    qfed1:
+      gxout: grid
+      cmark: 9
+      digsiz: 0.08
+      ccolor: 230 0 0
+      cthick: 5
+      expr: maskout(_biomass, _biomass-0.00000008)
+      
+    qfed2:
+      gxout: grid
+      cmark: 8
+      digsiz: 0.1
+      ccolor: 0 0 0
+      cthick: 5
+      expr: maskout(_biomass, _biomass-0.00000008)
+
+    rh:
+      gxout: shaded
+      method: shtorh
+      temp: _t2m
+      shum: _qv2m
+      pres: _ps/100
+      expr: $rhum
+      cbar: myViridis
+    # cbar: CETL17
+      clevs:
+      cmin: 0
+      cmax: 100
+      cint: 10
+      nsub: 5
+      skip: 5
+      clevs: 0 8 12 18 22 28 32 38 42 48 52 58 62 68 72 78 82 88 92 98
+      scale: log_scale
+      alpha_1:
+        - 0.000 0.000 0.000
+        - 0.100 0.000 0.000
+        - 0.300 1.000 1.000
+        - 1.000 1.000 1.000
+      alpha:
+        - 0.000 0.000 0.000
+        - 0.050 0.000 0.000
+        - 0.150 1.000 1.000
+        - 1.000 1.000 1.000
+
+    wspd: 
+      gxout: shaded
+      expr: mag(_u10m,_v10m)
+      cbar: Winds
+   ## cbar: mymagma
+      clevs:
+      cmin: 0
+      cmax: 40
+      cint: 5
+      nsub: 10
+      skip: 10
+      clevs:
+      scale: exp_scale
+      alpha:
+        - 0.000 0.000 0.000
+        - 0.250 0.000 0.000
+        - 0.400 1.000 1.000
+        - 1.000 1.000 1.000
