@@ -1,5 +1,6 @@
 import os
 import re
+import glob
 import yaml
 from string import Template
 from datetime import timedelta
@@ -133,6 +134,9 @@ def add_dt(dattim, iso_duration):
         factor = -1
         iso_duration = iso_duration[1:]
 
+    if 'P' not in iso_duration:
+        iso_duration = 'P' + iso_duration
+
     if 'T' not in iso_duration:
         iso_duration += 'T0H'
         
@@ -157,3 +161,30 @@ def add_dt(dattim, iso_duration):
         new_date += factor * timedelta(seconds=float(m[6]))
 
     return new_date
+
+#------------------------------------------------------------------------------
+
+def find_source(paths, target):
+
+    """Locates the path containing the target directory or file(s)
+       based on a left to right prioritization of paths encoded with the
+       colon (:) separator. 
+    Args:
+        paths: string
+            list of paths using a colon delimeter. Paths are searched from 
+            left to right.
+        target: string
+            directory, file or glob expression.
+    Returns:
+        path: string|None
+            first path to contain the target. None is returned if the target
+            is not located in any of the paths. 
+    """
+
+    for path in paths.split(':'):
+
+        src = glob.glob(os.path.join(path, target))
+        if src:
+            return path
+
+    return None
