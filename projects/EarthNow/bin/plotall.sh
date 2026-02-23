@@ -18,12 +18,19 @@ fi
 
 echo $PYTHONPATH
 
-python plotall.py \
-    --product basemap \
-    --nproc 1 \
-    --fdate 20260202_00z \
-    --pdate 20260202_1600 \
-    --map-type global \
-    --base-path /discover/nobackup/$USER/EarthNow/plots \
-    --style light
+for product in `cat $bindir/listing`; do
+
+  python plotall.py \
+      --product $product \
+      --nproc 1 \
+      --fdate 20260202_00z \
+      --pdate 20260202_1600 \
+      --map-type global \
+      --base-path /discover/nobackup/$USER/EarthNow/plots \
+      --style light
+
+   echo "=====> $product :  $?"
+
+done
+
 exit 0
