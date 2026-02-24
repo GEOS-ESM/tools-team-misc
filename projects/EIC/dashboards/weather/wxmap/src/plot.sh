@@ -20,4 +20,4 @@ wxmap.py --config ../eic \
          --region global \
          --fullframe --lights_off --no_title --no_label --no_logo \
          --geometry 4096x2048 \
-         --oname EIC_weather.nasa.gmao.geos-fp.analysis.q2m.Colorbar_12.4096x2048.%Y%m%d%H%M.png
+         --oname EIC_weather.nasa.gmao.geos-fp.analysis.q2m.Colorbar10_Final.4096x2048.%Y%m%d%H%M.png

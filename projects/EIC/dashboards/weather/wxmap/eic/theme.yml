@@ -161,7 +161,7 @@ theme:
     q2m:
       gxout: shaded
       expr: (_qv2m*1000)
-      cbar: Colorbar_12
+      cbar: Colorbar10_Final
       cbunits: g kg-1
       nsub: 10
       skip: 10
