@@ -45,6 +45,7 @@ theme:
       levels: [0]
       layers: [q2m]
       title: '2-meter Specific Humidity'
+      parea: 0 11 0 8.5
       map:
         frame: 'off'
         layers: [map-q2m]
