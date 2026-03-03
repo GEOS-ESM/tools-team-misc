@@ -1,0 +1,51 @@
+[cylc]
+    UTC mode = True
+[scheduling]
+    initial cycle point = 2026-01-14T09
+ #  final cycle point = 2026-01-13T09
+    max active cycle points = 1
+    [[xtriggers]]
+        clock_1 = wall_clock(offset=PT16H)
+    [[dependencies]]
+        [[[T09]]] # validity (hours)
+            graph = """
+                @clock_1 => GetData => EIC_plot => EIC_publish
+            """
+[runtime]
+    [[root]] # suite defaults
+
+        [[[environment]]]
+
+            datetime  = $CYLC_TASK_CYCLE_POINT
+            config    = $CYLC_SUITE_DEF_PATH/config.yml
+            inputdata = $CYLC_SUITE_DEF_PATH/inputdata.yml
+            INSTALL_PATH = $CYLC_SUITE_DEF_PATH
+            
+        [[[events]]]
+            mail to = joseph.v.ardizzone@nasa.gov
+            mail events = failed
+
+    [[GetData]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/workflow_modules"
+        script = "get_data.py $datetime $inputdata"
+        [[[job]]]
+            execution retry delays = 120*PT15M
+
+    [[EIC_publish]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/workflow_modules"
+        script = "EIC_publish.sh $datetime $config"
+        [[[job]]]
+            execution retry delays = 12*PT15M
+
+    [[EIC_plot]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/modules"
+        script = "EIC_plot.py $datetime $config"
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT1H
+        [[[directives]]]
+            --account = g2538
+            --qos = daohi
+            --constraint = mil
+            --ntasks = 28
+            --job-name = EIC_plot

@@ -1,0 +1,103 @@
+EIC_data_dir: /discover/nobackup/dao_ops/jardizzo/FLUID/EIC/portal
+EIC_pub_dir: /discover/nobackup/projects/gmao/yotc/pub/fp/.internal/SVS
+
+playlist: &PLAYLIST
+  cosfc:
+    levels: [0]
+    regions: [global]
+  pm25sfc:
+    levels: [0]
+    regions: [global]
+  o3sfc:
+    levels: [0]
+    regions: [global]
+  nox:
+    levels: [0]
+    regions: [global]
+  precip:
+    levels: [0]
+    regions: [global]
+  wspd10m:
+    levels: [0]
+    regions: [global]
+  rh2m:
+    levels: [0]
+    regions: [global]
+  t2m:
+    levels: [0]
+    regions: [global]
+
+EIC_analysis:
+  pre_script: source $INSTALL_PATH/wxmap_modules
+  theme: eic_analysis
+  playlist: *PLAYLIST
+  stream: GEOS
+  lights_off: 1
+  plot_only: 1
+  geometry: 4096x2048
+  start_dt: -P13D
+  end_dt: PT0H
+  t_deltat: PT1H
+  oname: $EIC_data_dir/assim/geos.$field.$region.%Y%m%d%H.png
+
+EIC_forecast:
+  pre_script: source $INSTALL_PATH/wxmap_modules
+  theme: eic_forecast
+  playlist: *PLAYLIST
+  stream: GEOS
+  lights_off: 1
+  plot_only: 1
+  geometry: 4096x2048
+  fcst_dt: PT0H
+  start_dt: PT0H
+  end_dt: P2DT36H
+  t_deltat: PT1H
+  oname: $EIC_data_dir/fcast/geos.$field.$region.%Y%m%d%H.png
+
+EIC_annotate:
+  font_color: 255 255 255
+  font_name: $INSTALL_PATH/resource/helr45w.ttf
+  date_box_name: $INSTALL_PATH/resource/date-box-curved-corner-500x100px.png
+  logo_box_name: $INSTALL_PATH/resource/logo-box-curved-corner-350x75px.png
+  nasa_logo_name: $INSTALL_PATH/resource/nasa-logo.png
+  gmao_logo_name: $INSTALL_PATH/resource/gmao-logo-white.png
+  oname: $EIC_data_dir/seamless/geos.$field.$region.%Y%m%d%H.png
+
+EIC_publish:
+  modules: ffmpeg_modules
+  playlist: *PLAYLIST
+  frame_rate: 12
+  frame_size: 2048x1024
+  quality: 25
+  codec: libx264
+  oname: $EIC_data_dir/mp4/geos.$field.$region.%Y%m%d.mp4
+  movies: [current_day, next_day, day_after_next]
+
+EIC_clean_movies:
+  playlist: *PLAYLIST
+  fcst_dt: PT0H
+  start_dt: -P5D
+  end_dt: P0D
+  t_deltat: P1D
+
+EIC_clean_images:
+  playlist: *PLAYLIST
+  fcst_dt: PT0H
+  start_dt: -P30D
+  end_dt: -P17D
+  t_deltat: PT1H
+
+current_day:
+  start_dt: -P14D
+  end_dt: PT35H
+  t_deltat: PT1H
+
+next_day:
+  start_dt: -P13D
+  end_dt: PT59H
+  t_deltat: PT1H
+
+day_after_next:
+  start_dt: -P12D
+  end_dt: PT83H
+  t_deltat: PT1H

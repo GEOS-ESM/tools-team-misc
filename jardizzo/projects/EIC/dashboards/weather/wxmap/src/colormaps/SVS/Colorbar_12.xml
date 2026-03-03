@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gradient>
+  <colorStops>
+    <stop position="0.0000" r="161" g="138" b="100" />
+    <stop position="0.3660" r="162" g="151" b="134" />
+    <stop position="0.7998" r="32" g="34" b="118" />
+    <stop position="1.0000" r="36" g="11" b="85" />
+  </colorStops>
+</gradient>
