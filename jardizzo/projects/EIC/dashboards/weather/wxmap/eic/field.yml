@@ -1,0 +1,274 @@
+field:
+
+  GEOS: &GEOSptr
+
+    _prectot:
+      long_name: CO Column Burden (Asia and Europe Biomass Burning)
+      units: kg m-2 s-1
+      expression: prectot.GEOSFP.tavg1_2d_flx_Nx(td=-1)
+
+    _coclbbae:
+      long_name: CO Column Burden (Asia and Europe Biomass Burning)
+      units: kg m-2 
+      expression: coclbbae.GEOSFP.inst1_2d_hwl_Nx
+
+    _coclbbaf:
+      long_name: CO Column Burden (Africa Biomass Burning)
+      units: kg m-2 
+      expression: coclbbaf.GEOSFP.inst1_2d_hwl_Nx
+
+    _coclbbla:
+      long_name: CO Column Burden (Central and South America Biomass Burning)
+      units: kg m-2
+      expression: coclbbla.GEOSFP.inst1_2d_hwl_Nx
+
+    _coclbbgl:
+      long_name: CO Column Burden (Biomass Burning)
+      units: kg m-2
+      expression: coclbbgl.GEOSFP.inst1_2d_hwl_Nx
+
+    _coclbbna:
+      long_name: CO Column Burden (North America Biomass Burning)
+      units: kg m-2
+      expression: coclbbna.GEOSFP.inst1_2d_hwl_Nx
+
+    _lwtup:
+      long_name: Upwelling Longwave Flux at TOA
+      units: W m-2
+      expression: lwtup.GEOSFP.tavg1_2d_rad_Nx(td=-1)
+
+    _tqv:
+      long_name: Total Precipitable Water Vapor
+      units: kg m-2
+      expression: tqv.GEOSFP.tavg1_2d_slv_Nx(td=-1)
+
+    _t2m:
+      long_name: 2-meter Air Temperature
+      units: K
+      expression: t2m.GEOSFP.tavg1_2d_slv_Nx(td=-1)
+
+    _uwnd:
+      long_name: East-West Wind
+      units: m s-1
+      expression: u500.GEOSFP.tavg1_2d_slv_Nx
+
+    _vwnd:
+      long_name: North-South Wind
+      units: m s-1
+      expression: v500.GEOSFP.tavg1_2d_slv_Nx
+
+    _h500:
+      long_name: Heights
+      units: m
+      expression: h500.GEOSFP.tavg1_2d_slv_Nx(z=1)
+
+    _u250:
+      long_name: East-West Wind
+      units: m s-1
+      expression: u250.GEOSFP.tavg1_2d_slv_Nx
+
+    _v250:
+      long_name: North-South Wind
+      units: m s-1
+      expression: v250.GEOSFP.tavg1_2d_slv_Nx
+
+    _o3sfc:
+      long_name: O3_volume_mixing_ratio_dry_air
+      units: mol mol-1
+      expression: o3.GEOSCF.htf_inst_15mn_glo_L1440x721_slv(z=1)
+
+    _no2sfc:
+      long_name: NO2_volume_mixing_ratio_dry_air
+      units: mol mol-1
+      expression: no2.GEOSCF.htf_inst_15mn_glo_L1440x721_slv(z=1)
+
+    _so2sfc:
+      long_name: SO2_volume_mixing_ratio_dry_air
+      units: mol mol-1
+      expression: so2.GEOSCF.htf_inst_15mn_glo_L1440x721_slv(z=1)
+
+    _cosfc:
+      long_name: CO_volume_mixing_ratio_dry_air
+      units: mol mol-1
+      expression: co.GEOSCF.htf_inst_15mn_glo_L1440x721_slv(z=1)
+
+    _pm25sfc:
+      long_name: Particulate_matter_with_diameter_below_2.5_um
+      units: ug m-3
+      expression: pm25_rh35.GEOSCF.htf_inst_15mn_glo_L1440x721_slv(z=1)
+
+    _duexttau:
+      long_name: Dust Extinction AOT [550 nm]
+      units: '1'
+      expression: duexttau.GEOSFP.inst1_2d_hwl_Nx
+
+    _suexttau:
+      long_name: SO4 Extinction AOT [550 nm]
+      units: '1'
+      expression: suexttau.GEOSFP.inst1_2d_hwl_Nx
+
+    _ssexttau:
+      long_name: Sea Salt Extinction AOT [550 nm]
+      units: '1'
+      expression: ssexttau.GEOSFP.inst1_2d_hwl_Nx
+
+    _ocexttau:
+      long_name: Organic Carbon Extinction AOT [550 nm]
+      units: '1'
+      expression: ocexttau.GEOSFP.inst1_2d_hwl_Nx
+
+    _bcexttau:
+      long_name: Black Carbon Extinction AOT [550 nm]
+      units: '1'
+      expression: bcexttau.GEOSFP.inst1_2d_hwl_Nx
+
+    _niexttau:
+      long_name: Nitrate Extinction AOT [550 nm]
+      units: '1'
+      expression: niexttau.GEOSFP.inst1_2d_hwl_Nx
+
+    _emis_co:
+      long_name: Carbon monoxide Emissions (total)
+      units: g mol-1
+      expression: emis_co.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_co_anth:
+      long_name: Carbon monoxide Emissions (Anthropogenic)
+      units: g mol-1
+      expression: emis_co_anth.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_co_bb:
+      long_name: Carbon monoxide Emissions (Biomass Burning)
+      units: g mol-1
+      expression: emis_co_bb.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_so2:
+      long_name: Sulfur dioxide Emissions (Total)
+      units: g mol-1
+      expression: emis_so2.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_isop:
+      long_name: Isoprene Emissions (Total)
+      units: g mol-1
+      expression: emis_isop.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_no_anth:
+      long_name: Nitrogen oxide industry emissions
+      units: g mol-1
+      expression: emis_no_anth.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_no_bb:
+      long_name: Nitrogen oxide biomass emissions
+      units: g mol-1
+      expression: emis_no_bb.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_no_lght:
+      long_name: Nitrogen oxide lightning emissions
+      units: g mol-1
+      expression: emis_no_lght.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _flashrate:
+      long_name: Lightning Flash Rate
+      units: min-1 km-2
+      expression: flashrate.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_no_soil:
+      long_name: Nitrogen oxide soil emissions
+      units: g mol-1
+      expression: emis_no_soil.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _emis_no:
+      long_name: Nitrogen oxide total emissions
+      units: kg m-2 s-1
+      expression: emis_no.GEOSCF.ems_tavg_1hr_glo_L1440x721_slv(z=1)
+
+    _no2:
+      long_name: Nitrogen Dioxide
+      units: mol mol-1
+      expression: no2.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _pm25du:
+      long_name: Dust PM with Diameter Below 2.5 um
+      units: ug m-3
+      expression: pm25du_rh35.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _pm25oc:
+      long_name: Organic Carbon PM with Diameter Below 2.5 um 
+      units: ug m-3
+      expression: pm25oc_rh35.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _pm25bc:
+      long_name: Black Carbon PM with Diameter Below 2.5 um 
+      units: ug m-3
+      expression: pm25bc_rh35.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _pm25ss:
+      long_name: Seasalt PM with Diameter Below 2.5 um 
+      units: ug m-3
+      expression: pm25ss_rh35.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _pm25su:
+      long_name: Sulfate PM with Diameter Below 2.5 um 
+      units: ug m-3
+      expression: pm25su_rh35.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _pm25ni:
+      long_name: Nitrate PM with Diameter Below 2.5 um 
+      units: ug m-3
+      expression: pm25ni_rh35.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _pm25tot:
+      long_name: PM with Diameter Below 2.5 um 
+      units: ug m-3
+      expression: pm25_rh35.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _no:
+      long_name: Nitrogen Oxide
+      units: mol mol-1
+      expression: no.GEOSCF.chm_tavg_1hr_glo_L1440x721_slv(td=-1,z=1)
+
+    _swgnt:
+      long_name: Surface Net Downward Shortwave Flux
+      units: W m-2
+      expression: swgnt.GEOSFP.tavg1_2d_rad_Nx(td=-1)
+
+    _lwgnt:
+      long_name: Surface Net Downward Shortwave Flux
+      units: W m-2
+      expression: lwgnt.GEOSFP.tavg1_2d_rad_Nx(td=-1)
+
+    _u10m:
+      long_name: 10-Meter Eastward Wind
+      units: m s-1
+      expression: u10m.GEOSFP.tavg1_2d_slv_Nx(z=1)
+
+    _v10m:
+      long_name: 10-Meter Northward Wind
+      units: m s-1
+      expression: v10m.GEOSFP.tavg1_2d_slv_Nx(z=1)
+
+    _w10m:
+      long_name: 10-Meter Wind Speed
+      units: m s-1
+      expression: mag(_u10m, _v10m)
+
+    _qv2m:
+      long_name: 2-Meter Specific Humidity
+      units: kg kg-1
+      expression: qv2m.GEOSFP.tavg1_2d_slv_Nx(td=-1)
+
+    _ps:
+      long_name: Surface Pressure
+      units: Pa
+      expression: ps.GEOSFP.tavg1_2d_slv_Nx(td=-1)
+
+    _biomass:
+      long_name: Biomass
+      units: 1
+      expression: biomass.QFED.QFED(z=1,t=1)
+
+  GEOSANA: *GEOSptr
+
+  G5FP: *GEOSptr
+
+  G5FPFC: *GEOSptr

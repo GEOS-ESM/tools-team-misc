@@ -1,0 +1,19 @@
+#!/bin/csh -f
+
+limit stacksize unlimited
+
+source /usr/share/modules/init/csh
+
+module purge
+source g5_modules
+
+setenv GAVERSION 2.1.0.oga.1
+
+setenv MYPYTHON /discover/nobackup/projects/gmao/share/dasilva/Python/epd-7.3-2-rh5-x86_64/bin
+
+set path = ( . /home/dao_ops/GEOSadas-CURRENT/GEOSadas/Linux/bin \
+               $SHARE/dasilva/opengrads/Contents $MYPYTHON \
+               ~adasilva/bin $SHARE/dasilva/bin /usr/local/bin \
+               $path )
+
+exit 0
