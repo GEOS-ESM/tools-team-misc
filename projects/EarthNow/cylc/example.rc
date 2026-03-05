@@ -1,0 +1,124 @@
+[cylc]
+    UTC mode = True
+[scheduling]
+    initial cycle point = 2024-03-28T00
+  # final cycle point = 2023-07-04T12
+    max active cycle points = 1
+    [[xtriggers]]
+        clock_1 = wall_clock(offset=PT12H)
+        clock_2 = wall_clock(offset=PT8H)
+        clock_3 = wall_clock(offset=PT14H)
+    [[dependencies]]
+        [[[T00]]] # validity (hours)
+            graph = """
+                @clock_3 => GEOS-FP => makeTraj & flyGEOS-FP => plotGEOS-FP
+                @clock_1 => GEOS-CF => flyGEOS-CF => plotGEOS-CF
+                @clock_2 => CAMS => plotCAMS
+                @clock_1 => CAM-Chem => plotCAM-Chem
+                @clock_3 => NAAPS
+                @clock_1 => MUSICA
+                @clock_1 => ARUNWRFchem => plotARUNWRFchem
+                @clock_1 => YSUNCARWRFchem => plotYSUNCARWRFchem
+                @clock_3 => UCLAWRFchem => plotUCLAWRFchem
+                @clock_3 => UCLAWRFchem_d2 => plotUCLAWRFchem_d2
+                @clock_3 => UIOWACMAQ
+                ModelData:succeed-all => plotALL
+            """
+[runtime]
+    [[root]] # suite defaults
+
+        [[[environment]]]
+
+            datetime  = $CYLC_TASK_CYCLE_POINT
+            taskname = $CYLC_TASK_NAME
+            deadline = 16L
+            INSTALL_PATH = $CYLC_SUITE_DEF_PATH
+            WX_CAMPAIGN = asia-aq
+            WX_PATH = /discover/nobackup/projects/gmao/asia_aq
+            WXTRAJ_CAMPAIGN = $WX_CAMPAIGN
+            WXMODEL_CAMPAIGN = $WX_CAMPAIGN
+            WXMODEL_ROOT = $WX_PATH
+            WXMODEL_NATIVE_DIR = $WXMODEL_ROOT/native
+            WXMODEL_DATA_DIR = $WXMODEL_ROOT/pub/data
+            WXMODEL_OPENDAP_DIR = $WXMODEL_ROOT/pub/opendap
+            
+        [[[events]]]
+            mail to = joseph.v.ardizzone@nasa.gov
+            mail events = failed
+
+    [[ModelData]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/WxModel_modules"
+        script = "getmodel.sh $datetime $taskname $deadline"
+        [[[job]]]
+            execution retry delays = 20*PT30M
+
+    [[GEOS-FP, CAMS, CAM-Chem, NAAPS, UIOWACMAQ]]
+        inherit = ModelData
+
+    [[GEOS-CF]]
+        inherit = ModelData 
+        script = "getmodel.sh $datetime GEOS-CF $deadline; getmodel.sh $datetime GEOS-CF_private $deadline"
+
+    [[MUSICA]]
+        inherit = ModelData 
+        script = "getmodel.sh $datetime MUSICA $deadline; getmodel.sh $datetime MUSICA2d $deadline"
+
+    [[ARUNWRFchem, YSUNCARWRFchem, UCLAWRFchem, UCLAWRFchem_d2]]
+        inherit = ModelData
+
+    [[plotModel]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/WxPlot_modules"
+        script = "makeplots.sh $datetime $taskname"
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT1H
+        [[[directives]]]
+            --account = g0613
+            --partition = preops
+            --qos = dastest
+            --constraint = cas
+            --ntasks = 30
+            --job-name = WxPlot
+
+    [[plotGEOS-FP, plotGEOS-CF, plotCAMS, plotCAM-Chem, plotNAAPS]]
+        inherit = plotModel
+
+    [[plotARUNWRFchem, plotYSUNCARWRFchem, plotUCLAWRFchem, plotUCLAWRFchem_d2]]
+        inherit = plotModel
+
+    [[plotALL]]
+        inherit = plotModel
+        [[[job]]]
+            execution time limit = PT1H30M
+
+    [[flyGEOS-FP, flyGEOS-CF]]
+        inherit = FlightTrack
+
+    [[makeTraj]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/WxTraj_modules"
+        script = "wxtraj.py $datetime GEOS-FP"
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT1H
+        [[[directives]]]
+            --account = g0613
+            --partition = preops
+            --qos = dastest
+            --constraint = cas
+            --ntasks = 10
+            --job-name = WxTraj
+
+    [[FlightTrack]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/WxFlight_modules"
+        script = "makeflight.sh $datetime $taskname"
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT1H
+        [[[directives]]]
+            --account = g0613
+            --partition = preops
+            --qos = dastest
+            --constraint = cas
+            --ntasks = 24 
+            --job-name = WxFlight
+

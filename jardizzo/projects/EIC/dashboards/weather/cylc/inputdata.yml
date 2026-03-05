@@ -1,0 +1,53 @@
+CF_PATH: /css/gmao/geos-cf/NRTv2/pub/opendap
+FP_PATH: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap
+LOCAL_PATH: /discover/nobackup/dao_ops/jardizzo/FLUID/EIC/data
+
+get_data:
+
+  CF_assim:
+
+    src: $CF_PATH/ana
+    dest: $LOCAL_PATH/assim
+    min_count: 2 
+    min_time: -PT30M
+
+    files:
+
+      - chm_tavg_1hr_glo_L1440x721_slv chm_tavg_1hr_glo_L1440x721_slv
+      - htf_inst_15mn_glo_L1440x721_slv htf_inst_15mn_glo_L1440x721_slv
+
+  CF_forecast:
+    
+    src: $CF_PATH/fcst
+    dest: $LOCAL_PATH/fcast
+    min_count: 2
+    min_age: 3600
+    
+    files:
+      
+      - chm_tavg_1hr_glo_L1440x721_slv/chm_tavg_1hr_glo_L1440x721_slv.%iy4%im2%id2_%ih2z chm_tavg_1hr_glo_L1440x721_slv
+      - htf_inst_15mn_glo_L1440x721_slv/htf_inst_15mn_glo_L1440x721_slv.%iy4%im2%id2_%ih2z htf_inst_15mn_glo_L1440x721_slv
+
+  FP_assim:
+
+    src: $FP_PATH/assim
+    dest: $LOCAL_PATH/assim
+    min_count: 3
+
+    files:
+
+      - tavg1_2d_slv_Nx tavg1_2d_slv_Nx
+      - tavg1_2d_rad_Nx tavg1_2d_rad_Nx
+      - tavg1_2d_flx_Nx tavg1_2d_flx_Nx
+
+  FP_forecast:
+
+    src: $FP_PATH/fcast
+    dest: $LOCAL_PATH/fcast
+    min_count: 3
+
+    files:
+
+      - tavg1_2d_slv_Nx/tavg1_2d_slv_Nx.%iy4%im2%id2_12 tavg1_2d_slv_Nx
+      - tavg1_2d_rad_Nx/tavg1_2d_rad_Nx.%iy4%im2%id2_12 tavg1_2d_rad_Nx
+      - tavg1_2d_flx_Nx/tavg1_2d_flx_Nx.%iy4%im2%id2_12 tavg1_2d_flx_Nx
