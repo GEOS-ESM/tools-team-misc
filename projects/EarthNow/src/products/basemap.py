@@ -11,6 +11,7 @@ from .registry import register
 
 from wxmaps_plotting import WxMapPlotter
 
+
 @register("basemap")
 def plot_basemap(fig, ax, plotter: WxMapPlotter, reader, args):
     """
@@ -35,8 +36,9 @@ def plot_basemap(fig, ax, plotter: WxMapPlotter, reader, args):
     # ------------------------------------------------------------
     fig, ax = plotter.create_basemap(
         boundaries=None,  # boundaries added explicitly below
-        feature_resolution=args.feature_resolution
-        if hasattr(args, "feature_resolution") else "10m",
+        feature_resolution=(
+            args.feature_resolution if hasattr(args, "feature_resolution") else "10m"
+        ),
     )
 
     # ------------------------------------------------------------
@@ -66,4 +68,3 @@ def plot_basemap(fig, ax, plotter: WxMapPlotter, reader, args):
             pdate=args.pdate,
             exp=args.experiment if hasattr(args, "experiment") else "",
         )
-

@@ -17,12 +17,13 @@ COLORS = load_color_table(
     "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_9p6micron.txt"
 )
 
-clevs = [-110., -59, -20, 6, 31, 57]  # Celsius
+clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
+
 
 @register("ozone_longwave_ir")
 def plot_ozone_longwave_ir(fig, ax, plotter, reader, args):
@@ -32,9 +33,7 @@ def plot_ozone_longwave_ir(fig, ax, plotter, reader, args):
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["TBRB07RG"]
+        args.fdate, args.pdate, variables=["TBRB07RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -58,15 +57,16 @@ def plot_ozone_longwave_ir(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
+
 def generate_colorbar():
     """Generate colorbar for ozone longwave IR"""
     from wxmaps_utils import save_colorbar_single
-    
+
     output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/ozone_longwave_ir.png"
     save_colorbar_single(
-        COLORS, 
-        LEVELS, 
-        output, 
+        COLORS,
+        LEVELS,
+        output,
         label="9.6 μm Ozone Band Brightness Temperature (°C)",
-        extend='both'
+        extend="both",
     )

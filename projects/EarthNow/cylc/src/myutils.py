@@ -4,8 +4,9 @@ import ruamel.yaml as yaml
 from string import Template
 from datetime import timedelta
 
+
 def str_replace(s, **defs):
-    """ Recursive variable substitution. Shell-style variables ($var, ${var})
+    """Recursive variable substitution. Shell-style variables ($var, ${var})
     are recursively substituted with definitions from ``defs``.
 
     :param s: input string containing variables.
@@ -20,10 +21,12 @@ def str_replace(s, **defs):
 
     return s_interp
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+
 
 def dict_merge(dct, merge_dct):
-    """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
+    """Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
     updating only top-level keys, dict_merge recurses down into dicts nested
     to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
     ``dct``.
@@ -33,22 +36,26 @@ def dict_merge(dct, merge_dct):
     :return: None
     """
     for k in merge_dct:
-        if (k in dct and isinstance(dct[k], dict) and isinstance(merge_dct[k], dict)):  #noqa
+        if (
+            k in dct and isinstance(dct[k], dict) and isinstance(merge_dct[k], dict)
+        ):  # noqa
             dict_merge(dct[k], merge_dct[k])
         else:
             dct[k] = merge_dct[k]
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+
 
 def read_yaml(filename):
 
-    with open(filename, 'r') as handle:
+    with open(filename, "r") as handle:
         buf = handle.read()
 
     cfg = yaml.safe_load(buf)
 
-    defs = {k:str(v) for k, v in iter(os.environ.items())}
-    defs.update({k:str(v) for k, v in iter(cfg.items()) if not isinstance(v, dict)})
+    defs = {k: str(v) for k, v in iter(os.environ.items())}
+    defs.update({k: str(v) for k, v in iter(cfg.items()) if not isinstance(v, dict)})
 
     buf = str_replace(buf, **defs)
 
@@ -56,7 +63,9 @@ def read_yaml(filename):
 
     return cfg
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+
 
 def parse_duration(iso_duration):
     """Parses an ISO 8601 duration string into a datetime.timedelta instance.
@@ -67,29 +76,31 @@ def parse_duration(iso_duration):
     """
 
     factor = 1
-    if iso_duration[0] == '-':
+    if iso_duration[0] == "-":
         factor = -1
         iso_duration = iso_duration[1:]
 
-    if 'T' not in iso_duration:
-        iso_duration += 'T0H'
-        
-    m = re.match(r'^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:.\d+)?)S)?$',
-        iso_duration)
+    if "T" not in iso_duration:
+        iso_duration += "T0H"
+
+    m = re.match(
+        r"^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:.\d+)?)S)?$",
+        iso_duration,
+    )
     if m is None:
         raise ValueError("invalid ISO 8601 duration string")
 
-    m = [m.group(i) for i in range(0,7)]
+    m = [m.group(i) for i in range(0, 7)]
 
     days = 0
     hours = 0
     minutes = 0
     seconds = 0.0
 
-    # Years and months are not being utilized here, as there is not enough 
+    # Years and months are not being utilized here, as there is not enough
     # information provided to determine which year and which month.
     # Python's time_delta class stores durations as days, seconds and
-    # microseconds internally, and therefore we'd have to 
+    # microseconds internally, and therefore we'd have to
     # convert parsed years and months to specific number of days.
 
     if m[3]:
