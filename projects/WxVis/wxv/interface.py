@@ -9,7 +9,7 @@ class Interface(object):
         self.parser = argparse.ArgumentParser(description=description)
 
         self.parser.add_argument('--theme', metavar='THEME',
-                    default=[],action='append',
+                    default=[],action='append', required=True,
                     help='Name of configuration file or directory ' +
                     'referencing a theme')
         self.parser.add_argument('--fcst_dt', metavar='FCST_DT',
