@@ -1,6 +1,6 @@
 from .registry import register
-from myutils import dict_merge, str_replace
-from conditional import Conditional
+from wxv.myutils import dict_merge, str_replace
+from wxv.conditional import Conditional
 
 class theme(object):
 
