@@ -21,6 +21,16 @@ class theme(object):
         dict_merge(layer, kwargs)
         self.layers[name] = layer
 
+    def merge(self, *args):
+
+        for theme_obj in args:
+
+            for name, attr in theme_obj.plots.items():
+                self.add_plot(name, **attr)
+
+            for name, attr in theme_obj.layers.items():
+                self.add_layer(name, **attr)
+
     def expand(self, attributes, request):
 
         defs = { k:str(v) for k,v in request.items() }

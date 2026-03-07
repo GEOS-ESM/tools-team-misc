@@ -10,10 +10,13 @@ for theme in args['theme']:
 
     try:
         module = importlib.import_module(theme)
-        print(f'Loading: {THEMES[theme]}')
     except:
         print(f'"{theme}" not found')
         sys.exit(2)
 
     p = THEMES[theme]()
-    print(p.plots)
+
+    for name, plt in p.plots.items():
+        print(name)
+        print(len(name)*'=')
+        print(plt)
