@@ -10,8 +10,13 @@ class user_merged_theme(theme):
         super().__init__(*args, **kwargs)
 
         p = wxmapsclassicpub()
-
         self.merge(p)
+
+        self.define_plots()
+
+    def define_plots(self):
+
+        super().define_plots()
 
         self.add_plot('vort-2', title='New Vorticity Plot')
 

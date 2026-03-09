@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from .registry import register
 from wxv.myutils import dict_merge, str_replace
 from wxv.conditional import Conditional
@@ -6,8 +7,12 @@ class theme(object):
 
     def __init__(self, *args, **kwargs):
 
+        self.attributes = SimpleNamespace()
         self.plots = {}
         self.layers = {}
+
+    def define_plots(self):
+        pass
 
     def add_plot(self, name, **kwargs):
 
