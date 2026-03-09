@@ -9,9 +9,13 @@ class Interface(object):
         self.parser = argparse.ArgumentParser(description=description)
 
         self.parser.add_argument('--theme', metavar='THEME',
-                    default=[],action='append', required=True,
+                    default=[], action='append', required=True,
                     help='Name of configuration file or directory ' +
                     'referencing a theme')
+        self.parser.add_argument('--region', metavar='REGION',
+                    required=True, help='Name of region to plot')
+        self.parser.add_argument('--level', metavar='LEVEL', default='',
+                    required=True, help='Pressure level (default: %(default)s)')
         self.parser.add_argument('--fcst_dt', metavar='FCST_DT',
                     default=None, help='Forecast date/time in ISO format')   
         self.parser.add_argument('--time_dt', metavar='TIME_DT',
@@ -36,4 +40,5 @@ class Interface(object):
             itime = int(dattim[8:14])
             fcst_dt = dt.datetime.strptime(dattim,'%Y%m%d%H%M%S')
 
-        return {'fcst_dt': fcst_dt, 'time_dt': time_dt, 'theme': args.theme}
+        return {'fcst_dt': fcst_dt, 'time_dt': time_dt, 'theme': args.theme,
+                'region': args.region, 'level': args.level}
