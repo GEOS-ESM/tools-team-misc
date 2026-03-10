@@ -34,6 +34,11 @@ stream:
 
   GEOS: *GEOSFPptr
 
+  CONUS2KM:
+
+    <<: *GEOSFPptr
+    uri: /discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/holding/inst1_2d_asm_Nx/%Y%m/Feature-c2160_L137.inst1_2d_asm_Nx.%Y%m%d_%H%Mz.nc4
+
   QFED:
   
     long_name: QFED
