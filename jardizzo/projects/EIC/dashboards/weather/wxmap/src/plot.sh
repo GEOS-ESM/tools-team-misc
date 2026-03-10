@@ -16,9 +16,9 @@ wxmap.py --config ../eic \
          --start_dt $sdate \
          --end_dt $edate \
          --t_deltat PT1H \
-         --field q2m \
+         --field smoke \
          --region global \
          --fullframe --lights_off --no_title --no_label --no_logo \
          --geometry 4096x2048 \
-         --oname /discover/nobackup/$USER/EIC/dashboards/weather/assim/geos.q2m.global.%Y%m%d%H.png
-       # --oname EIC_weather.nasa.gmao.geos-fp.analysis.q2m.Colorbar10_Final.4096x2048.%Y%m%d%H%M.png
+         --oname /discover/nobackup/$USER/EIC/dashboards/weather/assim/geos.smoke.global.%Y%m%d%H.png
+       # --oname EIC_weather.nasa.gmao.geos-fp.analysis.smoke.Colorbar10_Final.4096x2048.%Y%m%d%H%M.png
