@@ -17,12 +17,13 @@ COLORS = load_color_table(
     "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_WV_7p3micron.txt"
 )
 
-clevs = [-93.,-54,-30,-18,-5,7] # Celcius
+clevs = [-93.0, -54, -30, -18, -5, 7]  # Celcius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
+
 
 @register("low_level_water_vapor")
 def plot_low_level_water_vapor(fig, ax, plotter, reader, args):
@@ -32,9 +33,7 @@ def plot_low_level_water_vapor(fig, ax, plotter, reader, args):
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["TBRB09RG"]
+        args.fdate, args.pdate, variables=["TBRB09RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -58,15 +57,16 @@ def plot_low_level_water_vapor(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
+
 def generate_colorbar():
     """Generate colorbar for low-level water vapor"""
     from wxmaps_utils import save_colorbar_single
-    
+
     output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/low_level_water_vapor.png"
     save_colorbar_single(
-        COLORS, 
-        LEVELS, 
-        output, 
+        COLORS,
+        LEVELS,
+        output,
         label="7.3 μm Low-Level Water Vapor Brightness Temperature (°C)",
-        extend='both'
+        extend="both",
     )

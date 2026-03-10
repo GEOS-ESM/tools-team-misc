@@ -17,12 +17,13 @@ COLORS = load_color_table(
     "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/ColorBar450Band16_horz.txt"
 )
 
-clevs = [-87.,-60,-30,-15,0,4,12,24]  # Celsius
+clevs = [-87.0, -60, -30, -15, 0, 4, 12, 24]  # Celsius
 LEVELS = np.interp(7 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
+
 
 @register("co2_longwave_ir")
 def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
@@ -32,9 +33,7 @@ def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["TBRB05RG"]
+        args.fdate, args.pdate, variables=["TBRB05RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -58,15 +57,16 @@ def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
+
 def generate_colorbar():
     """Generate colorbar for CO2 longwave IR"""
     from wxmaps_utils import save_colorbar_single
-    
+
     output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/co2_longwave_ir.png"
     save_colorbar_single(
-        COLORS, 
-        LEVELS, 
-        output, 
+        COLORS,
+        LEVELS,
+        output,
         label="13.3 μm CO2 Longwave Brightness Temperature (°C)",
-        extend='both'
+        extend="both",
     )

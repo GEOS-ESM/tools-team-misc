@@ -31,4 +31,3 @@ from .winds_heights_700mb import plot_winds_heights_700mb
 from .winds_heights_850mb import plot_winds_heights_850mb
 
 __all__ = ["PRODUCTS"]
-

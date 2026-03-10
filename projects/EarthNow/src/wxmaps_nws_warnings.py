@@ -8,6 +8,7 @@ Rendering Strategy:
 - Z-order: Non-warnings at z=10/11, Warnings at z=12/13
 - Line thickness: Warnings = 1.0, Watches/Advisories/Statements = 0.5
 """
+
 import geopandas as gpd
 import pandas as pd
 import numpy as np
@@ -23,7 +24,7 @@ import xml.etree.ElementTree as ET
 
 class NWSWarnings:
     """Handler for NWS watch/warning shapefiles"""
-    
+
     # Official NWS VTEC Significance codes
     VTEC_SIGNIFICANCE = {
         "W": "Warning",
@@ -34,7 +35,7 @@ class NWSWarnings:
         "N": "Synopsis",
         "F": "Forecast",
     }
-    
+
     # Official NWS VTEC Phenomena codes
     # From https://www.nws.noaa.gov/directives/sym/pd01017003curr.pdf
     VTEC_PHENOMENA = {
@@ -107,7 +108,7 @@ class NWSWarnings:
         "ZF": "Freezing Fog",
         "ZR": "Freezing Rain",
     }
-    
+
     # Official NWS Colors from map_warnings_assist.xml
     # Taken from http://www.weather.gov/help-map
     NWS_COLORS = {
@@ -219,11 +220,11 @@ class NWSWarnings:
         "ZF.Y": "#008080",
         "ZR.Y": "#DA70D6",
     }
-    
+
     def __init__(self, shapefile_path: str):
         """
         Initialize NWS warnings reader
-        
+
         Parameters:
         -----------
         shapefile_path : str
@@ -231,23 +232,26 @@ class NWSWarnings:
         """
         self.shapefile_path = shapefile_path
         self.gdf = None
-        
+
     def load_shapefile(self):
         """Load the shapefile using geopandas"""
         if not Path(self.shapefile_path).exists():
             raise FileNotFoundError(f"Shapefile not found: {self.shapefile_path}")
-        
+
         self.gdf = gpd.read_file(self.shapefile_path)
         print(f"Loaded {len(self.gdf)} warning polygons from shapefile")
-        
+
         return self.gdf
-    
-    def filter_warnings(self, warning_type: Optional[str] = None,
-                       warning_status: Optional[str] = None,
-                       valid_time: Optional[datetime] = None) -> gpd.GeoDataFrame:
+
+    def filter_warnings(
+        self,
+        warning_type: Optional[str] = None,
+        warning_status: Optional[str] = None,
+        valid_time: Optional[datetime] = None,
+    ) -> gpd.GeoDataFrame:
         """
         Filter warnings by type, status, and time
-        
+
         Parameters:
         -----------
         warning_type : str, optional
@@ -256,97 +260,107 @@ class NWSWarnings:
             Warning status ('W'=Warning, 'A'=Watch, 'Y'=Advisory, 'S'=Statement)
         valid_time : datetime, optional
             Time to check validity (between ISSUED and EXPIRED)
-        
+
         Returns:
         --------
         GeoDataFrame : Filtered warnings
         """
         if self.gdf is None:
             self.load_shapefile()
-        
+
         filtered = self.gdf.copy()
-        
+
         # Filter by warning type (column name is 'PHENOM')
         if warning_type is not None:
-            if 'PHENOM' in filtered.columns:
-                filtered = filtered[filtered['PHENOM'] == warning_type]
-            elif 'PROD_TYPE' in filtered.columns:
-                filtered = filtered[filtered['PROD_TYPE'].str.contains(warning_type, na=False)]
-        
+            if "PHENOM" in filtered.columns:
+                filtered = filtered[filtered["PHENOM"] == warning_type]
+            elif "PROD_TYPE" in filtered.columns:
+                filtered = filtered[
+                    filtered["PROD_TYPE"].str.contains(warning_type, na=False)
+                ]
+
         # Filter by warning status (column name is 'SIG')
         if warning_status is not None:
-            if 'SIG' in filtered.columns:
-                filtered = filtered[filtered['SIG'] == warning_status]
-            elif 'GTYPE' in filtered.columns:
-                filtered = filtered[filtered['GTYPE'] == warning_status]
-        
+            if "SIG" in filtered.columns:
+                filtered = filtered[filtered["SIG"] == warning_status]
+            elif "GTYPE" in filtered.columns:
+                filtered = filtered[filtered["GTYPE"] == warning_status]
+
         # Filter by time validity
         if valid_time is not None:
-            valid_time_int = int(valid_time.strftime('%Y%m%d%H%M'))
-            
+            valid_time_int = int(valid_time.strftime("%Y%m%d%H%M"))
+
             # Try ISSUED/EXPIRED columns
-            if 'ISSUED' in filtered.columns and 'EXPIRED' in filtered.columns:
+            if "ISSUED" in filtered.columns and "EXPIRED" in filtered.columns:
                 # Convert to numeric, coercing errors to NaN
-                issued = pd.to_numeric(filtered['ISSUED'], errors='coerce')
-                expired = pd.to_numeric(filtered['EXPIRED'], errors='coerce')
-                
+                issued = pd.to_numeric(filtered["ISSUED"], errors="coerce")
+                expired = pd.to_numeric(filtered["EXPIRED"], errors="coerce")
+
                 # Filter where time is between issued and expired (and both are valid)
                 filtered = filtered[
-                    (issued <= valid_time_int) &
-                    (expired >= valid_time_int) &
-                    (issued.notna()) &
-                    (expired.notna())
+                    (issued <= valid_time_int)
+                    & (expired >= valid_time_int)
+                    & (issued.notna())
+                    & (expired.notna())
                 ]
             # Try INIT_ISS/INIT_EXP columns as alternative
-            elif 'INIT_ISS' in filtered.columns and 'INIT_EXP' in filtered.columns:
-                init_iss = pd.to_numeric(filtered['INIT_ISS'], errors='coerce')
-                init_exp = pd.to_numeric(filtered['INIT_EXP'], errors='coerce')
-                
+            elif "INIT_ISS" in filtered.columns and "INIT_EXP" in filtered.columns:
+                init_iss = pd.to_numeric(filtered["INIT_ISS"], errors="coerce")
+                init_exp = pd.to_numeric(filtered["INIT_EXP"], errors="coerce")
+
                 filtered = filtered[
-                    (init_iss <= valid_time_int) &
-                    (init_exp >= valid_time_int) &
-                    (init_iss.notna()) &
-                    (init_exp.notna())
+                    (init_iss <= valid_time_int)
+                    & (init_exp >= valid_time_int)
+                    & (init_iss.notna())
+                    & (init_exp.notna())
                 ]
-        
+
         print(f"Filtered to {len(filtered)} warnings")
         return filtered
-    
+
     def _collect_polygons(self, geometries: List) -> List[np.ndarray]:
         """
         Convert shapefile geometries to polygon coordinate arrays
-        
+
         Parameters:
         -----------
         geometries : list
             List of shapely geometries
-        
+
         Returns:
         --------
         list : List of numpy arrays with polygon coordinates
         """
         polygons = []
         for geom in geometries:
-            if geom.geom_type == 'Polygon':
+            if geom.geom_type == "Polygon":
                 coords = np.array(geom.exterior.coords)
                 polygons.append(coords)
-            elif geom.geom_type == 'MultiPolygon':
+            elif geom.geom_type == "MultiPolygon":
                 for poly in geom.geoms:
                     coords = np.array(poly.exterior.coords)
                     polygons.append(coords)
         return polygons
-    
-    def _render_warning_group(self, ax, phenom_sig: str, geometries: List,
-                              outline_width: float, fill: bool, alpha: float,
-                              transform: ccrs.Projection, zorder_base: int):
+
+    def _render_warning_group(
+        self,
+        ax,
+        phenom_sig: str,
+        geometries: List,
+        outline_width: float,
+        fill: bool,
+        alpha: float,
+        transform: ccrs.Projection,
+        zorder_base: int,
+    ):
         """
         Render a group of warnings with the same PHENOM.SIG combination
-        
+
         This is the core rendering function used by both single and batch plotting.
         Line thickness is automatically adjusted:
         - Warnings (W): outline_width (default 1.0)
         - Non-warnings (A/Y/S/etc): outline_width * 0.5 (default 0.5)
-        
+
         Parameters:
         -----------
         ax : GeoAxes
@@ -367,72 +381,78 @@ class NWSWarnings:
             Base z-order (fill will use zorder_base, outline will use zorder_base+1)
         """
         # Get official NWS color
-        color = self.NWS_COLORS.get(phenom_sig, '#FF0000')
-        
+        color = self.NWS_COLORS.get(phenom_sig, "#FF0000")
+
         # Parse phenom and sig for display
-        parts = phenom_sig.split('.')
+        parts = phenom_sig.split(".")
         if len(parts) != 2:
             return
-        
+
         warning_type, warning_status = parts
         type_name = self.VTEC_PHENOMENA.get(warning_type, warning_type)
         status_name = self.VTEC_SIGNIFICANCE.get(warning_status, warning_status)
-        
+
         # Adjust line thickness based on warning status
         # Warnings (W) get full thickness, others get half
-        if warning_status == 'W':
+        if warning_status == "W":
             line_width = outline_width
         else:
             line_width = outline_width * 0.5
-        
+
         # Collect polygon coordinates
         polygons = self._collect_polygons(geometries)
-        
+
         if not polygons:
             return
-        
-        print(f"  Rendering {type_name} {status_name}: "
-              f"{len(polygons)} polygons (color: {color}, width: {line_width:.1f}, z: {zorder_base}/{zorder_base+1})")
-        
+
+        print(
+            f"  Rendering {type_name} {status_name}: "
+            f"{len(polygons)} polygons (color: {color}, width: {line_width:.1f}, z: {zorder_base}/{zorder_base+1})"
+        )
+
         # Plot filled polygons (if requested)
         if fill:
             collection = PolyCollection(
                 polygons,
                 facecolors=color,
                 alpha=alpha,
-                edgecolors='none',
+                edgecolors="none",
                 transform=transform,
-                zorder=zorder_base
+                zorder=zorder_base,
             )
             ax.add_collection(collection)
-        
+
         # Always plot outlines (solid, no transparency)
         outline_collection = PolyCollection(
             polygons,
-            facecolors='none',
+            facecolors="none",
             edgecolors=color,
             linewidths=line_width,
             alpha=1.0,
             transform=transform,
-            zorder=zorder_base + 1
+            zorder=zorder_base + 1,
         )
         ax.add_collection(outline_collection)
-    
-    def plot_warnings(self, ax, warnings: Optional[gpd.GeoDataFrame] = None,
-                     warning_type: Optional[str] = None,
-                     warning_status: Optional[str] = None,
-                     valid_time: Optional[datetime] = None,
-                     outline_width: float = 1.0,
-                     fill: bool = False,
-                     alpha: float = 0.5,
-                     transform: Optional[ccrs.Projection] = None):
+
+    def plot_warnings(
+        self,
+        ax,
+        warnings: Optional[gpd.GeoDataFrame] = None,
+        warning_type: Optional[str] = None,
+        warning_status: Optional[str] = None,
+        valid_time: Optional[datetime] = None,
+        outline_width: float = 1.0,
+        fill: bool = False,
+        alpha: float = 0.5,
+        transform: Optional[ccrs.Projection] = None,
+    ):
         """
         Plot specific warnings on a Cartopy map
-        
+
         Line thickness is automatically adjusted based on warning status:
         - Warnings (W): outline_width (e.g., 1.0)
         - Non-warnings (A/Y/S): outline_width * 0.5 (e.g., 0.5)
-        
+
         Parameters:
         -----------
         ax : GeoAxes
@@ -457,57 +477,67 @@ class NWSWarnings:
         """
         if transform is None:
             transform = ccrs.PlateCarree()
-        
+
         # Get warnings to plot
         if warnings is None:
             warnings = self.filter_warnings(warning_type, warning_status, valid_time)
-        
+
         if len(warnings) == 0:
             print(f"No warnings to plot")
             return
-        
+
         # Group by PHENOM.SIG
         warning_groups = {}
         for idx, row in warnings.iterrows():
-            phenom = row.get('PHENOM', None)
-            sig = row.get('SIG', None)
-            
+            phenom = row.get("PHENOM", None)
+            sig = row.get("SIG", None)
+
             if phenom and sig:
                 key = f"{phenom}.{sig}"
                 if key not in warning_groups:
                     warning_groups[key] = []
                 warning_groups[key].append(row.geometry)
-        
+
         # Determine z-order based on whether this is a warning or not
-        if warning_status == 'W':
+        if warning_status == "W":
             zorder_base = 3  # Warnings on top
         else:
             zorder_base = 1  # Non-warnings below
-        
+
         # Render each group
         for phenom_sig, geometries in warning_groups.items():
             self._render_warning_group(
-                ax, phenom_sig, geometries, outline_width,
-                fill, alpha, transform, zorder_base
+                ax,
+                phenom_sig,
+                geometries,
+                outline_width,
+                fill,
+                alpha,
+                transform,
+                zorder_base,
             )
-    
-    def plot_all_warnings(self, ax, valid_time: Optional[datetime] = None,
-                         outline_width: float = 1.0,
-                         fill: bool = False,
-                         alpha: float = 0.5,
-                         severe_only: bool = False,
-                         transform: Optional[ccrs.Projection] = None):
+
+    def plot_all_warnings(
+        self,
+        ax,
+        valid_time: Optional[datetime] = None,
+        outline_width: float = 1.0,
+        fill: bool = False,
+        alpha: float = 0.5,
+        severe_only: bool = False,
+        transform: Optional[ccrs.Projection] = None,
+    ):
         """
         Plot ALL warnings and watches at the given time with NWS official colors
-        
+
         Uses two-pass rendering strategy (like IDL code):
         - Pass 1: Non-warnings (watches, advisories, statements) with 0.5 line width at z=10/11
         - Pass 2: Warnings only with 1.0 line width at z=12/13 (drawn on top)
-        
+
         Line thickness is automatically adjusted based on warning status:
         - Warnings (W): outline_width (e.g., 1.0)
         - Non-warnings (A/Y/S): outline_width * 0.5 (e.g., 0.5)
-        
+
         Parameters:
         -----------
         ax : GeoAxes
@@ -528,74 +558,88 @@ class NWSWarnings:
         """
         if transform is None:
             transform = ccrs.PlateCarree()
-        
+
         # Filter by time only (get all types and statuses)
         warnings = self.filter_warnings(valid_time=valid_time)
-        
+
         if len(warnings) == 0:
             print("No active warnings found")
             return
-        
+
         # Group warnings by PHENOM.SIG combination
         warning_groups = {}
-        
+
         for idx, row in warnings.iterrows():
-            phenom = row.get('PHENOM', None)
-            sig = row.get('SIG', None)
-            
+            phenom = row.get("PHENOM", None)
+            sig = row.get("SIG", None)
+
             if phenom and sig:
                 # Filter for severe only if requested
                 if severe_only:
-                    if not ((phenom == 'TO' and sig == 'W') or
-                           (phenom == 'SV' and sig == 'W')):
+                    if not (
+                        (phenom == "TO" and sig == "W")
+                        or (phenom == "SV" and sig == "W")
+                    ):
                         continue
-                
+
                 key = f"{phenom}.{sig}"
                 if key not in warning_groups:
                     warning_groups[key] = []
                 warning_groups[key].append(row.geometry)
-        
+
         print(f"Found {len(warning_groups)} different warning types/statuses")
-        
+
         # TWO-PASS RENDERING (like IDL code)
         # This ensures warnings are always drawn on top of watches/advisories
-        
+
         # PASS 1: Plot non-warnings (watches, advisories, statements) at z=10/11
         print("Pass 1: Rendering non-warnings (watches, advisories, statements)...")
         for phenom_sig, geometries in warning_groups.items():
-            parts = phenom_sig.split('.')
+            parts = phenom_sig.split(".")
             if len(parts) == 2:
                 _, sig = parts
-                if sig != 'W':  # Not a warning
+                if sig != "W":  # Not a warning
                     self._render_warning_group(
-                        ax, phenom_sig, geometries, outline_width,
-                        fill, alpha, transform, zorder_base=1
+                        ax,
+                        phenom_sig,
+                        geometries,
+                        outline_width,
+                        fill,
+                        alpha,
+                        transform,
+                        zorder_base=1,
                     )
-        
+
         # PASS 2: Plot warnings only at z=12/13 (on top)
         print("Pass 2: Rendering warnings (on top)...")
         for phenom_sig, geometries in warning_groups.items():
-            parts = phenom_sig.split('.')
+            parts = phenom_sig.split(".")
             if len(parts) == 2:
                 _, sig = parts
-                if sig == 'W':  # Warning only
+                if sig == "W":  # Warning only
                     self._render_warning_group(
-                        ax, phenom_sig, geometries, outline_width,
-                        fill, alpha, transform, zorder_base=3
+                        ax,
+                        phenom_sig,
+                        geometries,
+                        outline_width,
+                        fill,
+                        alpha,
+                        transform,
+                        zorder_base=3,
                     )
 
 
 def get_nws_shapefile_path(base_path: str, year: int) -> str:
     """
     Get NWS shapefile path for a given year
-    
+
     Parameters:
     -----------
     base_path : str
         Base directory containing shapefiles
     year : int
         Year
-    
+
     Returns:
     --------
     str : Path to shapefile
