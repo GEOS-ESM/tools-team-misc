@@ -16,6 +16,12 @@ install*
 # If you build with spack libraries, you can get spack log files
 spack*.log
 
+### Common Binary Files ###
+
+*.nc
+*.nc4
+*.h5
+
 ### Python ###
 
 # Byte-compiled / optimized / DLL files

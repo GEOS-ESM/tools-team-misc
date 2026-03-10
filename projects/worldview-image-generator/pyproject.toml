@@ -1,0 +1,26 @@
+[project]
+authors = [{name = "Hannah Zafar", email = "hannah.zafar@nasa.gov"}]
+dependencies = []
+description = "Add a short description here"
+name = "gmao-image-generator"
+requires-python = ">= 3.11"
+version = "0.1.0"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.pypi-dependencies]
+gmao_image_generator = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+libgdal = ">=3.12.0,<4"
+numpy = "1.26.4.*"
+cftime = ">=1.6.4,<2"
+pip = ">=25.3,<26"

@@ -14,14 +14,15 @@ from scipy.ndimage import gaussian_filter
 # ------------------------------------------------------------------
 
 vCOLORS = load_color_table(
-        "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/idl_colortable_5_reversed.txt"
-    )
+    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/idl_colortable_5_reversed.txt"
+)
 
-vLEVELS= 60.0 * np.arange(256) / 255.0 # seconds^-1
+vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
+
 
 @register("vorticity_slp_850mb")
 def plot_vorticity_slp_850mb(fig, ax, plotter, reader, args):
@@ -30,25 +31,19 @@ def plot_vorticity_slp_850mb(fig, ax, plotter, reader, args):
     """
     # Read from reader (reader decides the collection)
     vort, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["VORT850"]
+        args.fdate, args.pdate, variables=["VORT850"]
     )
-    vort = vort.astype(np.float32)*1.e5
+    vort = vort.astype(np.float32) * 1.0e5
 
     phis, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["PHIS"]
+        args.fdate, args.pdate, variables=["PHIS"]
     )
-    phis = phis.astype(np.float32)/9.81
+    phis = phis.astype(np.float32) / 9.81
 
     slp, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["SLP"]
+        args.fdate, args.pdate, variables=["SLP"]
     )
-    slp = slp.astype(np.float32)/100.0
+    slp = slp.astype(np.float32) / 100.0
     # mask and smooth
     slp_masked = np.ma.masked_where(phis > 1500, slp)
     lat_weight = np.cos(np.deg2rad(lats))[:, None]
@@ -78,12 +73,11 @@ def plot_vorticity_slp_850mb(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
-
     # ------------------------------------------------------------
     # Plot SLP contours
     # ------------------------------------------------------------
-    levs0 =  884 + np.arange(12) * 8
-    levs1 =  980 + np.arange(5)  * 4
+    levs0 = 884 + np.arange(12) * 8
+    levs1 = 980 + np.arange(5) * 4
     levs2 = 1000 + np.arange(31) * 2
     clevs = np.concatenate([levs0, levs1, levs2])
     cs = ax.contour(
@@ -98,22 +92,23 @@ def plot_vorticity_slp_850mb(fig, ax, plotter, reader, args):
     )
     # labels
     ax.clabel(
-         cs,
+        cs,
         fmt="%d",
         fontsize=9,
         inline=True,
         inline_spacing=5,
     )
 
+
 def generate_colorbar():
     """Generate colorbar for 850mb vorticity/SLP"""
     from wxmaps_utils import save_colorbar_single
-    
+
     output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/vorticity_slp_850mb.png"
     save_colorbar_single(
-        vCOLORS, 
-        vLEVELS, 
-        output, 
+        vCOLORS,
+        vLEVELS,
+        output,
         label="850mb Relative Vorticity (×10⁻⁵ s⁻¹) with Sea Level Pressure Contours (mb)",
-        extend='max'
+        extend="max",
     )

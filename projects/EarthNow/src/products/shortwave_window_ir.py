@@ -17,12 +17,13 @@ COLORS = load_color_table(
     "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_3p9micron.txt"
 )
 
-clevs = [-110., -59, -20, 6, 31, 57]  # Celsius
+clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
+
 
 @register("shortwave_window_ir")
 def plot_shortwave_window_ir(fig, ax, plotter, reader, args):
@@ -32,9 +33,7 @@ def plot_shortwave_window_ir(fig, ax, plotter, reader, args):
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["TBRB15RG"]
+        args.fdate, args.pdate, variables=["TBRB15RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -58,15 +57,16 @@ def plot_shortwave_window_ir(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
+
 def generate_colorbar():
     """Generate colorbar for shortwave window IR"""
     from wxmaps_utils import save_colorbar_single
-    
+
     output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/shortwave_window_ir.png"
     save_colorbar_single(
-        COLORS, 
-        LEVELS, 
-        output, 
+        COLORS,
+        LEVELS,
+        output,
         label="3.9 μm Shortwave Window Brightness Temperature (°C)",
-        extend='both'
+        extend="both",
     )
