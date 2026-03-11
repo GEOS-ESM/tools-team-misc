@@ -21,7 +21,12 @@ import warnings
 from datetime import datetime
 import pytz
 
-from earthnow.wxmaps_config import MapConfig, WxMapsConfig, ResolutionConfig, StyleConfig
+from earthnow.wxmaps_config import (
+    MapConfig,
+    WxMapsConfig,
+    ResolutionConfig,
+    StyleConfig,
+)
 
 # =============================================================================
 # Boundary draw order (bottom → top)

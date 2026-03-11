@@ -29,5 +29,6 @@ from .winds_heights_250mb import plot_winds_heights_250mb
 from .winds_heights_500mb import plot_winds_heights_500mb
 from .winds_heights_700mb import plot_winds_heights_700mb
 from .winds_heights_850mb import plot_winds_heights_850mb
+from .EarthNow_temperature_2m import plot_EarthNow_temperature_2m
 
 __all__ = ["PRODUCTS"]

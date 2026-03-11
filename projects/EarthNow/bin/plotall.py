@@ -136,6 +136,7 @@ def parse_args():
         "--feature_resolution", choices=["10m", "50m", "110m"], default="50m"
     )
 
+    parser.add_argument("--station_values", action="store_true")
     parser.add_argument("--cities", action="store_true")
     parser.add_argument("--roads", action="store_true")
     parser.add_argument("--major-roads-only", action="store_true")
