@@ -1,12 +1,12 @@
 """
-Ozone Longwave IR Product
-9.6 micron - Ozone Band - GOES Band 12
+Mid-Level Water Vapor Product
+6.9 micron - Mid-Level Water Vapor - GOES Band 09
 """
 
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from .registry import register
+from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 
 # ------------------------------------------------------------------
@@ -14,10 +14,10 @@ from earthnow.wxmaps_utils import load_color_table
 # ------------------------------------------------------------------
 
 COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_9p6micron.txt"
+    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_WV_6p9micron.txt"
 )
 
-clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
+clevs = [-93.0, -54, -30, -18, -5, 7]  # Celsius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
@@ -25,15 +25,15 @@ LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 # ------------------------------------------------------------------
 
 
-@register("ozone_longwave_ir")
-def plot_ozone_longwave_ir(fig, ax, plotter, reader, args):
+@register("mid_level_water_vapor")
+def plot_mid_level_water_vapor(fig, ax, plotter, reader, args):
     """
-    Plot ozone longwave IR brightness temperature (9.6 micron)
-    GOES Band 12 → TBRB07RG
+    Plot mid-level water vapor brightness temperature (6.9 micron)
+    GOES Band 09 → TBRB10RG
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["TBRB07RG"]
+        args.fdate, args.pdate, variables=["TBRB10RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -59,14 +59,14 @@ def plot_ozone_longwave_ir(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar():
-    """Generate colorbar for ozone longwave IR"""
+    """Generate colorbar for mid-level water vapor"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/ozone_longwave_ir.png"
+    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/mid_level_water_vapor.png"
     save_colorbar_single(
         COLORS,
         LEVELS,
         output,
-        label="9.6 μm Ozone Band Brightness Temperature (°C)",
+        label="6.9 μm Mid-Level Water Vapor Brightness Temperature (°C)",
         extend="both",
     )

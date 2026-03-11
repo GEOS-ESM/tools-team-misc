@@ -6,7 +6,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib.pyplot as plt
-from .registry import register
+from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 from scipy.ndimage import minimum_filter, gaussian_filter
 

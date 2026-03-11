@@ -1,12 +1,12 @@
 """
-Upper-Level Water Vapor Product
-6.2 micron - Upper-Level Water Vapor - GOES Band 08
+Shortwave Window IR Product
+3.9 micron - Shortwave Window - GOES Band 07
 """
 
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from .registry import register
+from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 
 # ------------------------------------------------------------------
@@ -14,10 +14,10 @@ from earthnow.wxmaps_utils import load_color_table
 # ------------------------------------------------------------------
 
 COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_WV_6p2micron.txt"
+    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_3p9micron.txt"
 )
 
-clevs = [-93.0, -54, -30, -18, -5, 7]  # Celsius
+clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
@@ -25,15 +25,15 @@ LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 # ------------------------------------------------------------------
 
 
-@register("upr_level_water_vapor")
-def plot_upr_level_water_vapor(fig, ax, plotter, reader, args):
+@register("shortwave_window_ir")
+def plot_shortwave_window_ir(fig, ax, plotter, reader, args):
     """
-    Plot upper-level water vapor brightness temperature (6.2 micron)
-    GOES Band 08 → TBRB11RG
+    Plot shortwave window IR brightness temperature (3.9 micron)
+    GOES Band 07 → TBRB15RG
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["TBRB11RG"]
+        args.fdate, args.pdate, variables=["TBRB15RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -59,14 +59,14 @@ def plot_upr_level_water_vapor(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar():
-    """Generate colorbar for upper-level water vapor"""
+    """Generate colorbar for shortwave window IR"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/upr_level_water_vapor.png"
+    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/shortwave_window_ir.png"
     save_colorbar_single(
         COLORS,
         LEVELS,
         output,
-        label="6.2 μm Upper-Level Water Vapor Brightness Temperature (°C)",
+        label="3.9 μm Shortwave Window Brightness Temperature (°C)",
         extend="both",
     )

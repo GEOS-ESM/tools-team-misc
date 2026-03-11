@@ -7,7 +7,7 @@ Used to validate map configuration, styling, projections, and boundaries.
 
 from typing import Optional
 from datetime import datetime
-from .registry import register
+from earthnow.products.registry import register
 
 from earthnow.wxmaps_plotting import WxMapPlotter
 

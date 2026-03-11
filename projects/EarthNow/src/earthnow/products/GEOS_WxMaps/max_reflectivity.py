@@ -6,7 +6,7 @@ Maximum Composite Reflectivity (DBZ_MAX / REFC)
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from .registry import register
+from earthnow.products.registry import register
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
