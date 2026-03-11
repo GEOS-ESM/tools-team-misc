@@ -13,14 +13,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install Black
-        run: pip install black==26.1.0
+      - name: Get changed Python files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/*.py
+            **/*.pyi
 
-      - name: Run Black check
-        run: black --check .
+      - name: Run Black against changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: psf/black@stable
+        with:
+          options: "--check --diff"
+          src: ${{ steps.changed-files.outputs.all_changed_files }}
