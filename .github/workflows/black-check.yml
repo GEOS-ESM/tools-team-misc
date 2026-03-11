@@ -24,6 +24,10 @@ jobs:
       - name: Get changed Python files
         id: changed-files
         uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/*.py
+            **/*.pyi
 
       - name: Run Black against changed files
         if: steps.changed-files.outputs.any_changed == 'true'
