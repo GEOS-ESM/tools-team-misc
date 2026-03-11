@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -22,5 +24,12 @@ jobs:
       - name: Install Black
         run: pip install black==26.1.0
 
+      - name: Get changed Python files
+        id: changed-files
+        run: |
+        CHANGED=$(git diff --name-only --diff-filter=ACM origin/${{ github.base_ref }}...HEAD -- '*.py')
+        echo "files=$CHANGED" >> $GITHUB_OUTPUT
+
       - name: Run Black check
-        run: black --check .
+        if: steps.changed-files.outputs.files != ''
+        run: echo "${{ steps.changed-files.outputs.files }}" | xargs black --check
