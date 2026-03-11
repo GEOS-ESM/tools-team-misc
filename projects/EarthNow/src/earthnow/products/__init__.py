@@ -7,6 +7,7 @@ from earthnow.products.registry import PRODUCTS
 # import modules so they self-register
 from . import GEOS_WxMaps
 from . import EarthNow
+
 # from .basemap import plot_basemap
 # from .wxmap import plot_wxmap
 # from .max_reflectivity import plot_max_reflectivity
