@@ -6,7 +6,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.colors import LinearSegmentedColormap, Normalize
-from .registry import register
+from earthnow.products.registry import register
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -93,8 +93,8 @@ COLORS = (
 # ------------------------------------------------------------------
 
 
-@register("EarthNow_temperature_2m")
-def plot_EarthNow_temperature_2m(fig, ax, plotter, reader, args):
+@register("temperature_2m_EarthNow")
+def plot_temperature_2m(fig, ax, plotter, reader, args):
     """
     Plot Temperature at 2-meters (F)
     """

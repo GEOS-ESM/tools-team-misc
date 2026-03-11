@@ -1,12 +1,12 @@
 """
-Shortwave Window IR Product
-3.9 micron - Shortwave Window - GOES Band 07
+CO2 Longwave IR Product
+13.3 micron - CO2 Longwave Band - GOES Band 16
 """
 
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from .registry import register
+from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 
 # ------------------------------------------------------------------
@@ -14,26 +14,26 @@ from earthnow.wxmaps_utils import load_color_table
 # ------------------------------------------------------------------
 
 COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_3p9micron.txt"
+    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/ColorBar450Band16_horz.txt"
 )
 
-clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
-LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
+clevs = [-87.0, -60, -30, -15, 0, 4, 12, 24]  # Celsius
+LEVELS = np.interp(7 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
 
 
-@register("shortwave_window_ir")
-def plot_shortwave_window_ir(fig, ax, plotter, reader, args):
+@register("co2_longwave_ir")
+def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
     """
-    Plot shortwave window IR brightness temperature (3.9 micron)
-    GOES Band 07 → TBRB15RG
+    Plot CO2 longwave IR brightness temperature (13.3 micron)
+    GOES Band 16 → TBRB05RG
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["TBRB15RG"]
+        args.fdate, args.pdate, variables=["TBRB05RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -59,14 +59,14 @@ def plot_shortwave_window_ir(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar():
-    """Generate colorbar for shortwave window IR"""
+    """Generate colorbar for CO2 longwave IR"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/shortwave_window_ir.png"
+    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/co2_longwave_ir.png"
     save_colorbar_single(
         COLORS,
         LEVELS,
         output,
-        label="3.9 μm Shortwave Window Brightness Temperature (°C)",
+        label="13.3 μm CO2 Longwave Brightness Temperature (°C)",
         extend="both",
     )

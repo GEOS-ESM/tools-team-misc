@@ -1,11 +1,11 @@
 """
-Winds and Heights at 250mb Product
+Winds and Heights at 500mb Product
 """
 
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from .registry import register
+from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 
 # ------------------------------------------------------------------
@@ -84,19 +84,19 @@ vLEVELS = [
 # ------------------------------------------------------------------
 
 
-@register("winds_heights_250mb")
-def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
+@register("winds_heights_500mb")
+def plot_winds_heights_500mb(fig, ax, plotter, reader, args):
     """
-    Plot Winds (knots) and Heights (m) at 250mb
+    Plot Winds (knots) and Heights (m) at 500mb
     """
     # Read from reader (reader decides the collection)
     uwnd, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["U250"]
+        args.fdate, args.pdate, variables=["U500"]
     )
     uwnd = uwnd.astype(np.float32) * 1.94384
 
     vwnd, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["V250"]
+        args.fdate, args.pdate, variables=["V500"]
     )
     vwnd = vwnd.astype(np.float32) * 1.94384
 
@@ -106,7 +106,7 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     )
 
     hgts, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["H250"]
+        args.fdate, args.pdate, variables=["H500"]
     )
     hgts = hgts.astype(np.float32) / 10.0
 
@@ -133,7 +133,7 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot height contours
     # ------------------------------------------------------------
-    hlevs = np.arange(960, 1146, 6)  # 9600m to 11400m every 60m
+    hlevs = np.arange(480, 630, 6)
     cs = ax.contour(
         lons,
         lats,
@@ -158,14 +158,14 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar():
-    """Generate colorbar for 250mb winds/heights"""
+    """Generate colorbar for 500mb winds/heights"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/winds_heights_250mb.png"
+    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/winds_heights_500mb.png"
     save_colorbar_single(
         vCOLORS,
         vLEVELS,
         output,
-        label="250mb Wind Speed (knots) with Geopotential Height Contours (dam)",
+        label="500mb Wind Speed (knots) with Geopotential Height Contours (dam)",
         extend="max",
     )

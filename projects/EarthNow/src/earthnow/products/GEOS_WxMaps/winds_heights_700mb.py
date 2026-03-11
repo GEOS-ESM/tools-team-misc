@@ -1,11 +1,11 @@
 """
-Winds and Heights at 850mb Product
+Winds and Heights at 700mb Product
 """
 
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from .registry import register
+from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 
 # ------------------------------------------------------------------
@@ -84,19 +84,19 @@ vLEVELS = [
 # ------------------------------------------------------------------
 
 
-@register("winds_heights_850mb")
-def plot_winds_heights_850mb(fig, ax, plotter, reader, args):
+@register("winds_heights_700mb")
+def plot_winds_heights_700mb(fig, ax, plotter, reader, args):
     """
-    Plot Winds (knots) and Heights (m) at 850mb
+    Plot Winds (knots) and Heights (m) at 700mb
     """
     # Read from reader (reader decides the collection)
     uwnd, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["U850"]
+        args.fdate, args.pdate, variables=["U700"]
     )
     uwnd = uwnd.astype(np.float32) * 1.94384
 
     vwnd, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["V850"]
+        args.fdate, args.pdate, variables=["V700"]
     )
     vwnd = vwnd.astype(np.float32) * 1.94384
 
@@ -106,7 +106,7 @@ def plot_winds_heights_850mb(fig, ax, plotter, reader, args):
     )
 
     hgts, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["H850"]
+        args.fdate, args.pdate, variables=["H700"]
     )
     hgts = hgts.astype(np.float32) / 10.0
 
@@ -133,7 +133,7 @@ def plot_winds_heights_850mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot height contours
     # ------------------------------------------------------------
-    hlevs = np.arange(90, 210, 3)
+    hlevs = np.arange(240, 360, 3)
     cs = ax.contour(
         lons,
         lats,
@@ -158,14 +158,14 @@ def plot_winds_heights_850mb(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar():
-    """Generate colorbar for 850mb winds/heights"""
+    """Generate colorbar for 700mb winds/heights"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/winds_heights_850mb.png"
+    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/winds_heights_700mb.png"
     save_colorbar_single(
         vCOLORS,
         vLEVELS,
         output,
-        label="850mb Wind Speed (knots) with Geopotential Height Contours (dam)",
+        label="700mb Wind Speed (knots) with Geopotential Height Contours (dam)",
         extend="max",
     )

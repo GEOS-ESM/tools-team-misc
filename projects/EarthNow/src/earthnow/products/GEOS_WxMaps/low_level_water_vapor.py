@@ -1,12 +1,12 @@
 """
-CO2 Longwave IR Product
-13.3 micron - CO2 Longwave Band - GOES Band 16
+Low-Level Water Vapor Product
+7.3 micron - Low-Level Water Vapor - GOES Band 10
 """
 
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from .registry import register
+from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 
 # ------------------------------------------------------------------
@@ -14,26 +14,26 @@ from earthnow.wxmaps_utils import load_color_table
 # ------------------------------------------------------------------
 
 COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/ColorBar450Band16_horz.txt"
+    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_WV_7p3micron.txt"
 )
 
-clevs = [-87.0, -60, -30, -15, 0, 4, 12, 24]  # Celsius
-LEVELS = np.interp(7 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
+clevs = [-93.0, -54, -30, -18, -5, 7]  # Celcius
+LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
 
 
-@register("co2_longwave_ir")
-def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
+@register("low_level_water_vapor")
+def plot_low_level_water_vapor(fig, ax, plotter, reader, args):
     """
-    Plot CO2 longwave IR brightness temperature (13.3 micron)
-    GOES Band 16 → TBRB05RG
+    Plot low-level water vapor brightness temperature (7.3 micron)
+    GOES Band 10 → TBRB09RG
     """
     # Read from reader
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["TBRB05RG"]
+        args.fdate, args.pdate, variables=["TBRB09RG"]
     )
     data = data.astype(np.float32) - 273.15  # Celsius
 
@@ -59,14 +59,14 @@ def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar():
-    """Generate colorbar for CO2 longwave IR"""
+    """Generate colorbar for low-level water vapor"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/co2_longwave_ir.png"
+    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/low_level_water_vapor.png"
     save_colorbar_single(
         COLORS,
         LEVELS,
         output,
-        label="13.3 μm CO2 Longwave Brightness Temperature (°C)",
+        label="7.3 μm Low-Level Water Vapor Brightness Temperature (°C)",
         extend="both",
     )
