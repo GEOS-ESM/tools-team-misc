@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gradient>
+  <colorStops>
+    <stop position="0.0000" r="190" g="190" b="190" />
+    <stop position="0.5037" r="195" g="172" b="138" />
+    <stop position="0.5576" r="191" g="167" b="120" />
+    <stop position="0.5999" r="189" g="156" b="112" />
+    <stop position="0.6333" r="184" g="146" b="104" />
+    <stop position="0.6626" r="178" g="136" b="95" />
+    <stop position="0.6960" r="172" g="126" b="86" />
+    <stop position="0.7266" r="166" g="117" b="77" />
+    <stop position="0.7588" r="160" g="108" b="69" />
+    <stop position="0.7864" r="152" g="98" b="61" />
+    <stop position="0.8142" r="143" g="90" b="58" />
+    <stop position="0.8462" r="131" g="84" b="58" />
+    <stop position="0.8782" r="122" g="77" b="58" />
+    <stop position="0.9031" r="109" g="70" b="58" />
+    <stop position="0.9307" r="99" g="64" b="59" />
+    <stop position="0.9556" r="86" g="58" b="59" />
+    <stop position="0.9773" r="73" g="52" b="58" />
+    <stop position="1.0000" r="51" g="49" b="63" />
+  </colorStops>
+</gradient>

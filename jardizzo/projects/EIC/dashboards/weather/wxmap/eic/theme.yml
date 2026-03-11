@@ -16,6 +16,16 @@ theme:
 
   plot:
 
+    smoke:
+      long_name: Aerosols
+      levels: [0]
+      layers: [brexttau]
+      title: 'AOT'
+      parea: 0 11 0 8.5
+      map:
+        frame: 'off'
+        layers: [map-smoke]
+
     precip: &PRECIP
       long_name: PRECIP
       levels: [0]
@@ -293,6 +303,20 @@ theme:
       nsub: 5 
       skip: 5 
       scale: exp_scale
+      <<: *AOT_ALPHA
+
+    brexttau:
+      gxout: shaded
+      expr: _brexttau*2
+      cbar: Colorbar_13B
+      cbunits:
+      clevs:
+      cmin: 0
+      cmax: 1
+      cint: 0.1
+      nsub: 10
+      skip: 10
+      scale:
       <<: *AOT_ALPHA
 
     niexttau:
