@@ -21,15 +21,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Black
-        run: pip install black==26.1.0
-
       - name: Get changed Python files
         id: changed-files
-        run: |
-        CHANGED=$(git diff --name-only --diff-filter=ACM origin/${{ github.base_ref }}...HEAD -- '*.py')
-        echo "files=$CHANGED" >> $GITHUB_OUTPUT
+        uses: tj-actions/changed-files@v40
 
-      - name: Run Black check
-        if: steps.changed-files.outputs.files != ''
-        run: echo "${{ steps.changed-files.outputs.files }}" | xargs black --check
+      - name: Run Black against changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: psf/black@stable
+        with:
+          options: "--check --diff"
+          src: ${{ steps.changed-files.outputs.all_changed_files }}
