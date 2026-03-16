@@ -1,8 +1,9 @@
 #!/bin/bash
 
-source /usr/share/lmod/lmod/init/bash
-module load python/GEOSpyD
-module load ffmpeg
+#NOTE: Getting rid of this to test the uv venv
+# source /usr/share/lmod/lmod/init/bash
+# module load python/GEOSpyD
+# module load ffmpeg
 
 bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 rootdir="$(dirname "$bindir")"
