@@ -17,7 +17,7 @@ PYTHONPATH="$srcdir${PYTHONPATH:+:$PYTHONPATH}" \
     --fdate 20260202_00z \
     --pdate 20260202_1600 \
     --map-type global \
-    --base-path /discover/nobackup/$USER/EarthNow/plots \
+    --base-path $NOBACKUP/EarthNow/plots \
     --style light \
     --boundaries countries \
     --boundaries states 
