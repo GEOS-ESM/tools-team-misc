@@ -12,15 +12,15 @@ import sys
 import cartopy.crs as ccrs  # ADD THIS LINE
 import numpy as np
 
-from wxmaps_config import WxMapsConfig, StyleConfig
-from wxmaps_plotting import WxMapPlotter
-from wxmaps_utils import (
+from earthnow.wxmaps_config import WxMapsConfig, StyleConfig
+from earthnow.wxmaps_plotting import WxMapPlotter
+from earthnow.wxmaps_utils import (
     get_output_filepath,
     parse_date_string,
 )
 
-from data_readers import DATA_READERS
-from products import PRODUCTS
+from earthnow.data_readers import DATA_READERS
+from earthnow.products import PRODUCTS
 
 # -----------------------------------------------------------------------------
 # ARGPARSE
@@ -136,6 +136,7 @@ def parse_args():
         "--feature_resolution", choices=["10m", "50m", "110m"], default="50m"
     )
 
+    parser.add_argument("--station_values", action="store_true")
     parser.add_argument("--cities", action="store_true")
     parser.add_argument("--roads", action="store_true")
     parser.add_argument("--major-roads-only", action="store_true")
@@ -293,7 +294,7 @@ def plot_single_pdate(pdate, args, style, map_config):
 
     # Add NWS warnings if requested (BEFORE timestamp so warnings are below text)
     if style.show_nws_warnings:
-        from wxmaps_utils import parse_date_string
+        from earthnow.wxmaps_utils import parse_date_string
 
         pdate_dt = parse_date_string(local_args.pdate)
         plotter.add_nws_warnings(pdate_dt)
@@ -341,7 +342,7 @@ def main():
     # PRE-COMPUTE COORDINATE TRANSFORMS
     # =========================================================================
     if isinstance(map_config.projection, ccrs.Geostationary):
-        from wxmaps_transform_cache import get_transform_cache
+        from earthnow.wxmaps_transform_cache import get_transform_cache
         import matplotlib.pyplot as plt
 
         print("\n" + "=" * 70)
@@ -407,7 +408,7 @@ def main():
     # =========================================================================
     # PRELOAD BASE IMAGES (after transform is computed)
     # =========================================================================
-    from wxmaps_base_images import preload_base_images_from_style
+    from earthnow.wxmaps_base_images import preload_base_images_from_style
 
     # Determine target resolution based on output resolution
     resolution_map = {"hd": 4000, "fhd": 4000, "2k": 6000, "4k": 4000, "8k": 8000}

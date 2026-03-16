@@ -4,26 +4,21 @@ source /usr/share/lmod/lmod/init/bash
 module load python/GEOSpyD
 module load ffmpeg
 
-bindir=`dirname $0`
-cd $bindir
-bindir=`pwd`
-rootdir=`dirname $bindir`
-srcdir=$rootdir/src
+bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+rootdir="$(dirname "$bindir")"
+srcdir="$rootdir/src"
+listing="$bindir/listing"
 
-if [ -z "$PYTHONPATH" ]; then
-  export PYTHONPATH=$srcdir
-else
-  export PYTHONPATH=${PYTHONPATH}:$srcdir
-fi
 
-echo $PYTHONPATH
-
-python plotall.py \
-    --product basemap \
+PYTHONPATH="$srcdir${PYTHONPATH:+:$PYTHONPATH}" \
+    python "$bindir/plotall.py" \
+    --product temperature_2m_EarthNow \
     --nproc 1 \
     --fdate 20260202_00z \
     --pdate 20260202_1600 \
     --map-type global \
     --base-path /discover/nobackup/$USER/EarthNow/plots \
-    --style light
+    --style light \
+    --boundaries countries \
+    --boundaries states 
 exit 0

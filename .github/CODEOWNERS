@@ -1,0 +1,25 @@
+# =============================================================================
+# CODEOWNERS
+# -----------------------------------------------------------------------------
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# - Order matters: the LAST matching rule takes precedence
+# - Owners can be: @username, @org/team, or user@email.com
+# - A PR will request review from all matching owners
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Global Fallback
+# Catches anything not matched by a more specific rule below
+# -----------------------------------------------------------------------------
+* @jardizzo
+
+
+# -----------------------------------------------------------------------------
+# Packages and Projects
+# -----------------------------------------------------------------------------
+projects/worldview-image-generator @hannahzafar @embell139
+
+projects/EarthNow @GEOS-ESM/EarthNow-Team
+
