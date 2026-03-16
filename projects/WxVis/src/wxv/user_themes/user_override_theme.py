@@ -1,5 +1,5 @@
-from themes.wxmapsclassicpub import *
-from themes.registry import *
+from wxv.themes.wxmapsclassicpub import *
+from wxv.themes.registry import *
 from wxv.conditional import Conditional
 
 @register("user_override_theme")

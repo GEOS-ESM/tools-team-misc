@@ -1,7 +1,9 @@
 import sys
 import importlib
 import wxv.interface as api
-from themes.registry import THEMES
+from wxv.themes.registry import THEMES
+
+print(THEMES)
 
 ui = api.Interface('Weather Visualizer')
 request = ui.get_args()

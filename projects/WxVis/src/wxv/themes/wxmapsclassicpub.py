@@ -1,5 +1,5 @@
-from .theme import theme
-from .registry import register
+from wxv.themes.theme import theme
+from wxv.themes.registry import register
 from wxv.myutils import dict_merge
 from wxv.conditional import Conditional
 
