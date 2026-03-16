@@ -1,9 +1,0 @@
-#!/bin/sh
-
-bin_path=`dirname $0`
-bin_path=`realpath $bin_path`
-install_path=`dirname $bin_path`
-
-export PYTHONPATH=${install_path}:${install_path}/user_themes
-
-python $bin_path/wxvis.py $*
