@@ -1,0 +1,8 @@
+User-defined Themes Examples
+============================
+
+cd <repo_install_path>/projects/WxVis/bin
+
+wxvis --theme user_merged_theme --region midatl --level 300
+wxvis --theme user_inherit_theme --region midatl --level 300
+wxvis --theme user_override_theme --region midatl --level 300
