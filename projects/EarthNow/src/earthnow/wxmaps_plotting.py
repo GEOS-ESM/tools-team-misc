@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+import geopandas as gpd
 import matplotlib.ticker as mticker
 from typing import Optional, List, Tuple
 import numpy as np
@@ -176,15 +177,30 @@ class WxMapPlotter:
             )
 
         if "countries" in boundaries:
-            print("  Adding Cartopy country borders")
-            self.ax.add_feature(
-                cfeature.BORDERS.with_scale(feature_resolution),
+            # print("  Adding Cartopy country borders")
+            # self.ax.add_feature(
+            #     cfeature.BORDERS.with_scale(feature_resolution),
+            #     linewidth=self.style.country_width,
+            #     edgecolor=self.style.country_color,
+            #     alpha=self.style.country_alpha,
+            #     facecolor="none",
+            #     zorder=5,
+            # )
+
+            # Fix for state-dept boundaries shapefile
+            # print("  Adding country borders (state dept compliant)")
+            shapefile_path = "/discover/nobackup/hzafar/state_dep_files/data/DoS_LSIB_v11_4_24Feb2025.shp"
+            gdf = gpd.read_file(shapefile_path)
+            state_dept_boundaries = cfeature.ShapelyFeature(
+                gdf.geometry,
+                ccrs.PlateCarree(),
                 linewidth=self.style.country_width,
                 edgecolor=self.style.country_color,
                 alpha=self.style.country_alpha,
                 facecolor="none",
-                zorder=5,
             )
+            self.ax.add_feature(state_dept_boundaries, zorder=5)
+
 
         if "states" in boundaries:
             print("  Adding Cartopy state borders")
@@ -594,6 +610,7 @@ class WxMapPlotter:
             zorder=6,
         )
 
+    #NOTE: What is the difference between this and the countries call above?
     def draw_countries(self, feature_resolution: str = "50m"):
         """Draw country boundaries"""
         self.ax.add_feature(
