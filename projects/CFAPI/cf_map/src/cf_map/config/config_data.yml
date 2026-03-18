@@ -1,0 +1,12 @@
+dataset:
+        fcast: '/discover/nobackup/projects/gmao/geos_cf/pub/GEOS-CF_NRT/opendap/fcast/'
+        assim: '/discover/nobackup/projects/gmao/geos_cf/pub/GEOS-CF_NRT///das/'
+data:
+        chm_p23: 'chm_inst_1hr_g1440x721_p23'
+        chm_v1: 'chm_tavg_1hr_g1440x721_v1'
+        met: 'met_tavg_1hr_g1440x721_x1'
+        aqc: 'aqc_tavg_1hr_g1440x721_v1'
+format:
+        json: 'application/json'
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        txt: 'text/plain'

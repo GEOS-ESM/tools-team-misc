@@ -240,3 +240,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Gitlab CFAPI
+projects/CFAPI/.git
+projects/CFAPI/.gitignore

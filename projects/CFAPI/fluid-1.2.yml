@@ -1,0 +1,75 @@
+# Environment for FLUID v1.2
+# Created on: 2025-06-05 SJR
+# Notes:
+# - Includes Flask stack for FLUID
+# - contains package information from 1.1 install
+#   (see /explore/dataportal/nobackup01/projects/GMAO/fluid-v1.1/conda-meta/history)
+# - adds dotenv for easier environmental setups
+# - adds xgrads for python/grads interface
+# - adds shapely, geopandas for possible plot upgrades
+# - includes jupyterlab for ipython use in testing (dev only)
+# - includes sqlite-logging for potential logger updates
+# - to create:
+# >> module load miniforge/14.9.0 # not sure if this is needed?
+# >> conda env create --prefix /explore/dataportal/nobackup01/projects/GMAO/fluid-v1.2 --file fluid-1.2.yml
+# Outside of the dataportal/main context:
+# >> conda env create --file=fluid-1.2.yml
+# to update (MINOR UPDATES)
+# >> conda env update --prefix /explore/dataportal/nobackup01/projects/GMAO/fluid-v1.2 --file fluid-1.2.yml --prune
+
+
+#prefix: /explore/dataportal/nobackup01/projects/GMAO/fluid-1.2
+name: fluid-1.2
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  # Core Python
+  - python=3.12.7
+
+  # Flask + WSGI
+  - flask-wtf=1.2.1
+  - gunicorn=23.0.0
+  - python-dotenv
+
+  # Scientific/Geo packages
+  - basemap=1.4.1
+  - cartopy=0.24.0
+  - shapely
+  - geopandas                                                                                                                                                                                                           
+  - xarray
+  - netcdf4
+  - libnetcdf=4.9.2
+  - scipy
+
+  # Data I/O
+  - fastparquet=2024.5.0
+  - openpyxl=3.1.5
+  - xlsxwriter=3.2.0
+  - pyyaml=6.0.2
+  - ruamel.yaml
+  - xgrads
+  - ffmpeg
+  #- watchdog #Commented out for now, may use in development later
+
+  # Data Visualization
+  - bokeh
+  - geoviews
+
+  # Jupyter support (if needed)
+  - jupyterlab #for debugging/testing - not needed in production
+
+  # Database
+  - psycopg2
+  - psycopg
+
+  # Interfacing
+  - jpype1
+
+  # Testing
+  - pytest
+
+  # Pip extras
+  - pip
+  - pip:
+      - sqlite-logging

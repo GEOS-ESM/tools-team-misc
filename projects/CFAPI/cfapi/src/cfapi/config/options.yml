@@ -1,0 +1,72 @@
+aliases:
+  collections:
+    fcast: [fcst, forecast]
+    assim: [ana, assimilation]
+  datasets:
+    chm: [chem, chemistry]
+    aqc: [airq, airquality]
+    met: [meteo, meteorology]
+  levels:
+    slv: [x1,v1]
+    p23: 
+    v72:
+  products:
+    PM25: [pm25,pm2.5,pm_25]
+    HCHO: [hcho, formaldehyde, h2co, form]
+    T: [t, temp, temperature]
+    PM25_RH35: [pm25_rh35_gcc,pm_25_rh35, pm_25_rh35_gcc]
+    ISOP: [isop, isoprene, c5h8]
+    THETA: [TH, ETH]
+    default: [NO2 or MET]
+    global_subs:
+      rh35_gcc: [rh35]
+      rh35: [rh35_gcc]
+      pm25: [pm2.5,pm_25]
+  legacy_products: 
+    CO: [co]
+    NO2: [no2]
+    SO2: [so2]
+    O3: [o3, ozone]
+    PM25: [pm25,pm2.5,pm_25]
+    HCHO: [hcho, formaldehyde, h2co, form]
+    T: [t, temp, temperature]
+    PM25_RH35: [pm25_rh35_gcc,pm_25_rh35, pm_25_rh35_gcc]
+    ISOP: [isop, isoprene, c5h8]
+    THETA: [TH, ETH]
+    NOy: [NOY, noy]
+    MET: [met]
+    default: [NO2 or MET]
+  versions:
+    v1: ['1']
+    v2: ['2']
+options:
+  aqc: 
+    products:
+      options: [NO2, CO, O3, PM25, SO2]
+      default: NO2
+    levels:
+      options: [slv]
+  chm: 
+    products:
+      options: [NO2, CO, O3, PM25, SO2, HCHO, NOy,PM25_RH35]
+      default: NO2
+    levels:
+      options: [slv,p23,v72]
+  met: 
+    products:
+      options: [MET, T]
+      default: MET
+    levels:
+      options: [slv,p23,v72]
+
+defaults:
+  version: v2
+  collection: fcast
+  dataset: aqc
+  level: slv
+  product: default
+  products: []
+  lat: 38.9
+  lon: -77.0
+  start: ~
+  end: ~
