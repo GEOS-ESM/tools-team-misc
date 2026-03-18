@@ -132,7 +132,7 @@ def generate_colorbar():
     from earthnow.wxmaps_utils import save_colorbar_single
 
     output = (
-        "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/temperature_2m.png"
+
     )
     save_colorbar_single(
         COLORS, LEVELS, output, label="2-Meter Temperature (°F)", extend="both"

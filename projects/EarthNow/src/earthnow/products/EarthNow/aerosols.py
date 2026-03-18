@@ -88,13 +88,6 @@ COLORS = (
     / 255.0
 )
 
-def print_shape(name,var):
-    print(f'Shape of {name}:')
-    try:
-        print(np.shape(var))
-    except Exception:
-        print('Nope, not going to print')
-
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
@@ -106,11 +99,10 @@ def plot_temperature_2m(fig, ax, plotter, reader, args):
     Plot Temperature at 2-meters (F)
     """
     # Read from reader (reader decides the collection)
-    data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["TMP_2M", "T2M"]
+    ocexttau, lats, lons, meta = reader.read_variable(
+        args.fdate, args.pdate, variables=["OCEXTTAU", "T2M"]
     )
-    print_shape('temp1', data)
-    data = (data.astype(np.float32) - 273.15) * 1.8000 + 32.0
+    ocexttau = (data.astype(np.float32) - 273.15) * 1.8000 + 32.0
 
     # ------------------------------------------------------------
     # Colormap + normalization
@@ -143,11 +135,6 @@ def plot_temperature_2m(fig, ax, plotter, reader, args):
     if args.station_values:
         # Add city temperature labels
         plotter.add_city_temperatures(data, lons, lats, temperature_unit="F")
-    print_shape('lons', lons)
-    print_shape('lats', lats)
-    print_shape('data', data)
-    print_shape('cmap', cmap)
-    print_shape('norm', norm)
 
 
 def generate_colorbar():

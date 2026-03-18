@@ -12,7 +12,7 @@ listing="$bindir/listing"
 
 PYTHONPATH="$srcdir${PYTHONPATH:+:$PYTHONPATH}" \
     python "$bindir/plotall.py" \
-    --product temperature_2m_EarthNow \
+    --product carbon_EarthNow \
     --nproc 1 \
     --fdate 20260202_00z \
     --pdate 20260202_1600 \
