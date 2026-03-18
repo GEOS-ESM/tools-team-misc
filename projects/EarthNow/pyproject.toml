@@ -20,7 +20,7 @@ dependencies = [
 plotting = [
   "matplotlib>=3.7",
   "cartopy>=0.22",
-  "astropy", 
+  "astropy",
   "shapely",
   "geopandas", #pandas only used with geopandas
   "pytz",
@@ -34,6 +34,7 @@ dev = [
   "pytest>=7",
   "ruff>=0.3",
   "mypy>=1.7",
+  "ipykernel>=7.2.0",
 ]
 
 # uv_build file selection (recommended for flat layout repos)

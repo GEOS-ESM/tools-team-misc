@@ -1,4 +1,6 @@
 ---
+ignore: |
+  jardizzo/
 
 extends: default
 

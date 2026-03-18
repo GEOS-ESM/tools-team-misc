@@ -12,11 +12,13 @@ listing="$bindir/listing"
 
 PYTHONPATH="$srcdir${PYTHONPATH:+:$PYTHONPATH}" \
     python "$bindir/plotall.py" \
-    --product basemap \
+    --product temperature_2m_EarthNow \
     --nproc 1 \
     --fdate 20260202_00z \
     --pdate 20260202_1600 \
     --map-type global \
     --base-path /discover/nobackup/$USER/EarthNow/plots \
-    --style light
+    --style light \
+    --boundaries countries \
+    --boundaries states 
 exit 0
