@@ -76,7 +76,7 @@ Carbon Aerosol Optical Thickness
 ## Global Dynamics
 `ploteic_vort500`
 500-mb Vorticity and Heights
-- Assignee:
+- Assignee:Hannah
 - Status:
 
 `ploteic_wind250`
