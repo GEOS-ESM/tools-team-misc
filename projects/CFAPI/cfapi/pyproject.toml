@@ -1,0 +1,44 @@
+[build-system]
+requires = ["uv_build>=0.10.0,<0.11.0"]
+build-backend = "uv_build"
+
+[project]
+name = "cfapi"
+version = "0.1.0"
+description = "CF API utilities and configuration handling"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Sandra Roberts" },
+]
+
+dependencies = [
+  "numpy",
+  "pandas",
+  "xarray",
+  "pyyaml",
+  "netCDF4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7",
+  "ruff>=0.3",
+  "mypy>=1.7",
+]
+
+# Only add this if you actually define cfapi.__main__.main or similar
+[project.scripts]
+cfapi = "cfapi.cfapi_interface:uvmain"
+
+[tool.uv.build-backend]
+include = [
+  "src/cfapi/**",
+]
+exclude = [
+  "**/__pycache__/**",
+  "**/*.pyc",
+  "**/.DS_Store",
+  "tests/**",
+  "test*.py",
+]

@@ -1,0 +1,47 @@
+v1:
+  dataset:
+    latest: '/discover/nobackup/projects/gmao/geos_cf/pub/GEOS-CF_NRT/opendap/fcast'
+    fcast: 'forecast/Y%Y/M%m/D%d/H12'
+    assim: 'ana/Y%Y/M%m/D%d'
+  data:
+    chm_slv: 'chm_tavg_1hr_g1440x721_v1'
+    met_slv: 'met_tavg_1hr_g1440x721_x1'
+    chm_p23: 'chm_inst_1hr_g1440x721_p23'
+    met_p23: 'met_inst_1hr_g1440x721_p23'
+    chm_v72: 'chm_inst_1hr_g1440x721_v72'
+    met_v72: 'met_inst_1hr_g1440x721_v72'
+    aqc_slv: 'aqc_tavg_1hr_g1440x721_v1'
+    aqc: 'aqc_tavg_1hr_g1440x721_v1'
+  products: 
+    chm: [CO, NO2, O3, PM25, SO2, HCHO]
+    met: [MET]
+    aqc: [CO, NO2, O3, PM25, SO2]
+  date_limits:
+    fcast: ['20190101','']
+    assim: ['20180101','']
+  format: &format
+    json: 'application/json'
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    txt: 'text/plain'
+v2:
+  dataset:
+    latest: '/css/gmao/geos-cf/NRTv2/pub/opendap/fcst'
+    fcast: 'fcst/Y%Y/M%m/D%d'
+    assim: 'ana/Y%Y/M%m/D%d'
+  data:
+    chm_slv: 'chm_tavg_1hr_glo_L1440x721_slv'
+    met_slv: 'met_tavg_1hr_glo_L1440x721_slv'
+    chm_p23: 'chm_inst_1hr_glo_L1440x721_p23'
+    met_p23: 'met_inst_1hr_glo_L1440x721_p23'
+    chm_v72: 'chm_inst_1hr_glo_L1440x721_v72'
+    met_v72: 'met_inst_1hr_glo_L1440x721_v72'
+    aqc_slv: 'aqc_tavg_1hr_glo_L1440x721_slv'
+    aqc: 'aqc_tavg_1hr_glo_L1440x721_slv'
+  products:
+    chm: [CO, NO2, O3, PM25, SO2, HCHO]
+    met: [MET]
+    aqc: [CO, NO2, O3, PM25, SO2]
+  date_limits:
+    fcast: ['20250804','']
+    assim: ['20250804','']
+  format: *format

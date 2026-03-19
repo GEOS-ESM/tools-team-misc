@@ -1,0 +1,38 @@
+
+collections:
+  fcast: [fcst, forecast]
+  assim: [ana, assimilation]
+datasets:
+  chm: [chem, chemistry]
+  aqc: [airq, airquality]
+  met: [meteo, meteorology]
+levels:
+  slv: [x1,v1]
+  p23: 
+  v72:
+products:
+  PM25: [pm25,pm2.5,pm_25]
+  HCHO: [hcho, formaldehyde, h2co, form]
+  T: [t, temp, temperature]
+  PM25_RH35: [pm25_rh35_gcc,pm_25_rh35, pm_25_rh35_gcc]
+  ISOP: [isop, isoprene, c5h8]
+  default: [NO2 or MET]
+  global_subs:
+    rh35_gcc: [rh35]
+    rh35: [rh35_gcc]
+    pm25: [pm2.5,pm_25]
+legacy_products: 
+  CO: [co]
+  NO2: [no2]
+  SO2: [so2]
+  O3: [o3, ozone]
+  PM25: [pm25,pm2.5,pm_25]
+  HCHO: [hcho, formaldehyde, h2co, form]
+  T: [t, temp, temperature]
+  PM25_RH35: [pm25_rh35_gcc,pm_25_rh35, pm_25_rh35_gcc]
+  ISOP: [isop, isoprene, c5h8]
+  MET: [met]
+  default: [NO2 or MET]
+versions:
+  v1: ['1']
+  v2: ['2']

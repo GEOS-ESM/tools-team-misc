@@ -1,0 +1,46 @@
+[build-system]
+requires = ["uv_build>=0.10.0,<0.11.0"]
+build-backend = "uv_build"
+
+[project]
+name = "cf-map"
+version = "0.1.0"
+description = "CF map plotting tools"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Sandra Roberts" },
+]
+dependencies = [
+  "cfapi",
+  "matplotlib",
+  "numpy",
+  "pandas",
+  "pyyaml",
+  "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7",
+  "ruff>=0.3",
+  "mypy>=1.7",
+]
+
+[project.scripts]
+cf-map = "cf_map.cli_interface:uvmain"
+
+[tool.uv.sources]
+cfapi = { path = "../cfapi", editable = true }
+
+[tool.uv.build-backend]
+include = [
+  "src/cf_map/**",
+]
+exclude = [
+  "**/__pycache__/**",
+  "**/*.pyc",
+  "**/.DS_Store",
+  "tests/**",
+  "test*.py",
+]

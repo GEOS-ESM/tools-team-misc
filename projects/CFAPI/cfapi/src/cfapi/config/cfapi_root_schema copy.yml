@@ -1,0 +1,49 @@
+Forecast and Replay Model Fields:
+  Chem:
+    Base URI: "/cfapi/<collection>/chm/<level>/<product>/<lat>x<lon>/<start_date>/<end_date>/"
+    collections: ["fcast", "assim"]
+    level: ["v1", "p23", "v72"]
+    product: ["CO", "NO2", "O3", "PM25", "SO2", "HCHO", "MET"]
+    lat: "float value of some latitude"
+    lon: "float value of some longitude"
+    start_date: "YYYYMMDD or latest"
+    end_date: "YYYYMMDD or empty if start_date is latest"
+    Default Values:
+      collection: "fcast"
+      level: "v1"
+      product: "NO2"
+      lat: "38.9"
+      lon: "-77.0"
+      start_date: "latest"
+      end_date: "None"
+
+  Met:
+    Base URI: "/cfapi/<collection>/met/<level>/MET/<lat>x<lon>/<start_date>/<end_date>/"
+    collections: ["fcast", "assim"]
+    level: ["x1", "v72"]
+    lat: "float value of some latitude"
+    lon: "float value of some longitude"
+    start_date: "YYYYMMDD or latest"
+    end_date: "YYYYMMDD or empty if start_date is latest"
+    Default Values:
+      collection: "fcast"
+      level: "x1"
+      lat: "38.9"
+      lon: "-77.0"
+      start_date: "latest"
+      end_date: "None"
+
+Historical AQC Data Sets:
+  All Data:
+    Base URI: "/cfapi/aqc/<collection>/<product>/<lat>x<lon>/<start_date>/<end_date>/"
+    collections: ["fcast", "assim"]
+    products: ["NO2", "O3", "PM25"]
+    start_date: "YYYYMMDD or latest"
+    end_date: "YYYYMMDD or empty if start_date is latest"
+    Default Values:
+      collection: "assim"
+      product: "NO2"
+      lat: "38.9"
+      lon: "-77.0"
+      start_date: "latest"
+      end_date: "None"

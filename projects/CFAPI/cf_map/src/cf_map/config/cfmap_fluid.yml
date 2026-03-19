@@ -1,0 +1,67 @@
+product:
+  NO2: 
+    var: no2
+    label: NO<sub>2</sub>
+    vals: [0, 10]
+    units: ppbv
+  O3: 
+    var: o3
+    label: O<sub>3</sub>
+    vals: [0, 70]
+    units: ppbv
+  PM25: 
+    var: pm25
+    label: PM2.5
+    vals: [0, 150]
+    units: '$\mu$g/m$^3$'
+format:
+  Excel:
+    var: xlsx
+    label: Excel
+  JSON:
+    var: json
+    label: JSON
+  ASCII:
+    var: txt
+    label: ASCII
+colormap:
+  viridis:
+    var: viridis
+    label: viridis
+  jet:
+    var: jet
+    label: jet
+  plasma:
+    var: plasma
+    label: plasma
+dataset:
+  slv:
+    var: chem_slv
+    label: Surface Level Chemistry
+  p23:
+    var: chem_p23
+    label: Pressure Levels Chemistry
+plot_type:
+  surf:
+    var: surf
+    label: Surface Concentration Plot
+    action: cfmap.fcst_plots
+  pres:
+    var: pres
+    label: Pressure Levels Plot
+    action: cfmap.fcst_plots
+  replay:
+    var: replay
+    label: Historical CF Plot
+    action: cfmap.assim_plots
+filepath:
+    v1: 
+        dir_temp: '/discover/nobackup/projects/gmao/geos_cf/pub/GEOS-CF_NRT/forecast/Y%Y/M%m/D%d/H%H/cog'
+        tif_temp: 'GEOS-CF.v01.fcst.chm_tavg_1hr_g1440x721_v1.{fcst}+%Y%m%d_%H%Mz.R0.{{product}}.tif'
+        fcst_hr: 12
+        fcst_str: '%Y%m%d_%Hz'
+    v2:
+        dir_temp: '/css/gmao/geos-cf/NRTv2/pub/fcst/Y%Y/M%m/D%d/cog'
+        tif_temp: 'GEOS.cf.fcst.chm_tavg_1hr_glo_L1440x721_slv.{fcst}+%Y%m%d_%H%Mz.R0.{{product}}.tif'
+        fcst_hr: 9
+        fcst_str: '%Y%m%d_%Hz'
