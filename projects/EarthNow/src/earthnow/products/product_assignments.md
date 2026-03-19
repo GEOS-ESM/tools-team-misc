@@ -28,11 +28,11 @@ Radar Reflectivity [Rain/Snow/Ice]
 - Status:
 
 Accumulated Precip [Rain & Snow]
-- Assignee:
+- Assignee: Emily
 - Status:
 
 Near Surface Winds
-- Assignee:
+- Assignee: Emily
 - Status:
 
 2-meter Temperature
@@ -50,11 +50,11 @@ Convective Available Potential Energy
 
 ## Composition
 Aerosol Optical Thickness [SS, DU, SU, NI]
-- Assignee:
+- Assignee: Sandra
 - Status:
 
 Carbon Aerosol Optical Thickness
-- Assignee:
+- Assignee: Sandra
 - Status:
 
 
