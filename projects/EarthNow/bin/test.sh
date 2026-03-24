@@ -1,14 +1,15 @@
 #!/bin/bash
 
-source /usr/share/lmod/lmod/init/bash
-module load python/GEOSpyD
-module load ffmpeg
+#NOTE: Running using the uv python config
 
 bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-rootdir="$(dirname "$bindir")"
-srcdir="$rootdir/src"
-listing="$bindir/listing"
 
+# Test uv setup works
+# script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# project_root="$(dirname "$script_dir")"
+# cd "$project_root"
+# uv run tests/test_uv.py
+# 
 
 PYTHONPATH="$srcdir${PYTHONPATH:+:$PYTHONPATH}" \
     python "$bindir/plotall.py" \
