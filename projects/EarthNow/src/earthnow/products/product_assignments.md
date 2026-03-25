@@ -43,7 +43,7 @@ Accumulated Precip [Rain & Snow]
 `ploteic_winds`
 Near Surface Winds
 - Assignee: Emily
-- Status:
+- Status: Done! 
 
 `ploteic_t2m`
 2-meter Temperature
