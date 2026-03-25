@@ -109,15 +109,14 @@ def plot_temperature_2m(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     vmin = min(LEVELS)
     vmax = max(LEVELS)
-
-    positions = (np.array(LEVELS) - vmin) / (vmax - vmin)
+    # Create a function to normalize over specified range
+    norm = Normalize(vmin=vmin, vmax=vmax)  
 
     cmap = LinearSegmentedColormap.from_list(
         "EarthNow_temperature_2m",
-        list(zip(positions, COLORS[:-1])),  # see note below
+        list(zip(norm(LEVELS), COLORS[:-1])),  # see note below
         N=256,
     )
-    norm = Normalize(vmin=vmin, vmax=vmax)
 
     # ------------------------------------------------------------
     # Plot field
