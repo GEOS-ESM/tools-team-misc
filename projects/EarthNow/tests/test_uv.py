@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import sys
-import cartopy.crs as ccrs  # ADD THIS LINE
+import cartopy.crs as ccrs
 import numpy as np
 
 from earthnow.wxmaps_config import WxMapsConfig, StyleConfig
