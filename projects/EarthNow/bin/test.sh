@@ -12,7 +12,7 @@ bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 
 
 PYTHONPATH="$srcdir${PYTHONPATH:+:$PYTHONPATH}" \
-    python "$bindir/plotall.py" \
+    uv run "$bindir/plotall.py" \
     --product temperature_2m_EarthNow \
     --nproc 1 \
     --fdate 20260202_00z \
