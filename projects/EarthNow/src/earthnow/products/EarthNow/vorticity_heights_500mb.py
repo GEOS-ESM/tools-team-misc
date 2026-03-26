@@ -43,6 +43,10 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # Colormap + normalization
     # ------------------------------------------------------------
     cmap = ListedColormap(vCOLORS)
+    cmap_colors = cmap(np.arange(cmap.N))
+    cmap_colors[:2, -1] = 0  # Set the first 2 colors transparent
+    cmap = ListedColormap(cmap_colors)
+
     norm = BoundaryNorm(vLEVELS, ncolors=cmap.N, clip=True)
 
     # ------------------------------------------------------------
