@@ -333,7 +333,7 @@ class BaseImagePlotter:
         # Plot the transformed image
         im = ax.imshow(
             warped_img,
-            origin="lower",
+            # origin="lower",
             extent=warped_extent,
             transform=ax.projection,
             interpolation=interpolation,
