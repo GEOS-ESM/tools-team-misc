@@ -31,7 +31,7 @@ if [ "$INPUT" == "global" ]; then
       --pdate 20260202_1600 \
       --map-type global \
       --base-path /discover/nobackup/$USER/EarthNow/plots \
-      --style dark 
+      --style grey_topo
   exit 0
 
 # Test CONUS
@@ -43,7 +43,7 @@ elif [ "$INPUT" == "conus" ]; then
       --pdate 20260202_1600 \
       --map-type conus \
       --base-path /discover/nobackup/$USER/EarthNow/plots \
-      --style satellite
+      --style grey_topo
   exit 0
 
 else

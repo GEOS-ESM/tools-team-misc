@@ -146,7 +146,7 @@ def parse_args():
     # -------------------------------------------------------------------------
     parser.add_argument(
         "--style",
-        choices=["wxmaps", "light", "dark", "nightlights", "satellite", "print"],
+        choices=["wxmaps", "light", "dark", "nightlights", "satellite", "print", "grey_topo"],
         default="wxmaps",
     )
 
@@ -238,6 +238,8 @@ def build_style(args):
         style = StyleConfig.satellite()
     elif args.style == "print":
         style = StyleConfig.print_quality()
+    elif args.style == "grey_topo": # I added my own style, but it might be better to changethis so any registered style exists. Also update that in plotall.py args
+        style = StyleConfig.grey_topo()
     else:
         raise ValueError(f"Unknown style: {args.style}")
 

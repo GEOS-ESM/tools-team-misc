@@ -273,6 +273,18 @@ class StyleConfig:
             show_title=True,
         )
 
+    @staticmethod
+    def grey_topo() -> "StyleConfig":
+        """Light basemap with topography"""
+        return StyleConfig(
+            use_base_image=True,
+            base_image_type="natural_earth_greyblue",
+            use_gshhs=False,
+            ocean_color="white",
+        )
+
+
+
 
 @dataclass
 class ResolutionConfig:
