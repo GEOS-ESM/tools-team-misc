@@ -43,7 +43,7 @@ Accumulated Precip [Rain & Snow]
 `ploteic_winds`
 Near Surface Winds
 - Assignee: Emily
-- Status:
+- Status: Done! 
 
 `ploteic_t2m`
 2-meter Temperature
@@ -81,5 +81,5 @@ Carbon Aerosol Optical Thickness
 
 `ploteic_wind250`
 250-mb Wind Speed and MSLP
-- Assignee:
+- Assignee: Emily
 - Status:

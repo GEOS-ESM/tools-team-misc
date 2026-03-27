@@ -431,7 +431,7 @@ def save_colorbar_grid(
 
 
 def save_colorbar_single(
-    colors, levels, output_path, label="", width=6600, height=600, extend="neither"
+    colors, levels, output_path, label="", width=6600, height=600, extend="neither", ticks=None
 ):
     """
     Generate a single horizontal colorbar PNG.
@@ -482,7 +482,9 @@ def save_colorbar_single(
     cb.outline.set_linewidth(3)
 
     # Set tick positions
-    if len(levels) > 20:
+    if ticks is not None:
+        tick_positions = ticks
+    elif len(levels) > 20:
         tick_positions = levels[:: len(levels) // 10]  # ~10 ticks
     else:
         tick_positions = levels[::2]
