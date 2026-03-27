@@ -44,7 +44,9 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     cmap = ListedColormap(vCOLORS)
     cmap_colors = cmap(np.arange(cmap.N))
-    cmap_colors[:2, -1] = 0  # Set the first 2 colors transparent
+
+    # Bills alphas for vort: alevs= [0,2.5], Match this
+    cmap_colors[:3, -1] = 0
     cmap = ListedColormap(cmap_colors)
 
     norm = BoundaryNorm(vLEVELS, ncolors=cmap.N, clip=True)
@@ -86,16 +88,26 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
         inline_spacing=5,
     )
 
+    # Generate a new colorbar tests
+    # ticks = np.arange(0,65,5)
+    # generate_colorbar(
+    #     cmap_colors, # If we apply transparency to a colormap, we want it to be reflected in the colobar we create... so perhaps we need to regenerate this more often/inside the function?
+    #     vLEVELS,
+    #     ticks,
+    # )
 
-def generate_colorbar():
+def generate_colorbar(colors, levels, ticks):
     """Generate colorbar for 500mb vorticity/heights"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/vorticity_heights_500mb.png"
+    #NOTE: Temp output location until we determine a central location
+    output = "/discover/nobackup/hzafar/EarthNow/plots/vorticity_heights_500mb.png"
+    # output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/vorticity_heights_500mb.png"
     save_colorbar_single(
-        vCOLORS,
-        vLEVELS,
+        colors,
+        levels,
         output,
-        label="500mb Relative Vorticity (×10⁻⁵ s⁻¹) with Geopotential Height Contours (m)",
-        extend="max",
+        label="500mb Cyclonic Relative Vorticity (×10⁻⁵ s⁻¹) and Height (m)",
+        extend="neither",
+        ticks=ticks,
     )
