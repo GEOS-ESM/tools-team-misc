@@ -34,12 +34,15 @@ or running 'uv run' before python calls:
 `uv run python plotall.py --product basemap [other args]`
 
 ### Pre-commit hooks 
-Optional to the EarthNow workflow is a pre-commit hook to run the black formatter automatically before each git commit. If you wish to activate this, simply install the hook with
+Optional to the EarthNow workflow is a pre-commit hook to run the black formatter. 
+If you wish to activate this, simply install the hook with
 `pre-commit install`
 
 More details: 
-    - This commit hook is defined with `.pre-commit-config.yaml` in the root directory of the git repo.
-    - Commits will fail automatically it black reformats any files, and you will need to run `git commit` again to confirm  your changes.
+    - This commit hook is defined with `.pre-commit-config.yaml` in the root 
+      directory of the git repo.
+    - Commits will fail automatically it black reformats any files, and you will 
+      need to run `git commit` again to confirm the changes.
 
 
 
