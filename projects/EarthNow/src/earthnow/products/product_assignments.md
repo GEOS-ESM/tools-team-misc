@@ -57,7 +57,7 @@ Convective Available Potential Energy
 
 `ploteic_helicity`
 2-5km Helicity and Radar Reflectivity
-- Assignee:
+- Assignee: Hannah
 - Status:
 
 
