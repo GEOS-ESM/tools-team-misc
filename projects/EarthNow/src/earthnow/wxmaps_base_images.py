@@ -166,7 +166,7 @@ class BaseImageCache:
 
                 # Downsample with high-quality Lanczos filter
                 print(
-                    f"  Downsampling to: {target_width}x{target_height} ({(target_width*target_height)/1e6:.1f}M pixels)"
+                    f"  Downsampling to: {target_width}x{target_height} ({(target_width * target_height) / 1e6:.1f}M pixels)"
                 )
                 img_resized = img.resize(
                     (target_width, target_height), Image.Resampling.LANCZOS
@@ -317,13 +317,16 @@ class BaseImagePlotter:
             target_shape=target_shape,
         )
 
-        # Apply the cached transform - FLIP for base images (they have origin='upper')
+        # Apply the cached transform
+        # CRITICAL: Base images (JPEG/PNG) have origin='upper' (row 0 = North)
+        # But geographic data convention is origin='lower' (row 0 = South)
+        # The transformation expects source data in origin='lower' format, so we must flip
         print(f"    Applying cached transform to base image...")
         warped_img, warped_extent = transform_cache.apply_transform(
-            source_data=self.image_array,  # Don't pre-flip, let apply_transform do it
+            source_data=self.image_array,
             transform_data=transform_data,
             fill_value=0,
-            flip_source_y=False,
+            flip_source_y=True,  # Flip source from origin='upper' to origin='lower' before interpolation
         )
 
         # Automatic limb darkening for full disk GEO
@@ -331,9 +334,11 @@ class BaseImagePlotter:
             warped_img = BaseImagePlotter.apply_limb_darkening(warped_img)
 
         # Plot the transformed image
+        # The warped_img array is constructed with row 0 = bottom (target_extent[2])
+        # This is origin='lower' convention, matching how compute_transform() builds the coordinate mapping
         im = ax.imshow(
             warped_img,
-            # origin="lower",
+            origin="lower",  # Output array has row 0 at bottom of map
             extent=warped_extent,
             transform=ax.projection,
             interpolation=interpolation,
