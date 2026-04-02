@@ -180,7 +180,11 @@ class TransformCache:
         height, width = target_shape
 
         # Create target coordinate grid
-        # Note: Y is from bottom to top (lat_min to lat_max)
+        # IMPORTANT: This creates output with origin='lower' convention:
+        # - Row 0 corresponds to target_extent[2] (bottom/minimum Y)
+        # - Row height-1 corresponds to target_extent[3] (top/maximum Y)
+        # For geographic data: extent[2]=-90 (South), extent[3]=90 (North)
+        # For projection data: extent[2]=bottom, extent[3]=top in projection coordinates
         x_target = np.linspace(target_extent[0], target_extent[1], width)
         y_target = np.linspace(target_extent[2], target_extent[3], height)
         xx_target, yy_target = np.meshgrid(x_target, y_target)
@@ -203,10 +207,14 @@ class TransformCache:
         )
 
         # Normalize source coordinates to [0, 1] range for interpolation
+        # This assumes source data will be in origin='lower' format:
+        # - Source row 0 should contain data at source_extent[2] (bottom/minimum Y)
+        # - Source row height-1 should contain data at source_extent[3] (top/maximum Y)
+        # For geographic: extent[2]=-90 (South), extent[3]=90 (North)
+        # If source data is an image with origin='upper', it MUST be flipped before interpolation!
         x_source_norm = (x_source - source_extent[0]) / (
             source_extent[1] - source_extent[0]
         )
-        # NO FLIP - we'll handle image origin in the apply step
         y_source_norm = (y_source - source_extent[2]) / (
             source_extent[3] - source_extent[2]
         )
@@ -336,7 +344,7 @@ class TransformCache:
         source_data: np.ndarray,
         transform_data: dict,
         fill_value: float = 0.0,
-        flip_source_y: bool = False,  # ADD THIS PARAMETER
+        flip_source_y: bool = False,
     ) -> Tuple[np.ndarray, Tuple[float, float, float, float]]:
         """
         Apply a cached transform to data
@@ -350,12 +358,16 @@ class TransformCache:
         fill_value : float
             Value for pixels outside source extent
         flip_source_y : bool
-            If True, flip source data vertically before interpolation
-            (use for image files with origin='upper')
+            If True, flip source data vertically before interpolation.
+            REQUIRED for image files (JPEG/PNG) which have origin='upper':
+            - origin='upper': row 0 = top (North for geographic images)
+            - origin='lower': row 0 = bottom (South for geographic images)
+            The interpolation expects origin='lower', so images must be flipped.
 
         Returns:
         --------
         tuple : (transformed_data, target_extent)
+            The output array has origin='lower' convention (row 0 = bottom)
         """
         # Flip source data if needed (for images with origin='upper')
         if flip_source_y:
