@@ -277,6 +277,40 @@ class BaseImagePlotter:
             )
         return self.image_array
 
+    def _get_cropped_source(self, ax):
+        """
+        Crop the global image to the visible map extent,
+        returning (cropped_array, cropped_extent).
+        """
+        # Get the visible extent in PlateCarree (lon/lat), with a small buffer
+        try:
+            lon_min, lon_max, lat_min, lat_max = ax.get_extent(ccrs.PlateCarree())
+        except Exception:
+            return self.image_array, self.extent  # fallback to global
+    
+        # Add a small buffer to avoid edge artifacts
+        buf = 2.0
+        lon_min = max(-180, lon_min - buf)
+        lon_max = min( 180, lon_max + buf)
+        lat_min = max( -90, lat_min - buf)
+        lat_max = min(  90, lat_max + buf)
+    
+        h, w = self.image_array.shape[:2]
+    
+        # Convert lon/lat bounds to pixel indices
+        # Image origin is upper-left, so lat is flipped
+        x0 = int((lon_min + 180) / 360 * w)
+        x1 = int((lon_max + 180) / 360 * w)
+        y0 = int((90 - lat_max) / 180 * h)
+        y1 = int((90 - lat_min) / 180 * h)
+    
+        x0, x1 = max(0, x0), min(w, x1)
+        y0, y1 = max(0, y0), min(h, y1)
+    
+        cropped = self.image_array[y0:y1, x0:x1]
+        cropped_extent = [lon_min, lon_max, lat_min, lat_max]
+        return cropped, cropped_extent
+
     def plot_on_map(
         self,
         ax,
@@ -348,6 +382,42 @@ class BaseImagePlotter:
             rasterized=True,
         )
 
+        print(f"    Done (interpolation={interpolation}, alpha={alpha})")
+
+        return im
+
+    def plot_on_map_nowarp(
+        self,
+        ax,
+        alpha: float = 1.0,
+        interpolation: str = "bilinear",
+        zorder: int = 0,
+        style=None,
+    ):
+        """
+        Plot base image on a Cartopy map
+        """
+        # Load from cache (fast after first load)
+        if self.image_array is None:
+            self.load_image()
+
+        print(f"  Plotting base image (no warp): {Path(self.image_path).name}")
+
+        source_image, source_extent = self._get_cropped_source(ax)
+
+        # Plot the transformed image
+        im = ax.imshow(
+            source_image,
+            origin="upper",               
+            extent=source_extent,        
+            transform=ccrs.PlateCarree(),
+            interpolation=interpolation,
+            resample=True,
+            alpha=alpha,
+            zorder=zorder,
+            rasterized=True,
+        )
+        
         print(f"    Done (interpolation={interpolation}, alpha={alpha})")
 
         return im
