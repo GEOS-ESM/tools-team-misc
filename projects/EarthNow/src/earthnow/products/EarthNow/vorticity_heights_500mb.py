@@ -52,18 +52,27 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     norm = BoundaryNorm(vLEVELS, ncolors=cmap.N, clip=True)
 
     # ------------------------------------------------------------
-    # Plot vorticity field
+    # Plot vorticity field (cyclonic)
     # ------------------------------------------------------------
-    ax.pcolormesh(
-        lons,
-        lats,
-        vort,
-        cmap=cmap,
-        norm=norm,
-        transform=ccrs.PlateCarree(),
-        shading="nearest",
-        zorder=4,
-    )
+    hemispheres = ["NH","SH"]
+    for hemis in hemispheres: # plot cyclonic in each hemisphere
+        mask=lats>0 
+        if hemis=="NH":
+            lats_mask = lats[mask]
+            vort_mask = vort[mask]
+        else:
+            lats_mask = lats[~mask]
+            vort_mask = vort[~mask]*-1
+        ax.pcolormesh(
+            lons,
+            lats_mask,
+            vort_mask,
+            cmap=cmap,
+            norm=norm,
+            transform=ccrs.PlateCarree(),
+            shading="nearest",
+            zorder=4,
+        )
 
     # ------------------------------------------------------------
     # Plot height contours
