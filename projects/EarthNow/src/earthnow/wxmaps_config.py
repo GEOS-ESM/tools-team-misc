@@ -297,12 +297,15 @@ class StyleConfig:
     @staticmethod
     @register_style("grey_topo")
     def grey_topo() -> "StyleConfig":
-        """Light basemap with topography"""
+        """Testing to create grey topo style"""
         return StyleConfig(
-            use_base_image=True,
-            base_image_type="natural_earth_greyblue",
+            # use_base_image=True,
+            # base_image_type="natural_earth_greyblue",
+            background_color="white",
+            text_color="black",
             use_gshhs=False,
-            ocean_color="white",
+            ocean_color="#E6E6E6",
+            land_color="#FFFFFF",
         )
 
 
