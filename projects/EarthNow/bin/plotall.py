@@ -12,7 +12,7 @@ import sys
 import cartopy.crs as ccrs  # ADD THIS LINE
 import numpy as np
 
-from earthnow.wxmaps_config import WxMapsConfig, StyleConfig
+from earthnow.wxmaps_config import WxMapsConfig, StyleConfig, STYLES
 from earthnow.wxmaps_plotting import WxMapPlotter
 from earthnow.wxmaps_utils import (
     get_output_filepath,
@@ -146,7 +146,7 @@ def parse_args():
     # -------------------------------------------------------------------------
     parser.add_argument(
         "--style",
-        choices=["wxmaps", "light", "dark", "nightlights", "satellite", "print", "grey_topo"],
+        choices=STYLES.keys(),
         default="wxmaps",
     )
 
@@ -226,22 +226,7 @@ def create_data_reader(args):
 
 
 def build_style(args):
-    if args.style == "wxmaps":
-        style = StyleConfig.wxmaps()
-    elif args.style == "light":
-        style = StyleConfig.light()
-    elif args.style == "dark":
-        style = StyleConfig.dark()
-    elif args.style == "nightlights":
-        style = StyleConfig.nightlights()
-    elif args.style == "satellite":
-        style = StyleConfig.satellite()
-    elif args.style == "print":
-        style = StyleConfig.print_quality()
-    elif args.style == "grey_topo": # I added my own style, but it might be better to changethis so any registered style exists. Also update that in plotall.py args
-        style = StyleConfig.grey_topo()
-    else:
-        raise ValueError(f"Unknown style: {args.style}")
+    style = STYLES[args.style]()
 
     if args.ocean_color:
         style.ocean_color = args.ocean_color

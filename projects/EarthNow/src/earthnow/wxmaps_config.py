@@ -9,6 +9,21 @@ from typing import Tuple, Optional, List, Dict, Any
 import cartopy.crs as ccrs
 import numpy as np
 
+# Create a STYLE registry to import style names
+STYLES = {}
+
+
+def register_style(name):
+    """
+    Decorator to register a style class
+    """
+
+    def decorator(cls):
+        STYLES[name] = cls
+        return cls
+
+    return decorator
+
 
 @dataclass
 class MapConfig:
@@ -129,6 +144,7 @@ class StyleConfig:
         return {k: v for k, v in self.__dict__.items()}
 
     @staticmethod
+    @register_style("wxmaps")
     def wxmaps() -> "StyleConfig":
         """WxMaps theme style"""
         return StyleConfig(
@@ -151,6 +167,7 @@ class StyleConfig:
         )
 
     @staticmethod
+    @register_style("light")
     def light() -> "StyleConfig":
         """Light theme style"""
         return StyleConfig(
@@ -176,6 +193,7 @@ class StyleConfig:
         )
 
     @staticmethod
+    @register_style("dark")
     def dark() -> "StyleConfig":
         """Dark theme style"""
         return StyleConfig(
@@ -201,6 +219,7 @@ class StyleConfig:
         )
 
     @staticmethod
+    @register_style("nightlights")
     def nightlights() -> "StyleConfig":
         """nightlights theme style"""
         return StyleConfig(
@@ -226,6 +245,7 @@ class StyleConfig:
         )
 
     @staticmethod
+    @register_style("satellite")
     def satellite() -> "StyleConfig":
         """Satellite-like style"""
         return StyleConfig(
@@ -247,6 +267,7 @@ class StyleConfig:
         )
 
     @staticmethod
+    @register_style("print_quality")
     def print_quality() -> "StyleConfig":
         """High-contrast style for printing"""
         return StyleConfig(
@@ -274,6 +295,7 @@ class StyleConfig:
         )
 
     @staticmethod
+    @register_style("grey_topo")
     def grey_topo() -> "StyleConfig":
         """Light basemap with topography"""
         return StyleConfig(
@@ -282,8 +304,6 @@ class StyleConfig:
             use_gshhs=False,
             ocean_color="white",
         )
-
-
 
 
 @dataclass
