@@ -2,9 +2,10 @@
 Vorticity and Heights at 500mb Product
 """
 
-import numpy as np
 import cartopy.crs as ccrs
-from matplotlib.colors import ListedColormap, BoundaryNorm
+import numpy as np
+from matplotlib.colors import BoundaryNorm, ListedColormap
+
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 
@@ -55,15 +56,15 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot vorticity field (cyclonic)
     # ------------------------------------------------------------
-    hemispheres = ["NH","SH"]
-    for hemis in hemispheres: # plot cyclonic in each hemisphere
-        mask=lats>0 
-        if hemis=="NH":
+    hemispheres = ["NH", "SH"]
+    for hemis in hemispheres:  # plot cyclonic in each hemisphere
+        mask = lats > 0
+        if hemis == "NH":
             lats_mask = lats[mask]
             vort_mask = vort[mask]
         else:
             lats_mask = lats[~mask]
-            vort_mask = vort[~mask]*-1
+            vort_mask = vort[~mask] * -1
         ax.pcolormesh(
             lons,
             lats_mask,
@@ -144,6 +145,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     #     vLEVELS,
     #     ticks,
     # )
+
 
 def generate_colorbar(colors, levels, ticks):
     """Generate colorbar for 500mb vorticity/heights"""
