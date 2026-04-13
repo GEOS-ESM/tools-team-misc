@@ -57,7 +57,7 @@ Convective Available Potential Energy
 
 `ploteic_helicity`
 2-5km Helicity and Radar Reflectivity
-- Assignee:
+- Assignee: Hannah
 - Status:
 
 
@@ -76,7 +76,7 @@ Carbon Aerosol Optical Thickness
 ## Global Dynamics
 `ploteic_vort500`
 500-mb Vorticity and Heights
-- Assignee:Hannah
+- Assignee: Hannah
 - Status:
 
 `ploteic_wind250`
