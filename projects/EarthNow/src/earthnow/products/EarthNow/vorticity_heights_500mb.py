@@ -42,6 +42,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
+    # TODO: Incorporate generalized colormap module
     cmap = ListedColormap(vCOLORS)
     cmap_colors = cmap(np.arange(cmap.N))
 
@@ -79,6 +80,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
 
     # Smooth heights
+    # TODO: Make this a function for easy application across products
     import scipy.ndimage as ndimage
 
     pngImgIdim = 3840
