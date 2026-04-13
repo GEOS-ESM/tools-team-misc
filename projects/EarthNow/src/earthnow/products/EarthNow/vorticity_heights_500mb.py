@@ -80,7 +80,32 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
 
     # Smooth heights
     import scipy.ndimage as ndimage
-    hgts_smoothed = ndimage.gaussian_filter(hgts, sigma=10)
+
+    pngImgIdim = 3840
+    pngImgJdim = 2160
+
+    # Gaussian Filter: This doesn't look the exact same
+    # sigma = 20.0
+    # hgts_smoothed = ndimage.gaussian_filter(hgts, sigma=sigma, mode="wrap")
+
+    # Boxcar filter as in IDL SMOOTH (IDL: idata = SMOOTH(h500, pngImgIdim*0.025, /NAN, /EDGE_TRUNCATE))
+    window_size = int(pngImgIdim * 0.025)
+    # hgts_smoothed = ndimage.generic_filter(hgts, np.nanmean, size=window_size, mode="constant", cval=np.nan) # This is SO SLOW (not optimized in C)
+    # have to mask out NANs so they are incorporated into the smoothing
+    mask = ~np.isnan(hgts)
+    hgts_valid = np.where(mask, hgts, 0)
+    sum_data = ndimage.uniform_filter(
+        hgts_valid, size=window_size, mode="constant", cval=0.0
+    )
+    sum_weights = ndimage.uniform_filter(
+        mask.astype(float), size=window_size, mode="constant", cval=0.0
+    )
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        hgts_smoothed = sum_data / sum_weights
+
+    hgts_smoothed[sum_weights == 0] = np.nan
+    hgts_smoothed[~mask] = np.nan
     hlevs = np.arange(4500, 6300, 30)  # 4800m to 6240m every 30m
 
     cs = ax.contour(
