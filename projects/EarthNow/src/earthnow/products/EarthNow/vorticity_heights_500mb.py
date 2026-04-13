@@ -106,6 +106,13 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
 
     hgts_smoothed[sum_weights == 0] = np.nan
     hgts_smoothed[~mask] = np.nan
+
+    # Subsample the data for plotting (only for quick speed applications)
+    # stride = 6
+    # lons_sub = lons[::stride]
+    # lats_sub = lats[::stride]
+    # hgts_sub = hgts_smoothed[::stride, ::stride]
+
     hlevs = np.arange(4500, 6300, 30)  # 4800m to 6240m every 30m
 
     cs = ax.contour(
@@ -140,7 +147,7 @@ def generate_colorbar(colors, levels, ticks):
     """Generate colorbar for 500mb vorticity/heights"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    #NOTE: Temp output location until we determine a central location
+    # NOTE: Temp output location until we determine a central location
     output = "/discover/nobackup/hzafar/EarthNow/plots/vorticity_heights_500mb.png"
     # output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/vorticity_heights_500mb.png"
     save_colorbar_single(
