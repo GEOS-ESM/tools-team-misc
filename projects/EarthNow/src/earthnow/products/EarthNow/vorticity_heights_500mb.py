@@ -77,10 +77,12 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot height contours
     # ------------------------------------------------------------
-    hlevs = np.arange(4800, 6300, 60)  # 4800m to 6240m every 60m
+
     # Smooth heights
     import scipy.ndimage as ndimage
     hgts_smoothed = ndimage.gaussian_filter(hgts, sigma=10)
+    hlevs = np.arange(4500, 6300, 30)  # 4800m to 6240m every 30m
+
     cs = ax.contour(
         lons,
         lats,
@@ -94,6 +96,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # labels
     ax.clabel(
         cs,
+        cs.levels[::2],
         fmt="%d",
         fontsize=5,
         inline=True,
