@@ -24,6 +24,33 @@ vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
 # ------------------------------------------------------------------
 
 
+def boxcar_smooth_2D(array, window_size):
+    """
+    Perform 2D boxcar smoothing with a specified window_size
+
+    Args:
+    - window_size: int
+    """
+    import numpy as np
+    from scipy.ndimage import uniform_filter
+
+    # have to mask out NANs so they do not affect smoothing
+    mask = ~np.isnan(array)
+    array_clean = np.where(mask, array, 0)
+
+    sum_data = uniform_filter(array_clean, size=window_size, mode="constant", cval=0.0)
+    sum_weights = uniform_filter(
+        mask.astype(float), size=window_size, mode="constant", cval=0.0
+    )
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        array_smoothed = sum_data / sum_weights
+
+    array_smoothed[sum_weights == 0] = np.nan
+    array_smoothed[~mask] = np.nan
+    return array_smoothed
+
+
 @register("vorticity_heights_500mb_EarthNow")
 def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     """
@@ -81,29 +108,12 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
 
     # Smooth heights
-    # TODO: Make this a function for easy application across products
-    import scipy.ndimage as ndimage
-
     # 4k dimensions
     pngImgIdim = 3840
     pngImgJdim = 2160
-
     window_size = int(pngImgIdim * 0.025)  # This is the window size Bill's IDL uses
-    # have to mask out NANs so they are incorporated into the smoothing
-    mask = ~np.isnan(hgts)
-    hgts_valid = np.where(mask, hgts, 0)
-    sum_data = ndimage.uniform_filter(
-        hgts_valid, size=window_size, mode="constant", cval=0.0
-    )
-    sum_weights = ndimage.uniform_filter(
-        mask.astype(float), size=window_size, mode="constant", cval=0.0
-    )
 
-    with np.errstate(invalid="ignore", divide="ignore"):
-        hgts_smoothed = sum_data / sum_weights
-
-    hgts_smoothed[sum_weights == 0] = np.nan
-    hgts_smoothed[~mask] = np.nan
+    hgts_smoothed = boxcar_smooth_2D(hgts, window_size=window_size)
 
     # Subsample the data for plotting (only for quick speed applications)
     # stride = 6
