@@ -48,7 +48,7 @@ Near Surface Winds
 `ploteic_t2m`
 2-meter Temperature
 - Assignee: Sandra
-- Status:
+- Status: Done!
 
 `ploteic_cape`
 Convective Available Potential Energy
@@ -57,7 +57,7 @@ Convective Available Potential Energy
 
 `ploteic_helicity`
 2-5km Helicity and Radar Reflectivity
-- Assignee:
+- Assignee: Hannah
 - Status:
 
 
@@ -77,7 +77,7 @@ Carbon Aerosol Optical Thickness
 `ploteic_vort500`
 500-mb Vorticity and Heights
 - Assignee:Hannah
-- Status:
+- Status: Done! Except for locating the identical basemap that the IDL code uses.
 
 `ploteic_wind250`
 250-mb Wind Speed and MSLP
