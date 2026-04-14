@@ -84,16 +84,11 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # TODO: Make this a function for easy application across products
     import scipy.ndimage as ndimage
 
+    # 4k dimensions
     pngImgIdim = 3840
     pngImgJdim = 2160
 
-    # Gaussian Filter: This doesn't look the exact same
-    # sigma = 20.0
-    # hgts_smoothed = ndimage.gaussian_filter(hgts, sigma=sigma, mode="wrap")
-
-    # Boxcar filter as in IDL SMOOTH (IDL: idata = SMOOTH(h500, pngImgIdim*0.025, /NAN, /EDGE_TRUNCATE))
-    window_size = int(pngImgIdim * 0.025)
-    # hgts_smoothed = ndimage.generic_filter(hgts, np.nanmean, size=window_size, mode="constant", cval=np.nan) # This is SO SLOW (not optimized in C)
+    window_size = int(pngImgIdim * 0.025)  # This is the window size Bill's IDL uses
     # have to mask out NANs so they are incorporated into the smoothing
     mask = ~np.isnan(hgts)
     hgts_valid = np.where(mask, hgts, 0)
