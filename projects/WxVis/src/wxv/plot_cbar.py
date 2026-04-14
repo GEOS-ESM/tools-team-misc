@@ -14,7 +14,7 @@ alpha = [(0, 0, 0), (0.5, 1, 1), (1, 1, 1)]
 
 def plot_colorbar(**kwargs):
 
-    if kwargs.get('list', False):
+    if kwargs.get("list", False):
 
         print("Colormaps\n")
         for name in plt.colormaps.keys():
@@ -29,10 +29,11 @@ def plot_colorbar(**kwargs):
     cname = kwargs.get("cmap", "viridis")
 
     cscale = kwargs.get("cscale", "linear")
-    kwargs['cscale'] = NORMFUNCS.get(cscale, None)
+    kwargs["cscale"] = NORMFUNCS.get(cscale, None)
 
     cb = Colorbar(cname, ALPHA=alpha, **kwargs)
-    cb.draw(cname+".png")
+    cb.draw(cname + ".png")
+
 
 if __name__ == "__main__":
 
@@ -44,7 +45,12 @@ if __name__ == "__main__":
         "-o", "--oname", metavar="ONAME", type=str, default=None, help="Filename"
     )
     parser.add_argument(
-        "-c", "--cmap", metavar="COLORMAP", type=str, default=None, help="Name of colormap"
+        "-c",
+        "--cmap",
+        metavar="COLORMAP",
+        type=str,
+        default=None,
+        help="Name of colormap",
     )
     parser.add_argument(
         "--cscale",
@@ -73,7 +79,12 @@ if __name__ == "__main__":
         "--vint", metavar="VINT", type=float, default=None, help="Value increment"
     )
     parser.add_argument(
-        "--vlevs", metavar="VLEVS", nargs='+', type=float, default=None, help="Value levels"
+        "--vlevs",
+        metavar="VLEVS",
+        nargs="+",
+        type=float,
+        default=None,
+        help="Value levels",
     )
     parser.add_argument(
         "--nsub", metavar="NSUB", type=int, default=1, help="Value Sub-divisions"
