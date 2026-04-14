@@ -38,6 +38,7 @@ def log_scale(x):
 # ------------------------------------------------------------------------------
 
 
+@register("log_scale1")
 def log_scale1(x):
     return nlog(x, 1.0)
 
@@ -53,6 +54,7 @@ def exp_scale(x):
 # ------------------------------------------------------------------------------
 
 
+@register("exp_scale20")
 def exp_scale20(x):
     return nexp(x, 20.0)
 
@@ -60,18 +62,6 @@ def exp_scale20(x):
 # ------------------------------------------------------------------------------
 
 
+@register("exp_scale30")
 def exp_scale30(x):
     return nexp(x, 30.0)
-
-@register("TwoSlopeNorm")
-def twoslopenorm(x):
-    return TwoSlopeNorm(0.9, vmin=0, vmax=1)(x)
-
-@register("AsinhNorm")
-def asinhnorm(x):
-    return AsinhNorm(linear_width=1, vmin=0, vmax=1)(x)
-
-@register("CenteredNorm")
-def centerednorm(x):
-    print(x, CenteredNorm(vcenter=0.3, halfrange=0.3)(x))
-    return CenteredNorm(vcenter=0.3, halfrange=0.3)(x)

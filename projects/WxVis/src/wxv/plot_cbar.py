@@ -3,24 +3,22 @@
 import os
 import sys
 import argparse
+import matplotlib.pyplot as plt
 
-from colorbar import Colormaps, Colorbar
+import wxv.colors
+from colorbar import Colorbar
 from normfuncs import NORMFUNCS
 
-alpha = [(0, 1, 1), (0.5, 1, 1), (1, 1, 1)]
+alpha = [(0, 0, 0), (0.5, 1, 1), (1, 1, 1)]
 
 
 def plot_colorbar(**kwargs):
 
-    cmaps = Colormaps()
-
     if kwargs.get('list', False):
 
         print("Colormaps\n")
-        for file in cmaps.files:
-            bname = os.path.basename(file)
-            bname, ext = os.path.splitext(bname)
-            print(bname)
+        for name in plt.colormaps.keys():
+            print(name)
 
         print("\nColor Normalization Functions\n")
         for name in NORMFUNCS:
@@ -29,16 +27,12 @@ def plot_colorbar(**kwargs):
         sys.exit(0)
 
     cname = kwargs.get("cmap", "viridis")
-    colors = cmaps.get(cname)
 
-    cnorm = kwargs.get("cnorm", "linear")
-    kwargs['cnorm'] = NORMFUNCS.get(cnorm, None)
+    cscale = kwargs.get("cscale", "linear")
+    kwargs['cscale'] = NORMFUNCS.get(cscale, None)
 
-    colors = cmaps.get(cname)
-    cb = Colorbar('mycbar', colors, **kwargs)
+    cb = Colorbar(cname, ALPHA=alpha, **kwargs)
     cb.draw(cname+".png")
-
-    print(cb.cmap)
 
 if __name__ == "__main__":
 
@@ -53,11 +47,11 @@ if __name__ == "__main__":
         "-c", "--cmap", metavar="COLORMAP", type=str, default=None, help="Name of colormap"
     )
     parser.add_argument(
-        "--cnorm",
+        "--cscale",
         metavar="CNORM",
         type=str,
         default="linear",
-        help="Color normalization method",
+        help="Color scaling method",
     )
     parser.add_argument(
         "--vscale",
@@ -68,6 +62,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--list", action="store_true", help="List colormaps")
     parser.add_argument("--reverse", action="store_true", help="Reverse colormap")
+    parser.add_argument("--discrete", action="store_true", help="Use discrete colors")
     parser.add_argument(
         "--vmin", metavar="VMIN", type=float, default=None, help="Minimum value"
     )
@@ -76,6 +71,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--vint", metavar="VINT", type=float, default=None, help="Value increment"
+    )
+    parser.add_argument(
+        "--vlevs", metavar="VLEVS", nargs='+', type=float, default=None, help="Value levels"
     )
     parser.add_argument(
         "--nsub", metavar="NSUB", type=int, default=1, help="Value Sub-divisions"

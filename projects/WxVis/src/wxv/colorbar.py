@@ -6,88 +6,7 @@ from pathlib import Path
 
 from PIL import Image
 from matplotlib import font_manager
-from matplotlib.colors import LinearSegmentedColormap
-
-
-class Colormaps(object):
-
-    def __init__(self, paths=""):
-
-        self.files = []
-
-        paths += os.getenv("COLORMAPSPATH", "")
-
-        for path in paths.split(":"):
-            self.files += Path(path).glob("*.csv")
-
-    def get(self, name):
-
-        # Check for matplotlib color first.
-
-        if plt.colormaps.get(name, None):
-            base_cmap = plt.colormaps.get(name, None)
-            colors = base_cmap(np.linspace(0, 1, 256))
-            return self.segment(colors)
-
-        # Search for CSV file matching the requested name.
-
-        for fname in self.files:
-
-            bname = os.path.basename(fname)
-            bname, ext = os.path.splitext(bname)
-            nodes = bname.split("-")
-            iname = f"{nodes[0]}-{nodes[1]}"
-            aname = f"{nodes[0]}-" + "-".join(nodes[2:])
-            if name == iname or name == aname or name == bname:
-                colors = self.read_csv(fname)
-                return self.segment(colors, normalize=True)
-
-        raise FileNotFoundError(f"'{name}' colormap not found.")
-
-    def read_csv(self, fname):
-
-        colors = []
-
-        with open(fname, "r") as f:
-            lines = f.read().splitlines()
-
-        for line in lines:
-            colors.append(line.split(","))
-
-        return colors
-
-    def segment(self, clist, normalize=False):
-        """"""
-        segmentdata = {}
-        colors = []
-
-        factor = 1.0
-        if normalize:
-            factor = 255.0
-
-        for color in clist:
-
-            rgba = [float(c) / factor for c in color]
-            if len(rgba) < 4:
-                rgba.append(1.0)
-            colors.append(rgba)
-
-        data = np.linspace(0.0, 1.0, len(colors))
-
-        for i, channel in enumerate(["red", "green", "blue", "alpha"]):
-
-            segmentdata[channel] = []
-
-            for index, rgba in enumerate(colors):
-                x = data[index]
-                y0 = rgba[i]
-                y1 = y0
-                values = (x, y0, y1)
-                segmentdata[channel].append(values)
-
-        return segmentdata
-
-    __call__ = get
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 
 class Colorbar(object):
@@ -95,7 +14,6 @@ class Colorbar(object):
     def __init__(
         self,
         name,
-        colors,
         vmin=None,
         vmax=None,
         vint=None,
@@ -103,7 +21,7 @@ class Colorbar(object):
         vscale="linear",
         nsub=1,
         skip=None,
-        cnorm=None,
+        cscale=None,
         alpha=None,
         discrete=False,
         reverse=False,
@@ -111,17 +29,23 @@ class Colorbar(object):
     ):
 
         self.name = "_" + name
-        self.segmentdata = dict(colors)
         self.vmin = vmin
         self.vmax = vmax
         self.vint = vint
-        self.vlevs = vlevs
+        self.vlevs = np.array(vlevs)
         self.vscale = vscale
         self.nsub = nsub
         self.skip = skip
-        self.cnorm = cnorm
+        self.cscale = cscale
         self.alpha = alpha
         self.discrete = discrete
+
+        cmap = plt.colormaps.get(name, None)
+        if isinstance(cmap, ListedColormap):
+            colors = cmap(np.linspace(0, 1, cmap.N))
+            self.segmentdata = self.segment(colors)
+        else:
+            self.segmentdata = dict(cmap._segmentdata)
 
         if not skip:
             self.skip = nsub
@@ -132,17 +56,17 @@ class Colorbar(object):
 
         self.vlevs = self.refine_levs(vlevs, nsub, vscale)
 
-        if alpha:
-            self.segmentdata["alpha"] = list(alpha)
-
-        if cnorm:
-            self.normalize_segment(cnorm)
+        if cscale:
+            self.scale_segment(cscale)
 
         if discrete:
             self.discretize_segment()
 
         if reverse:
             self.reverse_segment()
+
+        if alpha:
+            self.segmentdata["alpha"] = list(ALPHA)
 
         # Get a list of colors from the segment data
 
@@ -160,21 +84,20 @@ class Colorbar(object):
         self.cmap.set_under(colors[0])
         self.cmap.set_over(colors[-1])
 
+
     def reverse_segment(self):
         """"""
         segmentdata = self.segmentdata
 
-        for channel in ["red", "green", "blue"]:
-            val = segmentdata[channel]
+        for channel, val in segmentdata.items():
             valnew = [(1.0 - a, b, c) for a, b, c in list(reversed(val))]
             segmentdata[channel] = valnew
 
-    def normalize_segment(self, norm):
+    def scale_segment(self, norm):
         """"""
         segmentdata = self.segmentdata
 
-        for channel in ["red", "green", "blue"]:
-            val = segmentdata[channel]
+        for channel, val in segmentdata.items():
             valnew = [(round(norm(a), 4), b, c) for a, b, c in val]
             segmentdata[channel] = valnew
 
@@ -182,8 +105,7 @@ class Colorbar(object):
         """"""
         segmentdata = self.segmentdata
 
-        for channel in ["red", "green", "blue"]:
-            vertices = segmentdata[channel]
+        for channel, vertices in segmentdata.items():
             for index, val in enumerate(vertices[0:-1]):
                 a, b, c = vertices[index]
                 c = vertices[index + 1][1]
@@ -240,7 +162,7 @@ class Colorbar(object):
 
     def draw(self, pathname):
 
-        a = np.array([[self.vmin, self.vmax]])
+        a = np.array([[0, len(self.vlevs)-1]])
         fig = plt.figure()
         dpi = fig.get_dpi()
         fig.set_size_inches(1800.0 / dpi, 92.0 / dpi)
@@ -269,7 +191,7 @@ class Colorbar(object):
             if i % self.skip != 0:
                 continue
 
-            levels.append(lev)
+            levels.append(i)
             labels.append(str(round(lev, 3)).strip("0").rstrip("."))
             if not labels[-1]:
                 labels[-1] = "0"
@@ -303,6 +225,37 @@ class Colorbar(object):
         plt.close()
 
         return
+
+    def segment(self, clist, normalize=False):
+        """"""
+        segmentdata = {}
+        colors = []
+
+        factor = 1.0
+        if normalize:
+            factor = 255.0
+
+        for color in clist:
+
+            rgba = [float(c) / factor for c in color]
+            if len(rgba) < 4:
+                rgba.append(1.0)
+            colors.append(rgba)
+
+        data = np.linspace(0.0, 1.0, len(colors))
+
+        for i, channel in enumerate(["red", "green", "blue", "alpha"]):
+
+            segmentdata[channel] = []
+
+            for index, rgba in enumerate(colors):
+                x = data[index]
+                y0 = rgba[i]
+                y1 = y0
+                values = (x, y0, y1)
+                segmentdata[channel].append(values)
+
+        return segmentdata
 
 def num_convert(val):
 
