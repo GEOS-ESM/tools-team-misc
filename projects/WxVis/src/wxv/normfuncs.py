@@ -3,6 +3,7 @@ from matplotlib.colors import TwoSlopeNorm, AsinhNorm, CenteredNorm
 
 NORMFUNCS = {}
 
+
 def register(name):
     def decorator(func):
         NORMFUNCS[name] = func

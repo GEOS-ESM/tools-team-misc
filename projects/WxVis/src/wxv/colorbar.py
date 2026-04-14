@@ -84,7 +84,6 @@ class Colorbar(object):
         self.cmap.set_under(colors[0])
         self.cmap.set_over(colors[-1])
 
-
     def reverse_segment(self):
         """"""
         segmentdata = self.segmentdata
@@ -162,7 +161,7 @@ class Colorbar(object):
 
     def draw(self, pathname):
 
-        a = np.array([[0, len(self.vlevs)-1]])
+        a = np.array([[0, len(self.vlevs) - 1]])
         fig = plt.figure()
         dpi = fig.get_dpi()
         fig.set_size_inches(1800.0 / dpi, 92.0 / dpi)
@@ -256,6 +255,7 @@ class Colorbar(object):
                 segmentdata[channel].append(values)
 
         return segmentdata
+
 
 def num_convert(val):
 
