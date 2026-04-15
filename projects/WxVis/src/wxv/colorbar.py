@@ -66,7 +66,7 @@ class Colorbar(object):
             self.reverse_segment()
 
         if alpha:
-            self.segmentdata["alpha"] = list(ALPHA)
+            self.segmentdata["alpha"] = list(alpha)
 
         # Get a list of colors from the segment data
 
@@ -83,6 +83,37 @@ class Colorbar(object):
 
         self.cmap.set_under(colors[0])
         self.cmap.set_over(colors[-1])
+
+    def segment(self, clist, normalize=False):
+        """"""
+        segmentdata = {}
+        colors = []
+
+        factor = 1.0
+        if normalize:
+            factor = 255.0
+
+        for color in clist:
+
+            rgba = [float(c) / factor for c in color]
+            if len(rgba) < 4:
+                rgba.append(1.0)
+            colors.append(rgba)
+
+        data = np.linspace(0.0, 1.0, len(colors))
+
+        for i, channel in enumerate(["red", "green", "blue", "alpha"]):
+
+            segmentdata[channel] = []
+
+            for index, rgba in enumerate(colors):
+                x = data[index]
+                y0 = rgba[i]
+                y1 = y0
+                values = (x, y0, y1)
+                segmentdata[channel].append(values)
+
+        return segmentdata
 
     def reverse_segment(self):
         """"""
@@ -224,37 +255,6 @@ class Colorbar(object):
         plt.close()
 
         return
-
-    def segment(self, clist, normalize=False):
-        """"""
-        segmentdata = {}
-        colors = []
-
-        factor = 1.0
-        if normalize:
-            factor = 255.0
-
-        for color in clist:
-
-            rgba = [float(c) / factor for c in color]
-            if len(rgba) < 4:
-                rgba.append(1.0)
-            colors.append(rgba)
-
-        data = np.linspace(0.0, 1.0, len(colors))
-
-        for i, channel in enumerate(["red", "green", "blue", "alpha"]):
-
-            segmentdata[channel] = []
-
-            for index, rgba in enumerate(colors):
-                x = data[index]
-                y0 = rgba[i]
-                y1 = y0
-                values = (x, y0, y1)
-                segmentdata[channel].append(values)
-
-        return segmentdata
 
 
 def num_convert(val):
