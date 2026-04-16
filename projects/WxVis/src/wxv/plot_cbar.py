@@ -9,7 +9,7 @@ import wxv.colors
 from colorbar import Colorbar
 from normfuncs import NORMFUNCS
 
-alpha = [(0, 0, 0), (0.5, 1, 1), (1, 1, 1)]
+alpha = [(0, 1, 1), (0.5, 1, 1), (1, 1, 1)]
 
 
 def plot_colorbar(**kwargs):
@@ -20,7 +20,7 @@ def plot_colorbar(**kwargs):
         for name in plt.colormaps.keys():
             print(name)
 
-        print("\nColor Normalization Functions\n")
+        print("\nColor Scaling Functions\n")
         for name in NORMFUNCS:
             print(name)
 
@@ -31,7 +31,7 @@ def plot_colorbar(**kwargs):
     cscale = kwargs.get("cscale", "linear")
     kwargs["cscale"] = NORMFUNCS.get(cscale, None)
 
-    cb = Colorbar(cname, ALPHA=alpha, **kwargs)
+    cb = Colorbar(cname, alpha=alpha, **kwargs)
     cb.draw(cname + ".png")
 
 
