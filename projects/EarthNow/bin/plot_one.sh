@@ -57,7 +57,7 @@ else
   # Generate all plots
   uv run "$bindir/plotall.py" \
     --product "$PRODUCT" \
-    --nproc 48 \
+    --nproc "$SLURM_CPUS_PER_TASK" \
     --fdate "$FDATE" \
     --map-type "$MAP_TYPE" \
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
