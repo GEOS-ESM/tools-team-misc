@@ -153,7 +153,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
         cs,
         cs.levels[::2],
         fmt="%d",
-        fontsize=12,
+        fontsize=args.contour_label_size,
         inline=True,
         inline_spacing=5,
     )

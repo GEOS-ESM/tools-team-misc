@@ -35,6 +35,7 @@ class MapConfig:
     center_lon: Optional[float] = None
     center_lat: Optional[float] = None
     standard_parallels: Optional[Tuple[float, float]] = None
+    contour_label_size: int = 8
 
 
 @dataclass
@@ -422,6 +423,7 @@ class WxMapsConfig:
             center_lon=-96,
             center_lat=37,
             standard_parallels=(33, 45),
+            contour_label_size=12,
         )
 
     @staticmethod
