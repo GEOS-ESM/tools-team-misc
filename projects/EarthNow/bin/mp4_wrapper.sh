@@ -1,0 +1,15 @@
+#!/bin/bash
+
+MAPTYPE="global"
+
+PLOTS_PATH=/discover/nobackup/"$USER"/EarthNow/plots/
+
+IMG_GLOB="OpsCONUS02KM/PLOTALL_VORTICITY_HEIGHTS_500MB_EARTHNOW/Y2026/M04/D0*/*{$MAPTYPE}*.png"
+
+OUTPUT_NAME="vorticity_${MAPTYPE}_04082026.mp4"
+OUTPUT=$PLOTS_PATH$OUTPUT_NAME
+
+
+# echo $GLOB_PATH
+mp4_generator.sh -o "$OUTPUT" "$PLOTS_PATH$IMG_GLOB"
+
