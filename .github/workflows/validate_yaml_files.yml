@@ -16,20 +16,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           filter: blob:none
+
+      # Only check changed YAML files:
+      - name: Get changed YAML files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **.yml
+            **.yaml
+
+      # Run yamllint ONLY on the changed files
       - id: yaml-lint
         name: yaml-lint
+        if: steps.changed-files.outputs.any_changed == 'true'
         uses: ibiqlik/action-yamllint@v3
         with:
           no_warnings: true
           format: colored
           config_file: .yamllint.yml
+          file_or_dir: ${{ steps.changed-files.outputs.all_changed_files }}
 
-      - uses: actions/upload-artifact@v6
-        if: always()
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.changed-files.outputs.any_changed == 'true'
         with:
           name: yamllint-logfile
           path: ${{ steps.yaml-lint.outputs.logfile }}
