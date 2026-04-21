@@ -4,15 +4,9 @@
 
 # Add input arg to run various tests
 # Check if arguments are provided
-# if [ "$#" -ne 4 ]; then
-#   echo "Error: Incorrect number of arguments."
-#   echo "Usage: $0 [conus|global] [YYYYMMDD] [product_name] [single | all]"
-#   exit 1
-# fi
-
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 4 ]; then
   echo "Error: Incorrect number of arguments."
-  echo "Usage: $0 [conus|global] [single | all]"
+  echo "Usage: $0 [conus|global] [YYYYMMDD] [product_name] [single | all]"
   exit 1
 fi
 
@@ -24,17 +18,17 @@ if [[ $MAP_TYPE != "conus" && $MAP_TYPE != "global" ]]; then
 fi
 
 # Parse date
-# if [[ ! $2 =~ ^[0-9]{8}$ ]]; then
-#   echo "Error: Invalid date format (YYYYMMD)"
-#   exit 1
-# fi
+if [[ ! $2 =~ ^[0-9]{8}$ ]]; then
+  echo "Error: Invalid date format (YYYYMMDD)"
+  exit 1
+fi
 
-FDATE="20260408"
+FDATE=$2
 FDATE="$FDATE""_00z"
 
-PRODUCT="vorticity_heights_500mb_EarthNow"
+PRODUCT=$3
 
-FRAMES="${2,,}"
+FRAMES="${4,,}"
 if [[ $FRAMES != "single" && $FRAMES != "all" ]]; then
   echo "Error: Invalid frame argument. Valid args: 'single',  'all' (frames)."
   exit 1
