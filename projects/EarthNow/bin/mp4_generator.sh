@@ -30,14 +30,15 @@
 
     # quality values range from 18 (high quality) to 28 (low quality)
 
-    framerate=3
+    framerate=5
     quality=25
     moviewth=1024
     moviehgt=768
     # movieres="1080p"
     framesize="${moviewth}x${moviehgt}"
 
-    ffmpeg -loglevel debug -threads 6 -pattern_type glob -r $framerate -i "$@" -y -r $framerate -s "$framesize" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf $quality ${mp4file}
+    # ffmpeg -loglevel debug -threads 6 -r $framerate -i "$@" -y -r $framerate -s "$framesize" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf $quality ${mp4file}
+    ffmpeg -threads 6 -r $framerate -f concat -safe 0 -i "$1" -y -s "$framesize" -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf $quality ${mp4file}
 
     exit 0
 
