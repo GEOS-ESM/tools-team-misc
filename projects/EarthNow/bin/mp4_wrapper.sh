@@ -1,7 +1,12 @@
 #!/bin/bash
 
-MAPTYPE="conus"
-SLURM_JOB_ID="55492940"
+if [ "$#" -ne 2 ]; then
+  echo "Error: Incorrect number of arguments."
+  echo "Usage: $0 [conus|global] [SLURM-job-ID]" 
+  exit 1
+fi
+MAPTYPE=$1
+SLURM_JOB_ID=$2
 
 # Access SLURM log file and extract saved image paths to file
 LOG_FILE="${MAPTYPE}_vort_images-${SLURM_JOB_ID}.out"
