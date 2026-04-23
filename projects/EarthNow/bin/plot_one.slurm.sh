@@ -10,5 +10,5 @@
 #SBATCH --time=0:30:00
 #SBATCH --no-requeue
 
-./plot_one.sh global all
+./plot_one.sh global 20260401 "vorticity_heights_500mb_EarthNow" all
 
