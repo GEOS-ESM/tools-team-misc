@@ -20,12 +20,12 @@ Sandwich RGB - Blended LW IR and Veggie VIS
 
 `ploteic_band14`
 11.2 micron - Longwave Band IR
-- Assignee:
+- Assignee: Bennett
 - Status:
 
 `ploteic_band09`
 6.9 micron - Mid Level Water Vapor IR
-- Assignee:
+- Assignee: Bennett
 - Status:
 
 
