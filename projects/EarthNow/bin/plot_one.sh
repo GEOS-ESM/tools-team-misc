@@ -57,3 +57,4 @@ else
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
     --style grey_topo
   exit
+fi
