@@ -174,8 +174,6 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # Make labels bold/thicker
     # for label in clabels:
     #    label.set_fontweight("bold")
-    
-    generate_colorbar()
 
 
 def generate_colorbar():
