@@ -303,8 +303,8 @@ class StyleConfig:
             # Currently don't have the correct grey_topo base image
             # so testing using only shapes
             # Eventually we can put the base image here
-            #use_base_image=True,
-            #base_image_type="natural_earth_greyblue",
+            # use_base_image=True,
+            # base_image_type="natural_earth_greyblue",
             background_color="white",
             text_color="black",
             use_gshhs=False,

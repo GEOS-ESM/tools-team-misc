@@ -55,8 +55,8 @@ aLEVELS = [0, 12.5]  # opacity kicks in at 12.5 m/s
 # ------------------------------------------------------------
 # cmap = ListedColormap(wCOLORS)
 # norm = BoundaryNorm(wLEVELS, ncolors=cmap.N, clip=True)
-#cmap_base = LinearSegmentedColormap.from_list("custom_wind", wCOLORS, N=256)
-cmap_base = plt.get_cmap('turbo')
+# cmap_base = LinearSegmentedColormap.from_list("custom_wind", wCOLORS, N=256)
+cmap_base = plt.get_cmap("turbo")
 norm = Normalize(vmin=wLEVELS.min(), vmax=wLEVELS.max())
 
 # Divide colorbar into 256 colors
@@ -67,7 +67,7 @@ rgba_table = cmap_base(np.linspace(0, 1, 256))  # shape (256,4)
 
 # Calculate alpha values and clip to min = 0, max = 1
 alphas = np.clip((clevs - aLEVELS[0]) / (aLEVELS[1] - aLEVELS[0]), 0.0, 1.0)
-print('alphas: ',alphas)
+print("alphas: ", alphas)
 rgba_table[:, 3] = alphas  # overwrite alpha channel
 cmap = ListedColormap(rgba_table, name="custom_wind")
 
@@ -89,32 +89,31 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     uwnd, lats, lons, meta = reader.read_variable(
         args.fdate, args.pdate, variables=["U250"]
     )
-    print('dims after uwnd read ===')
-    print('uwnd: ',uwnd.size)
-    print('lats: ',lats.size)
-    print('lons: ',lons.size)
-    print('meta: ',meta)
+    print("dims after uwnd read ===")
+    print("uwnd: ", uwnd.size)
+    print("lats: ", lats.size)
+    print("lons: ", lons.size)
+    print("meta: ", meta)
     # uwnd = uwnd.astype(np.float32) * 1.94384 # convert m/s to knots
 
     vwnd, lats, lons, meta = reader.read_variable(
         args.fdate, args.pdate, variables=["V250"]
     )
-    print('dims after vwnd read ===')
-    print('vwnd: ',vwnd.size)
-    print('lats: ',lats.size)
-    print('lons: ',lons.size)
-    print('meta: ',meta)
+    print("dims after vwnd read ===")
+    print("vwnd: ", vwnd.size)
+    print("lats: ", lats.size)
+    print("lons: ", lons.size)
+    print("meta: ", meta)
     # vwnd = vwnd.astype(np.float32) * 1.94384 # convert m/s to knots
 
     wspd = np.sqrt(uwnd**2 + vwnd**2)
     print(
         f"wspd: min={np.nanmin(wspd):.6f}, max={np.nanmax(wspd):.6f}, mean={np.nanmean(wspd):.6f}"
     )
-    print('dims after wspd calc ===')
-    print('wspd: ',wspd.size)
-    print('uwnd: ',lats.size)
-    print('vwnd: ',lons.size)
-
+    print("dims after wspd calc ===")
+    print("wspd: ", wspd.size)
+    print("uwnd: ", lats.size)
+    print("vwnd: ", lons.size)
 
     # ------------------------------------------------------------
     # Plot wind field
@@ -131,21 +130,21 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     )
 
     # ------------------------------------------------------------
-    # Read SLP 
+    # Read SLP
     # ------------------------------------------------------------
     slp, lats, lons, meta = reader.read_variable(
         args.fdate, args.pdate, variables=["SLP"]
     )
     slp = slp.astype(np.float32) / 100.0
-    print('dims after slp read ===')
-    print('slp: ',slp.size)
-    print('lats: ',lats.size)
-    print('lons: ',lons.size)
-    print('meta: ',meta)
+    print("dims after slp read ===")
+    print("slp: ", slp.size)
+    print("lats: ", lats.size)
+    print("lons: ", lons.size)
+    print("meta: ", meta)
 
     pngImgIdim = 3840
     pngImgJdim = 2160
-    window_size = int(pngImgIdim * 0.025) # This is the window size bill's IDL uses
+    window_size = int(pngImgIdim * 0.025)  # This is the window size bill's IDL uses
 
     slp_smoothed = boxcar_smooth_2D(slp, window_size=window_size)
 
@@ -180,7 +179,9 @@ def generate_colorbar():
     """Generate colorbar for 250mb winds/heights"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/eibell/EarthNow/colorbars/winds_heights_250mb_EarthNow.png"
+    output = (
+        "/discover/nobackup/eibell/EarthNow/colorbars/winds_heights_250mb_EarthNow.png"
+    )
     save_colorbar_single(
         wCOLORS,
         wLEVELS,
