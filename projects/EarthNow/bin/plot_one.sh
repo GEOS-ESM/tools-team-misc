@@ -49,9 +49,14 @@ if [[ "$FRAMES" = "single" ]]; then
   exit 0
 else
   # Generate all plots
+  if  [[ -n "$SLURM_CPUS_PER_TASK" ]]; then
+    nproc="$SLURM_CPUS_PER_TASK"
+  else
+    nproc=1
+  fi
   uv run "$bindir/plotall.py" \
     --product "$PRODUCT" \
-    --nproc "$SLURM_CPUS_PER_TASK" \
+    --nproc "$nproc" \
     --fdate "$FDATE" \
     --map-type "$MAP_TYPE" \
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
