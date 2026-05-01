@@ -4,9 +4,9 @@
 
 # Add input arg to run various tests
 # Check if arguments are provided
-if [ "$#" -ne 7 ]; then
+if [ "$#" -ne 6 ]; then
   echo "Error: Incorrect number of arguments."
-  echo "Usage: ${BASH_SOURCE[0]} <conus|global> <Style> <YYYYMMDD> <HHz> <product_name> <single|all> <nproc>"
+  echo "Usage: ${BASH_SOURCE[0]} <conus|global> <Style> <forecast time as YYYYMMDD_HHz> <frame time as YYYYMMDD_HHHHz> <product_name> <single|all>"
   exit 1
 fi
 
@@ -21,17 +21,18 @@ fi
 STYLE_TYPE=$2
 
 # Parse date
-FDATE=$3
-if [[ ! "$FDATE" =~ ^[0-9]{8}$ ]]; then
-  echo "Error: Invalid date format (YYYYMMDD)"
+# FDATE defines the *directory* (forecast initialization time) 
+# and PDATE defines the frame/timestamp to plot
+FDATE="${3,,}"
+if [[ ! $FDATE =~ ^[0-9]{8}_[0-9]{2}z$ ]]; then
+  echo "Error: Invalid first date format (YYYYMMDD_HHz)"
   exit 1
 fi
 
-
-TIMEZ="${4,,}"
-if [[ ! $TIMEZ =~ ^[0-9]{2}z$ ]]; then
-    echo "Error: Invalid time format. Use (HHz or HHZ) where HH is hours GMT"
-    exit 1
+PDATE="${4,,}"
+if [[ ! $PDATE =~ ^[0-9]{8}_[0-9]{4}z$ ]]; then
+  echo "Error: Invalid second date format (YYYYMMDD_HHHHz)"
+  exit 1
 fi
 
 PRODUCT=$5
@@ -42,12 +43,6 @@ if [[ $FRAMES != "single" && $FRAMES != "all" ]]; then
   exit 1
 fi
 
-NPROC=$7
-if [[ ! "$NPROC" =~ ^[0-9]+$ ]]; then
-  echo "Error: Invalid nproc argument. Must contain only numbers."
-  exit 1
-fi
-
 
 bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -55,9 +50,9 @@ if [[ "$FRAMES" = "single" ]]; then
   # Generate single plot
   uv run "$bindir/plotall.py" \
     --product "$PRODUCT" \
-    --nproc "$NPROC" \
-    --fdate "${FDATE}_${TIMEZ}" \
-    --pdate "${FDATE}_${TIMEZ}" \
+    --nproc 1 \
+    --fdate "$FDATE" \
+    --pdate "$PDATE" \
     --map-type "$MAP_TYPE" \
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
     --style "$STYLE_TYPE"
@@ -71,8 +66,8 @@ else
   fi
   uv run "$bindir/plotall.py" \
     --product "$PRODUCT" \
-    --nproc "$NPROC" \
-    --fdate "${FDATE}_${TIMEZ}" \
+    --nproc 1 \
+    --fdate "$FDATE" \
     --map-type "$MAP_TYPE" \
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
     --style "$STYLE_TYPE"
