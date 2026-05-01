@@ -66,7 +66,7 @@ else
   fi
   uv run "$bindir/plotall.py" \
     --product "$PRODUCT" \
-    --nproc 1 \
+    --nproc "$nproc" \
     --fdate "$FDATE" \
     --map-type "$MAP_TYPE" \
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
