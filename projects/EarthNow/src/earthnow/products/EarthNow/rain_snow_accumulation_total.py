@@ -47,12 +47,13 @@ snowLEVELS = [
     34,
     36,
     40,
-    44,
-    48,
-    52,
-    56,
-    60,
 ]
+#    44,
+#    48,
+#    52,
+#    56,
+#    60,
+# ]
 
 rainLEVELS = [
     0.01,
@@ -107,7 +108,7 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
-    cmap = plt.get_cmap("Blues")
+    cmap = plt.get_cmap("PuBu")
     norm = BoundaryNorm(snowLEVELS, ncolors=cmap.N, clip=True)
 
     # ------------------------------------------------------------
@@ -141,7 +142,7 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
-    cmap = plt.get_cmap("Greens")
+    cmap = plt.get_cmap("YlGn")
     norm = BoundaryNorm(rainLEVELS, ncolors=cmap.N, clip=True)
     # ------------------------------------------------------------
     # Plot field
