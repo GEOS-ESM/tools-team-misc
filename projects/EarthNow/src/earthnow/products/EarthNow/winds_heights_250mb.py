@@ -67,7 +67,6 @@ rgba_table = cmap_base(np.linspace(0, 1, 256))  # shape (256,4)
 
 # Calculate alpha values and clip to min = 0, max = 1
 alphas = np.clip((clevs - aLEVELS[0]) / (aLEVELS[1] - aLEVELS[0]), 0.0, 1.0)
-print("alphas: ", alphas)
 rgba_table[:, 3] = alphas  # overwrite alpha channel
 cmap = ListedColormap(rgba_table, name="custom_wind")
 
@@ -89,31 +88,17 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     uwnd, lats, lons, meta = reader.read_variable(
         args.fdate, args.pdate, variables=["U250"]
     )
-    print("dims after uwnd read ===")
-    print("uwnd: ", uwnd.size)
-    print("lats: ", lats.size)
-    print("lons: ", lons.size)
-    print("meta: ", meta)
     # uwnd = uwnd.astype(np.float32) * 1.94384 # convert m/s to knots
 
     vwnd, lats, lons, meta = reader.read_variable(
         args.fdate, args.pdate, variables=["V250"]
     )
-    print("dims after vwnd read ===")
-    print("vwnd: ", vwnd.size)
-    print("lats: ", lats.size)
-    print("lons: ", lons.size)
-    print("meta: ", meta)
     # vwnd = vwnd.astype(np.float32) * 1.94384 # convert m/s to knots
 
     wspd = np.sqrt(uwnd**2 + vwnd**2)
     print(
         f"wspd: min={np.nanmin(wspd):.6f}, max={np.nanmax(wspd):.6f}, mean={np.nanmean(wspd):.6f}"
     )
-    print("dims after wspd calc ===")
-    print("wspd: ", wspd.size)
-    print("uwnd: ", lats.size)
-    print("vwnd: ", lons.size)
 
     # ------------------------------------------------------------
     # Plot wind field
@@ -136,11 +121,6 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
         args.fdate, args.pdate, variables=["SLP"]
     )
     slp = slp.astype(np.float32) / 100.0
-    print("dims after slp read ===")
-    print("slp: ", slp.size)
-    print("lats: ", lats.size)
-    print("lons: ", lons.size)
-    print("meta: ", meta)
 
     pngImgIdim = 3840
     pngImgJdim = 2160
