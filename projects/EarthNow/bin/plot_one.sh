@@ -4,9 +4,9 @@
 
 # Add input arg to run various tests
 # Check if arguments are provided
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 6 ]; then
   echo "Error: Incorrect number of arguments."
-  echo "Usage: $0 [conus|global] [YYYYMMDD] [product_name] [single | all]"
+  echo "Usage: ${BASH_SOURCE[0]} <conus|global> <Style> <forecast time as YYYYMMDD_HHz> <frame time as YYYYMMDD_HHHHz> <product_name> <single|all>"
   exit 1
 fi
 
@@ -17,22 +17,32 @@ if [[ $MAP_TYPE != "conus" && $MAP_TYPE != "global" ]]; then
   exit 1
 fi
 
+# Parse map type
+STYLE_TYPE=$2
+
 # Parse date
-if [[ ! $2 =~ ^[0-9]{8}$ ]]; then
-  echo "Error: Invalid date format (YYYYMMDD)"
+# FDATE defines the *directory* (forecast initialization time) 
+# and PDATE defines the frame/timestamp to plot
+FDATE="${3,,}"
+if [[ ! $FDATE =~ ^[0-9]{8}_[0-9]{2}z$ ]]; then
+  echo "Error: Invalid first date format (YYYYMMDD_HHz)"
   exit 1
 fi
 
-FDATE=$2
-FDATE="$FDATE""_00z"
+PDATE="${4,,}"
+if [[ ! $PDATE =~ ^[0-9]{8}_[0-9]{4}z$ ]]; then
+  echo "Error: Invalid second date format (YYYYMMDD_HHHHz)"
+  exit 1
+fi
 
-PRODUCT=$3
+PRODUCT=$5
 
-FRAMES="${4,,}"
+FRAMES="${6,,}"
 if [[ $FRAMES != "single" && $FRAMES != "all" ]]; then
   echo "Error: Invalid frame argument. Valid args: 'single',  'all' (frames)."
   exit 1
 fi
+
 
 bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -42,10 +52,10 @@ if [[ "$FRAMES" = "single" ]]; then
     --product "$PRODUCT" \
     --nproc 1 \
     --fdate "$FDATE" \
-    --pdate "$FDATE" \
+    --pdate "$PDATE" \
     --map-type "$MAP_TYPE" \
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
-    --style grey_topo
+    --style "$STYLE_TYPE"
   exit 0
 else
   # Generate all plots
@@ -60,6 +70,6 @@ else
     --fdate "$FDATE" \
     --map-type "$MAP_TYPE" \
     --base-path /discover/nobackup/"$USER"/EarthNow/plots \
-    --style grey_topo
+    --style "$STYLE_TYPE"
   exit
 fi
