@@ -38,7 +38,7 @@ elif [[ "$FRAMES" == "all" ]]; then
         echo "Note: PDATE ($PDATE) not in use when 'all' is specified."
     fi
 else
-    echo: "Error: Invalid argument 5. Valid args: 'single', 'all'."
+    echo "Error: Invalid argument 5. Valid args: 'single', 'all'."
     exit 1
 fi
 
