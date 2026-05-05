@@ -22,6 +22,47 @@ from earthnow.wxmaps_utils import (
 from earthnow.data_readers import DATA_READERS
 from earthnow.products import PRODUCTS
 
+import logging
+
+
+# Create logger and colored handler function
+def setup_logger(logger_level, enabled=True):
+    import logging
+    from colorlog import ColoredFormatter
+    from pathlib import Path
+
+    # Set logger name to the script name for clarity in logs
+    script_name = Path(__file__).stem
+    logger = logging.getLogger(script_name)
+
+    if not enabled:
+        logger.disabled = True
+        return logger
+
+    logging.basicConfig(
+        # Change this based on what level you want to see
+        # level=logging.DEBUG,
+        level=logger_level,
+    )
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        ColoredFormatter("\n%(log_color)s %(levelname)s: %(name)s: %(message)s\n")
+    )
+    logger.propagate = (
+        False  # Prevent logs from duplicating when using the colored formatting
+    )
+    logger.addHandler(handler)
+
+    # Silence matplotlib debug logs
+    logging.getLogger("matplotlib").setLevel(logging.WARNING)
+
+    return logger
+
+
+# Change this to logging.WARNING or logging.DEBUG to see more logs, or set enabled=False to disable all logging
+logger = setup_logger(logging.DEBUG, enabled=True)
+
 # -----------------------------------------------------------------------------
 # ARGPARSE
 # -----------------------------------------------------------------------------
@@ -184,6 +225,7 @@ def create_data_reader(args):
     ReaderClass = DATA_READERS[
         args.data_reader
     ]  # FIX: He returns the reader twice? Here and in the if statement
+    logger.debug(f"Initial Reader: {ReaderClass=}")
 
     # FIX: # I think this is if you put all the option fields: data-reader, exp_id, and collection - but if you only specify the data reader and nothing else it will still use defaults. So it will never have a args.data_reader be fp since its set via defaults...
     # Ok for geos replay: this is the default inputs, but isn't this just duplicating what is already in the reader?
@@ -230,6 +272,15 @@ def create_data_reader(args):
             reader = ReaderClass(exp_path=args.exp_path, exp_id=args.exp_id)
 
     return reader
+
+
+def return_valid_directory(reader, args):
+    if reader.resolve_file(args.fdate, args.pdate) is not None:
+        return "Data reader directory found"
+    else:
+        raise FileNotFoundError(
+            f"Data reader could not find directory for fdate {args.fdate} and pdate {args.pdate}"
+        )
 
 
 # -----------------------------------------------------------------------------
@@ -280,6 +331,13 @@ def plot_single_pdate(pdate, args, style, map_config):
 
     # Create reader for this worker
     reader = create_data_reader(local_args)
+    logger.debug(
+        f"Reader returned: {reader=}"
+    )  # This returns GEOS replay reader always
+
+    # Test reader returns a valid directory
+    logger.debug(return_valid_directory(reader, local_args))
+    sys.exit()
 
     # Call product function
     local_args.contour_label_size = map_config.contour_label_size
