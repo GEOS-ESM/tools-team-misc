@@ -37,6 +37,9 @@ def parse_args():
     # -------------------------------------------------------------------------
     # Core required args
     # -------------------------------------------------------------------------
+    # FIX: THIS ENTIRE ARG IS AN ISSUE - the data reader should be determined by the dates
+    # Also, just specifying the data reader won't override the other defaults (exp-path, collection, etc.)
+    # I'm assuming he just added this so he could plot GEOS-AI separately?
     parser.add_argument(
         "--data-reader",
         default="geos_cycled_replays",
@@ -178,18 +181,16 @@ def create_data_reader(args):
 
     Handles different initialization signatures for different readers.
     """
-    ReaderClass = DATA_READERS[args.data_reader]
+    ReaderClass = DATA_READERS[
+        args.data_reader
+    ]  # FIX: He returns the reader twice? Here and in the if statement
 
-    if args.data_reader == "geos_forward_processing":
-        # Forward Processing reader uses different parameters
-        reader = ReaderClass(
-            base_path=args.fp_base_path,
-            exp_id=args.exp_id,
-            collection=(
-                args.collection if args.collection != "inst1_2d_asm_Nx" else None
-            ),
-        )
-    elif args.data_reader == "geos_cycled_replays":
+    # FIX: # I think this is if you put all the option fields: data-reader, exp_id, and collection - but if you only specify the data reader and nothing else it will still use defaults. So it will never have a args.data_reader be fp since its set via defaults...
+    # Ok for geos replay: this is the default inputs, but isn't this just duplicating what is already in the reader?
+    # OK WAIT ----- this second "call" specifies the map type from args I guess
+    # Is there a default map type? Like is the intial reader call even necessary
+
+    if args.data_reader == "geos_cycled_replays":
         # Cycled Replays reader
         reader = ReaderClass(
             exp_path=args.exp_path,
@@ -198,13 +199,24 @@ def create_data_reader(args):
             collection=args.collection,
             map_type=args.map_type,
         )
+    elif args.data_reader == "geos_forward_processing":
+        # Forward Processing reader uses different parameters
+        reader = ReaderClass(
+            base_path=args.fp_base_path,
+            exp_id=args.exp_id,
+            collection=(
+                args.collection if args.collection != "inst1_2d_asm_Nx" else None
+            ),
+        )
     elif args.data_reader == "gencast_geos_fp":
         # GenCast reader
         reader = ReaderClass(
             exp_path=args.exp_path, exp_res=args.exp_res, exp_id=args.exp_id
         )
+
     else:
         # Generic fallback - try all parameters and let reader handle it
+        # If no reader specified, try defaults #FIX: But the defaults is the replay?????
         try:
             reader = ReaderClass(
                 exp_path=args.exp_path,
@@ -214,7 +226,7 @@ def create_data_reader(args):
                 map_type=args.map_type,
             )
         except TypeError:
-            # If that fails, try minimal parameters
+            # If that fails, try minimal parameters # FIX: So i guess the reader doesn't need the maptype but would it still return data?
             reader = ReaderClass(exp_path=args.exp_path, exp_id=args.exp_id)
 
     return reader
