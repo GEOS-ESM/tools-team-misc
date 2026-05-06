@@ -61,7 +61,7 @@ def setup_logger(logger_level, enabled=True):
 
 
 # Change this to logging.WARNING or logging.DEBUG to see more logs, or set enabled=False to disable all logging
-logger = setup_logger(logging.DEBUG, enabled=True)
+logger = setup_logger(logging.DEBUG, enabled=False)
 
 # -----------------------------------------------------------------------------
 # ARGPARSE
