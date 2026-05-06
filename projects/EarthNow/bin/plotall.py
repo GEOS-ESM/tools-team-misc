@@ -337,7 +337,6 @@ def plot_single_pdate(pdate, args, style, map_config):
 
     # Test reader returns a valid directory
     logger.debug(return_valid_directory(reader, local_args))
-    sys.exit()
 
     # Call product function
     local_args.contour_label_size = map_config.contour_label_size
