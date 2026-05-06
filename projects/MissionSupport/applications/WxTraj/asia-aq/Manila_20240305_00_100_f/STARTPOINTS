@@ -1,0 +1,44 @@
+**********************************************************************
+*                                                                    *
+*                 TRAJECTORY MODEL                                   *
+*                 DEFINITION OF STARTING/ENDING POINTS               *
+*                                                                    *
+*  The first 7 characters of the comment are also used as filenames. *
+*  Therefore, they cannot be blank and they must be different for    *
+*  each starting point.                                              *
+*                                                                    *
+*  Kind of trajectory: 1 = 3 dimensional                             *
+*                      2 = on model layers                           *
+*                      3 = mixing layer                              *
+*                      4 = isobaric                                  *
+*                      5 = isentropic                                *
+*                                                                    *
+**********************************************************************
+*                                                                    *
+*  Unit of z coordinate: 1 = Meters above sea level                  *
+*                        2 = Meters above ground                     *
+*                        3 = Hectopascal                             *
+*                                                                    *
+*  For mixing layer trajectories (kind 3), the z coordinate must be  *
+*  given in m.a.g.l. (option 2)                                      *
+*                                                                    *
+**********************************************************************
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 120.9800
+____.____                  f9.4  Longitude [DEG]
+
+  14.5990
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+   100.000
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+Manila_20240305_00_100_f
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

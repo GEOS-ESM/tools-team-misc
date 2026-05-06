@@ -1,0 +1,39 @@
+**********************************************************************
+*                                                                    *
+*                 TRAJECTORY MODEL                                   *
+*                 DEFINITION OF THE CET DOMAIN                       *
+*  A CET STARTING DOMAIN IS DEFINED BY THE LOWER LEFT AND UPPER RIGHT*
+*  CORNER IN A LATITUDE/LONGITUDE COORDINATE SYSTEM, AND BY A LOWER  *
+*  AND UPPER LEVEL. TRAJECTORIES ARE STARTED AT DISTANCES DX, DY AND *
+*  DZ WITHIN THIS DOMAIN.                                            *
+*                                                                    *
+*  Kind of trajectory: 1 = 3 dimensional                             *
+*                      2 = on model layers                           *
+*                      3 = not allowed in CET mode                   *
+*                      4 = isobaric                                  *
+*                      5 = isentropic                                *
+*                                                                    *
+**********************************************************************
+*                                                                    *
+*  Unit of z coordinate: 1 = Meters above sea level                  *
+*                        2 = Meters above ground                     *
+*                        3 = Hectopascal                             *
+*                                                                    *
+*  The vertical distance DZ between the trajectories must be         *
+*  given in the same units.                                          *
+*                                                                    *
+**********************************************************************
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  10.0                     F Lower left longitude [DEG]
+  48.0                     F Lower left latitude [DEG]
+  15.0                     F Upper right longitude [DEG]
+  50.0                     F Upper right latitude [DEG]
+   0.5                     F DX: Longitudinal distance between trajectories [DEG]
+   0.5                     F DY: Latitudinal distance between trajectories [DEG]
+ 5                         I Kind of trajectory (see file header)
+ 2                         I Unit of z coordinate
+ 2000.0                    F Lower z-coordinate (see file header)
+ 3000.0                    F Upper z-coordinate (see file header)
+  500.0                    F DZ: Vertical interval of trajectories (see file header)
+'TEST'
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

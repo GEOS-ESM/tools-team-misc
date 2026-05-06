@@ -1,0 +1,52 @@
+# Directory path to gridded forecast files (NetCDF)
+FC_FILE_PATH: /css/gmao/geos-cf/NRTv2/pub/fcst/Y%iy4/M%im2/D%id2
+
+# Directory path to gridded forecast control files
+FC_GRID_PATH: /css/gmao/geos-cf/NRTv2/pub/opendap/fcst
+
+collections: &COLLECTIONS
+
+  chm_tavg_1hr_glo_L1440x721_slv:
+
+    src: $FC_FILE_PATH
+    min_count: 120
+    offset: 30
+
+    files:
+
+      - "GEOS.cf.fcst.chm_tavg_1hr_glo_L1440x721_slv.%iy4%im2%id2_%ih2z+*nc4"
+
+  chm_inst_1hr_glo_L1440x721_p23:
+
+    src: $FC_FILE_PATH
+    min_count: 120
+    offset: 60
+
+    files:
+
+      - "GEOS.cf.fcst.chm_inst_1hr_glo_L1440x721_p23.%iy4%im2%id2_%ih2z+*nc4"
+
+  met_tavg_1hr_glo_L1440x721_slv:
+
+    src: $FC_FILE_PATH
+    min_count: 120
+    offset: 30
+
+    files:
+
+      - "GEOS.cf.fcst.met_tavg_1hr_glo_L1440x721_slv.%iy4%im2%id2_%ih2z+*nc4"
+
+get_data:
+
+# <<: *COLLECTIONS
+
+  opendap:
+
+    src: $FC_GRID_PATH
+    min_count: 3
+
+    files:
+
+      - $FC_GRID_PATH/met_tavg_1hr_glo_L1440x721_slv/met_tavg_1hr_glo_L1440x721_slv.%iy4%im2%id2_%ih2z
+      - $FC_GRID_PATH/chm_inst_1hr_glo_L1440x721_p23/chm_inst_1hr_glo_L1440x721_p23.%iy4%im2%id2_%ih2z
+      - $FC_GRID_PATH/chm_tavg_1hr_glo_L1440x721_slv/chm_tavg_1hr_glo_L1440x721_slv.%iy4%im2%id2_%ih2z

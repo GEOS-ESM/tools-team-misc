@@ -1,0 +1,73 @@
+DATA_DIR: /discover/nobackup/dao_ops/jardizzo/FLUID/SARP
+PUB_DIR: /discover/nobackup/projects/gmao/yotc/pub/fp/.internal/SARP
+PLAYLIST: [custom-2]
+
+custom-2:
+
+  ntasks: 24
+  model: GEOS-CF
+  collection: custom-2
+  themes: [custom-2_mission, SARP-2026]
+  stream: GEOSCFFC
+  regions: [sarp]
+  fcst_dt: PT0H
+  start_dt: PT3H
+  end_dt: P4DT21H
+  t_deltat: PT3H
+  frame_rate: 4
+  geometry: 1024x768
+  quality: 25
+  codec: libx264
+  ftitle: "GEOS-CF Forecast Initialized on %B %d, %Y at %HZ"
+  fdate: "%Y%m%d_%H"
+  data_dir: $DATA_DIR/$model/$fdate/$collection
+  pub_dir: $PUB_DIR/$model/$fdate/$collection
+  oname: $data_dir/$region/$field/$level/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.%Y%m%dT%H.png
+  mname: $pub_dir/$region/movies/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.mp4
+  station_plot: "--theme custom-2_mission --theme SARP-2026 --stream GEOSCFFC --fcst_dt $fcst_dt --time_dt $start_dt --t_deltat $t_deltat --field pm25du --level 700 --region sarp --oname $pub_dir/$region/images/stations.png --lights_off --fullframe --plot_only"
+  station_plot_title: "Dust PM2.5 at 700mb"
+  station_gram: "https://fluid.nccs.nasa.gov/gram/cf_pm25"
+
+  playlist:
+
+    gases:
+      section: Gases
+      levels: [1000,975,950,925,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100]
+      fields: [ch4,hcho,co,no2,o3,pan,isop,so2,noy,nh3]
+
+    pm25:
+      section: Particulate Matter (2.5)
+      levels: [1000,975,950,925,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100]
+      fields: [pm25,pm25bc,pm25oc,pm25ss,pm25su,pm25du,pm25ni,pm25soa]
+
+    met-1:
+      section: Single-Level Meteorology
+      levels: [0]
+      fields: [cldtt,zpbl,ps,slp]
+
+    met-2:
+      section: Multi-Level Meteorology
+      levels: [1000,975,950,925,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100]
+      fields: [h,t,th,q,rh,u,v,wspd,omega,epv]
+
+    aerosols:
+
+      section: Aerosols (550nm)
+      levels: [0]
+      fields: [aod550_bc,aod550_oc,aod550_dust,aod550_ss,aod550_sna]
+
+    totcol:
+
+      section: Total Column
+      levels: [0]
+      fields: [totcol_co,totcol_no2,totcol_o3,totcol_so2]
+
+    tropcol:
+      section: Tropospheric Column
+      levels: [0]
+      fields: [tropcol_co,tropcol_no2,tropcol_o3,tropcol_so2,tropcol_hcho]
+
+    surface:
+      section: Surface Concentrations
+      levels: [0]
+      fields: [cosfc,no2sfc,o3sfc,so2sfc,hchosfc]

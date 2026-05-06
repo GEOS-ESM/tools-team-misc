@@ -1,0 +1,69 @@
+[cylc]
+    UTC mode = True
+[scheduling]
+    initial cycle point = 2026-05-05T00
+  # final cycle point = 2026-04-30T12
+    max active cycle points = 2
+    [[xtriggers]]
+        clock_1 = wall_clock(offset=PT6H)
+    [[dependencies]]
+        [[[T00,T12]]] # validity (hours)
+            graph = """
+               @clock_1 => getGEOSFP => plotGEOSFP
+            """
+        [[[T09]]]
+            graph = """
+               @clock_1 => getGEOSCF => plotGEOSCF
+            """
+[runtime]
+    [[root]] # suite defaults
+
+        [[[environment]]]
+
+            datetime = $CYLC_TASK_CYCLE_POINT
+            input_fp_config = $CYLC_SUITE_DEF_PATH/config/inputs-fp.yml
+            input_cf_config = $CYLC_SUITE_DEF_PATH/config/inputs-cf.yml
+            sarp_fp_config = $CYLC_SUITE_DEF_PATH/config/sarp-fp.yml
+            sarp_cf_config = $CYLC_SUITE_DEF_PATH/config/sarp-cf.yml
+            
+        [[[events]]]
+            mail to = joseph.v.ardizzone@nasa.gov
+            mail events = failed
+
+    [[getGEOSFP]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/modules"
+        script = "get_data.py $datetime $input_fp_config"
+        [[[job]]]
+            execution retry delays = 60*PT15M, 72*PT1H
+
+    [[getGEOSCF]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/modules"
+        script = "get_data.py $datetime $input_cf_config"
+        [[[job]]]
+            execution retry delays = 60*PT15M, 72*PT1H
+
+    [[plotGEOSFP]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/modules"
+        script = "sarp_plot.py $datetime $sarp_fp_config"
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT1H
+        [[[directives]]]
+            --account = g2538
+            --qos = daohi
+            --constraint = mil
+            --ntasks = 28
+            --job-name = WxSARPFP
+
+    [[plotGEOSCF]]
+        pre-script = "source $CYLC_SUITE_DEF_PATH/modules"
+        script = "sarp_plot.py $datetime $sarp_cf_config"
+        [[[job]]]
+            batch system = slurm
+            execution time limit = PT1H
+        [[[directives]]]
+            --account = g2538
+            --qos = daohi
+            --constraint = mil
+            --ntasks = 28
+            --job-name = WxSARPCF

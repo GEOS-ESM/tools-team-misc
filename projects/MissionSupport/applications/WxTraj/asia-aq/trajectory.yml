@@ -1,0 +1,7 @@
+WX_PATH: /discover/nobackup/projects/gmao/asia_aq
+
+GEOS-FP:
+  tmplFile: inst3_3d_asm_Nv.tmpl
+# ctlFile: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/seamless/inst3_3d_asm_Nv/inst3_3d_asm_Nv.%Y%m%d_%H
+  outputs: $WX_PATH/pub/trajectories/GEOS-FP/Y%Y/M%m/D%d/H%H
+  seamless:

@@ -1,0 +1,44 @@
+handlers: 'copy:geoscf'
+
+shift_dt: -12
+
+tau_start: 0
+tau_end: 120
+tau_inc: 3
+
+copy:
+
+  machine:
+  login:
+  password:
+  remote_dir: /discover/nobackup/projects/gmao/geos_cf/pub/GEOS-CF_NRT/.internal/forecast/Y%iy4/M%im2/D%id2/H%ih2
+  local_dir: $WXMODEL_DATA_DIR/GEOS-CF/Y%iy4/M%im2/D%id2/H%ih2
+
+  sockets: 4
+
+  inst1:
+
+    tau_start: 0
+    tau_end: 120
+    tau_inc: 1
+
+    remote_files:
+
+      - GEOS-CF.v01.fcst.aaq_inst_1hr_r461x361_x1.%iy4%im2%id2_%ih2z+%y4%m2%d2_%h2%n2z.nc4
+
+geoscf:
+
+  tasks: 1
+
+  tau_start: 0
+  tau_end: 0
+  tau_inc: 3
+
+  data_dir: $WXMODEL_DATA_DIR/GEOS-CF/Y%iy4/M%im2/D%id2/H%ih2
+  input_dir: /discover/nobackup/projects/gmao/geos_cf/pub/GEOS-CF_NRT/.internal/opendap/fcast
+  output_dir: $WXMODEL_OPENDAP_DIR/GEOS-CF
+  dummy_file: $WXMODEL_DATA_DIR/dummy.ctl
+
+  collections:
+
+    - aaq_inst_1hr_r461x361_x1

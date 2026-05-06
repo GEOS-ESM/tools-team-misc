@@ -1,0 +1,17 @@
+#!/usr/bin/sh
+#=======================================================================
+# name - setup_env.sh
+# purpose -
+#   This script can be "sourced" from the c shell to set environment
+
+
+# Set Python PATH
+#-----------------
+setenv PYTHONPATH /discover/nobackup/pcastell/workspace/simplekml:/home/dao_ops/gmao_packages/Workflow/Shared:/home/dao_ops/gmao_packages/WxTraj/src
+
+setenv PATH "${PATH}:/home/dao_ops/gmao_packages/WxTraj/bin"
+
+# source AeroApps modules
+source ./g5_modules
+
+

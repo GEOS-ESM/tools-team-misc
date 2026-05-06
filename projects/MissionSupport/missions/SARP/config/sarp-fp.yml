@@ -1,0 +1,138 @@
+DATA_DIR: /discover/nobackup/dao_ops/jardizzo/FLUID/SARP
+PUB_DIR: /discover/nobackup/projects/gmao/yotc/pub/fp/.internal/SARP
+PLAYLIST: [wxmapschem2d, wxmapschem3d, weather]
+
+wxmapschem3d:
+
+  ntasks: 24
+  model: GEOS-FP
+  collection: chem3d
+  themes: [chem3d_mission, SARP-2026]
+  stream: G5FPFC
+  regions: [sarp]
+  fcst_dt: PT0H
+  start_dt: PT00H
+  end_dt: P5DT0H
+  t_deltat: PT3H
+  frame_rate: 4
+  geometry: 1024x768
+  quality: 25
+  codec: libx264
+  ftitle: "GEOS-FP Forecast Initialized on %B %d, %Y at %HZ"
+  fdate: "%Y%m%d_%H"
+  data_dir: $DATA_DIR/$model/$fdate/$collection
+  pub_dir: $PUB_DIR/$model/$fdate/$collection
+  oname: $data_dir/$region/$field/$level/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.%Y%m%dT%H.png
+  mname: $pub_dir/$region/movies/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.mp4
+  station_plot: "--theme chem3d_mission --theme SARP-2026 --stream G5FPFC --fcst_dt $fcst_dt --time_dt $start_dt --t_deltat PT3H --field du --level 700 --region sarp --oname $pub_dir/$region/images/stations.png --lights_off --fullframe --plot_only"
+  station_plot_title: "Dust at 700mb"
+  station_gram: "https://fluid.nccs.nasa.gov/gram/du"
+
+  playlist:
+
+    chem3d-1:
+
+      section: Aerosols
+      levels: [50, 70, 100, 150, 200, 300, 400, 500, 600, 700, 850, 925]
+      fields: [bc,oc,du,pm,pm25,pm10,ss,so4,no3]
+
+    chem3d-2:
+      section: Carbon Monoxide
+      levels: [50, 70, 100, 150, 200, 300, 400, 500, 600, 700, 850, 925]
+      fields: [co,cobbae,cobbaf,cobbla,cobbna,cobbot,coffas,coffeu,coffna]
+
+    chem3d-3:
+      section: Other Gases
+      levels: [50, 70, 100, 150, 200, 300, 400, 500, 600, 700, 850, 925]
+      fields: [so2,cfc12strat,cfc12trop]
+
+wxmapschem2d:
+
+  ntasks: 24
+  model: GEOS-FP
+  collection: chem2d
+  themes: [chem2d_mission, SARP-2026]
+  stream: G5FPFC
+  regions: [sarp]
+  fcst_dt: PT0H
+  start_dt: PT00H
+  end_dt: P5DT0H
+  t_deltat: PT3H
+  frame_rate: 4
+  geometry: 1024x768
+  quality: 25
+  codec: libx264
+  ftitle: "GEOS-FP Forecast Initialized on %B %d, %Y at %HZ"
+  fdate: "%Y%m%d_%H"
+  data_dir: $DATA_DIR/$model/$fdate/$collection
+  pub_dir: $PUB_DIR/$model/$fdate/$collection
+  oname: $data_dir/$region/$field/$level/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.%Y%m%dT%H.png
+  mname: $pub_dir/$region/movies/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.mp4
+  station_plot: "--theme chem2d_mission --theme SARP-2026 --stream G5FPFC --fcst_dt $fcst_dt --time_dt $start_dt --t_deltat PT3H --field duaot --region sarp --level 0 --oname $pub_dir/$region/images/stations.png --lights_off --fullframe --plot_only"
+  station_plot_title: "Dust AOT"
+  station_gram: "https://fluid.nccs.nasa.gov/gram/du"
+
+  playlist:
+
+    chem2d-1:
+      section: Aerosols
+      levels: [0]
+      fields: [bcaot,bcsmass,ocaot,ocsmass,bcocaot,bcocsmass,duaot,ssaot,suaot,fineaot,niaot,totaot]
+
+    chem2d-2:
+      section: Carbon Monoxide
+      levels: [0]
+      fields: [cobbae,cobbaf,cobbla,cobbna,cocl,conbas,conbeu,conbna,cosc]
+
+    chem2d-3:
+      section: Other Gases
+      levels: [0]
+      fields: [nismass,so2cmass,so2smass,to3]
+
+weather:
+
+  ntasks: 24
+  model: GEOS-FP
+  collection: weather
+  themes: [weather_mission, SARP-2026]
+  stream: G5FPFC
+  regions: [sarp]
+  fcst_dt: PT0H
+  start_dt: PT00H
+  end_dt: P5DT0H
+  t_deltat: PT3H
+  frame_rate: 4
+  geometry: 1024x768
+  quality: 25
+  codec: libx264
+  ftitle: "GEOS-FP Forecast Initialized on %B %d, %Y at %HZ"
+  fdate: "%Y%m%d_%H"
+  data_dir: $DATA_DIR/$model/$fdate/$collection
+  pub_dir: $PUB_DIR/$model/$fdate/$collection
+  oname: $data_dir/$region/$field/$level/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.%Y%m%dT%H.png
+  mname: $pub_dir/$region/movies/nasa.gmao.sarp.$collection.$field.$level.$region.$fdate.mp4
+  station_plot: "--theme weather_mission --theme SARP-2026 --stream G5FPFC --fcst_dt $fcst_dt --time_dt $start_dt --t_deltat PT3H --field precip --level 0 --region sarp --oname $pub_dir/$region/images/stations.png --lights_off --fullframe --plot_only"
+  station_plot_title: "Precipitation / Cloud Fraction"
+  station_gram: "https://fluid.nccs.nasa.gov/gram/meteo"
+
+  playlist:
+
+    weather-1:
+      section: Precip/Clouds
+      levels: [0]
+      fields: [precip,cldlow,cldmid,cldhgh,cldtot,cldprs,taulow,taumid,tauhgh]
+
+    weather-2:
+      section: Aerosols
+      levels: [0]
+      fields: [fineaot,dustaot]
+
+    weather-3:
+      section: Single-Level Meteorology
+      levels: [0]
+      fields: [pblh,tropp,wstar,svent]
+
+    weather-4:
+      section: Multi-Level Meteorology
+      levels: [925, 850, 700, 600, 500, 400, 300, 200, 150, 100, 70, 50]
+      fields: [cldwat,dumass,rh,tmpu,wspd,vort,omega,epv]

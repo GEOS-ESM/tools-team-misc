@@ -1,0 +1,49 @@
+import os
+import sys
+import glob
+from netCDF4 import Dataset
+
+def get_data(ipath, field, flight):
+
+    location = flight['location']
+    aircraft = flight['aircraft']
+
+    # Find the collection file containing the desired field
+
+    ipath = os.path.join(ipath, 'data')
+    pattern = os.path.join(ipath, location+'_'+aircraft+'_*.rc')
+    filelist = glob.glob(pattern)
+
+    track_file = None
+    for file in filelist:
+
+        with open(file, 'r') as f:
+            lines = f.readlines()
+
+        vars = lines[0].split(':')[0]
+        vars = vars.split(',')
+
+        if field in vars:
+            track_file = os.path.splitext(file)[0] + '.nc'
+
+    if not track_file:
+        return None
+
+    fh = Dataset(track_file, 'r')
+
+    time = fh.variables['time'][:]
+
+    if 'lev' in fh.variables:
+        lev = fh.variables['lev'][:]
+    else:
+        lev = None
+
+    data = fh.variables[field][:]
+    fh.close()
+
+    return {'name':field, 'data':data, 'time':time, 'lev':lev}
+
+flight = { 'location': 'Manila', 'aircraft': 'DC8' }
+field = get_data(sys.argv[1], 'BC', flight)
+
+print(field['time'])

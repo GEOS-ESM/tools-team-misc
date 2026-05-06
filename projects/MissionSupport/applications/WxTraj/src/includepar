@@ -1,0 +1,131 @@
+********************************************************************************
+*        Include file for calculation of trajectories (Program FLEXTRA)        *
+*        This file contains the parameter statements used in FLEXTRA           *
+*                                                                              *
+*        Authors: A. Stohl, G. Wotawa                                          *
+*                                                                              *
+*        1 February 1994                                                       *
+*        Update: December 1998, A. Stohl                                       *
+*                                                                              *
+********************************************************************************
+
+      implicit none
+
+      real pi,p0,kappa,eps,eps1
+      parameter(pi=3.14159265,p0=101325,kappa=0.286,eps=1.e-5)
+      parameter(eps1=1.e-30)
+
+C number "pi"
+C eps = tiny number
+C kappa = exponent of formula for potential temperature
+C p0 = parameter for calculation of vertical coordinate eta (ECMWF)
+
+      real xmwml
+      parameter(xmwml=18.016/28.960)
+
+* xmwml   ratio of molar weights of water vapor and dry air
+
+      real r_earth,r_air,ga
+
+      parameter(r_earth=6.371e6,r_air=287.05,ga=9.81)
+
+C r_earth      radius of earth [m]
+C r_air        individual gas constant for dry air [J/kg/K]
+C ga           gravity acceleration of earth [m/s**2]
+
+
+      integer nxmax,nymax,nuvzmax,nwzmax
+      parameter(nxmax=1152,nymax=721,nuvzmax=92,nwzmax=92)
+
+C nxmax,nymax             maximum dimension of wind fields in x and y
+C                         direction, respectively
+C nuvzmax,nwzmax          maximum dimension of (u,v) and (w) wind fields in z
+C                         direction
+
+      integer itermax
+      parameter(itermax=50)
+
+C itermax                 Maximum number of iterations in integration
+C                         scheme of trajectory equation
+
+      integer numpath
+      parameter(numpath=4)
+
+C numpath                 Number of different pathnames for input/output files
+
+      integer numbwfmax
+      parameter(numbwfmax=15000)
+
+C numbwfmax               maximum number of windfields
+
+
+      real deltahormax,deltavermax         
+      parameter(deltahormax=0.0001,deltavermax=0.0001)
+
+C deltahormax             Maximum horizontal distance between two iterations
+C                         of the integration scheme
+C deltavermax             Maximum vertical distance between two iterations
+C                         of the integration scheme
+
+      integer maxpoint
+c     parameter(maxpoint=160)
+      parameter(maxpoint= 50)
+
+C maxpoint                Maximum number of trajectory starting/ending
+C                         points
+
+      integer maxtra,maxtime,maxitime
+      parameter(maxtra=100*maxpoint)
+      parameter(maxtime=1500,maxitime=10000)
+
+C maxtra       maximum number of simultaneously calculated trajectories
+C maxtime      maximum number of trajectory timesteps
+C maxitime     maximum number of equidistant interpolated time steps
+
+      integer idiffnorm,idiffmax
+      parameter(idiffnorm=21600)
+      parameter(idiffmax=2*idiffnorm)
+
+C idiffnorm    normal time difference between two windfields
+C idiffmax     maximum time difference between two windfields
+
+      integer unitpath,unitcommand,unitgrid,unitavailab
+      integer unitpoin,unitwind,unittraj,unittraji
+      integer unitvert,unitoro
+      parameter(unitpath=1,unitcommand=1,unitgrid=1)
+      parameter(unitavailab=1,unitpoin=1,unitwind=1)
+      parameter(unitvert=1,unitoro=1)
+      parameter(unittraj=70,unittraji=8)
+
+
+C Parameters for GRIB file decoding
+***********************************
+
+      integer jpack,jpunp
+
+      parameter(jpack=4*nxmax*nymax,jpunp=4*jpack)
+
+
+C Parameters for polar stereographic projection close to the poles
+******************************************************************
+
+      real switchnorth,switchsouth
+      parameter(switchnorth=75.,switchsouth=-75.)
+
+C switchnorth    use polar stereographic grid north of switchnorth
+C switchsouth    use polar stereographic grid south of switchsouth
+
+
+C Parameters for nested grids
+*****************************
+
+      integer maxnests
+      parameter(maxnests=1)
+
+C maxnests       maximum number of nested grids
+
+      integer nxmaxn,nymaxn
+      parameter(nxmaxn=251,nymaxn=151)
+
+C nxmaxn,nymaxn  maximum dimension of nested wind fields in
+C                x and y direction, respectively
