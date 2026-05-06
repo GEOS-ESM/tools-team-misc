@@ -5,7 +5,7 @@ For IDL script references, look in this dir:
 ## Radiation band variables
 `ploteic_geocolor`
 GeoColor: True View of Earth
-- Assignee:
+- Assignee: Emily
 - Status:
 
 `ploteic_sandwich`
@@ -20,25 +20,25 @@ Sandwich RGB - Blended LW IR and Veggie VIS
 
 `ploteic_band14`
 11.2 micron - Longwave Band IR
-- Assignee:
+- Assignee: Bennett
 - Status:
 
 `ploteic_band09`
 6.9 micron - Mid Level Water Vapor IR
-- Assignee:
+- Assignee: Bennett
 - Status:
 
 
 ## Surface variables
 `ploteic_radar`
 Radar Reflectivity [Rain/Snow/Ice]
-- Assignee:
+- Assignee: Emily
 - Status:
 
 `ploteic_precip`
 Accumulated Precip [Rain & Snow]
 - Assignee: Emily
-- Status:
+- Status: Done!
 
 `ploteic_winds`
 Near Surface Winds
@@ -82,4 +82,4 @@ Carbon Aerosol Optical Thickness
 `ploteic_wind250`
 250-mb Wind Speed and MSLP
 - Assignee: Emily
-- Status:
+- Status: Done!

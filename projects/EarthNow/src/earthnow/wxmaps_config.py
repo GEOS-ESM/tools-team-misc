@@ -35,6 +35,7 @@ class MapConfig:
     center_lon: Optional[float] = None
     center_lat: Optional[float] = None
     standard_parallels: Optional[Tuple[float, float]] = None
+    contour_label_size: int = 8
 
 
 @dataclass
@@ -299,6 +300,9 @@ class StyleConfig:
     def grey_topo() -> "StyleConfig":
         """Testing to create grey topo style"""
         return StyleConfig(
+            # Currently don't have the correct grey_topo base image
+            # so testing using only shapes
+            # Eventually we can put the base image here
             # use_base_image=True,
             # base_image_type="natural_earth_greyblue",
             background_color="white",
@@ -306,6 +310,16 @@ class StyleConfig:
             use_gshhs=False,
             ocean_color="#E6E6E6",
             land_color="#FFFFFF",
+        )
+
+    @staticmethod
+    @register_style("greyblue")
+    def greyblue() -> "StyleConfig":
+        """Simple image-only Natural Earth template"""
+        return StyleConfig(
+            use_base_image=True,
+            base_image_type="natural_earth_greyblue",
+            use_gshhs=False,
         )
 
 
@@ -422,6 +436,7 @@ class WxMapsConfig:
             center_lon=-96,
             center_lat=37,
             standard_parallels=(33, 45),
+            contour_label_size=12,
         )
 
     @staticmethod
