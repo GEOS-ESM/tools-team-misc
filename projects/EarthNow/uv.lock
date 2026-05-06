@@ -384,9 +384,17 @@ name = "earthnow"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "astropy" },
+    { name = "cartopy" },
+    { name = "geopandas" },
+    { name = "matplotlib" },
     { name = "netcdf4" },
     { name = "numpy" },
+    { name = "pandas" },
+    { name = "pillow" },
+    { name = "pytz" },
     { name = "scipy" },
+    { name = "shapely" },
 ]
 
 [package.optional-dependencies]
@@ -398,38 +406,28 @@ dev = [
     { name = "ruff" },
     { name = "xarray" },
 ]
-images = [
-    { name = "pillow" },
-]
-plotting = [
-    { name = "astropy" },
-    { name = "cartopy" },
-    { name = "geopandas" },
-    { name = "matplotlib" },
-    { name = "pytz" },
-    { name = "shapely" },
-]
 
 [package.metadata]
 requires-dist = [
-    { name = "astropy", marker = "extra == 'plotting'" },
-    { name = "cartopy", marker = "extra == 'plotting'", specifier = ">=0.22" },
-    { name = "geopandas", marker = "extra == 'plotting'" },
+    { name = "astropy" },
+    { name = "cartopy", specifier = ">=0.22" },
+    { name = "geopandas" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=7.2.0" },
-    { name = "matplotlib", marker = "extra == 'plotting'", specifier = ">=3.7" },
+    { name = "matplotlib", specifier = ">=3.7" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.7" },
     { name = "netcdf4", specifier = ">=1.6.0" },
     { name = "numpy", specifier = ">=1.23" },
-    { name = "pillow", marker = "extra == 'images'", specifier = ">=10" },
+    { name = "pandas" },
+    { name = "pillow", specifier = ">=10" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.5.1" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7" },
-    { name = "pytz", marker = "extra == 'plotting'" },
+    { name = "pytz" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3" },
     { name = "scipy", specifier = ">=1.10" },
-    { name = "shapely", marker = "extra == 'plotting'" },
+    { name = "shapely" },
     { name = "xarray", marker = "extra == 'dev'", specifier = ">=2026.2.0" },
 ]
-provides-extras = ["plotting", "images", "dev"]
+provides-extras = ["dev"]
 
 [[package]]
 name = "executing"
