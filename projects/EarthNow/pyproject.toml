@@ -49,3 +49,8 @@ exclude = [
   "**/.DS_Store",
   "test*.py",
 ]
+
+[dependency-groups]
+dev = [
+    "colorlog>=6.10.1",
+]
