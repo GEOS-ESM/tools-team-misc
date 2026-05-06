@@ -1,0 +1,48 @@
+handlers: 'copy:uclad2wrf'
+
+shift_dt: 6  
+tau_start: 0
+tau_end: 72
+tau_inc: 1
+
+copy:
+
+  machine:
+  login:
+  password:
+  remote_dir: /discover/nobackup/projects/firechem/ASIA-AQ/UCLA_forecast/%iy4%im2%id2
+  local_dir: $WXMODEL_NATIVE_DIR/UCLAWRFchem_d2/Y%iy4/M%im2/D%id2/H%ih2
+
+  sockets: 3
+
+  tau_start: 0
+  tau_end: 72
+  tau_inc: 1
+
+  remote_files: &FILENAMES
+
+    - wrfout_d02_%y4-%m2-%d2_%h2:00:00
+
+uclad2wrf:
+
+  tau_start: 0
+  tau_end: 72
+  tau_inc: 1
+
+  tasks: 4
+
+  input_dir: $WXMODEL_NATIVE_DIR/UCLAWRFchem_d2/Y%iy4/M%im2/D%id2/H%ih2
+  output_dir: $WXMODEL_DATA_DIR/UCLAWRFchem_d2/Y%iy4/M%im2/D%id2/H%ih2
+  output_file: uclawrfchem.llp.%y4%m2%d2_%h2z.nc4
+  ncl_script: $WXMODEL_BIN_DIR/ucla_wrfchem_subset.ncl
+
+  grads_dir: $WXMODEL_OPENDAP_DIR/UCLAWRFchem_d2
+  grads_file: UCLAWRFchem_d2.%iy4%im2%id2_%ih2.ddf
+  grads_latest: UCLAWRFchem_d2.latest.ddf
+  dummy_file: $WXMODEL_DATA_DIR/dummy.ddf
+  files: *FILENAMES
+
+  grads_records:
+      - DSET $output_dir/$output_file
+      - OPTIONS template
+      - TDEF time 73 linear %ih2:00z%id2%imc%iy4 1hr

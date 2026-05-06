@@ -1,0 +1,40 @@
+handlers: 'wget:musica2d'
+
+wget:
+
+  url: https://g-a4619f.7a577b.6fbd.data.globus.org/
+  remote_dir: MUSICAv0_forecasts/
+  local_dir: $WXMODEL_NATIVE_DIR/MUSICA/Y%iy4/M%im2/D%id2/H%ih2
+
+  sockets: 4
+
+  tau_start: 0
+  tau_end: 96
+  tau_inc: 1
+
+  remote_files: &FILENAMES
+    - f.e22_asd0822.FHIST.nudged.f01_2D.fcst.cam.h2.%y4-%m2-%d2-%s5.nc
+
+musica2d:
+  tau_start: 0
+  tau_end: 96
+  tau_inc: 1
+
+  tasks: 4
+
+  input_dir: $WXMODEL_NATIVE_DIR/MUSICA/Y%iy4/M%im2/D%id2/H%ih2
+  output_dir: $WXMODEL_DATA_DIR/MUSICA/Y%iy4/M%im2/D%id2/H%ih2
+  output_file: musica.2d.%y4%m2%d2_%h2z.nc4
+
+  grads_dir: $WXMODEL_OPENDAP_DIR/MUSICA
+  grads_file: MUSICA2d.%iy4%im2%id2_%ih2.ddf
+  grads_latest: MUSICA2d.latest.ddf
+  dummy_file: $WXMODEL_DATA_DIR/dummy.ddf
+  files: *FILENAMES
+
+  grads_records:
+      - DSET $output_dir/$output_file
+      - OPTIONS template
+      - TDEF time 97 linear %ih2:00z%id2%imc%iy4 1hr
+      - XDEF lon 500 linear 90.05 0.1
+      - YDEF lat 450 linear 0.05 0.1

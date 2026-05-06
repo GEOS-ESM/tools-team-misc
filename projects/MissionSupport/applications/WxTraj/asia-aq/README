@@ -1,0 +1,1 @@
+flextra_run_ops.py 2024-01-14T00 ~/cylc-run/ASIA-AQ/start_points/start_points_bangkok.csv --ctlFile /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/seamless/inst3_3d_asm_Nv/inst3_3d_asm_Nv.20240114_00 --outputs /discover/nobackup/projects/gmao/asia_aq/pub/trajectories/2024011400 --seamless

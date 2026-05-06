@@ -1,0 +1,11 @@
+OVERVIEW
+=========
+
+These codes were written under time pressure and there is room for optimization. First, the YAML config files can be optimized to reduce redundant parameter specifications. Second, the handlers can become registered components that a generalized application could invoke without the need for a special driver for SARP or any other mission. The "wxplot" utility (bundled with WxMap) can be used to achieve this optimization and there is the potential to eliminate the need for any specialized drivers. The YAML config files can be augmented to specify the handler for every playlist theme.
+
+SPECIAL NOTES on CYLC
+=====================
+
+The cylc implementation requires that the suite.rc file be located at the root location of the software package. A utility is needed to stage all file dependencies with the suite.rc file relocated for the cylc implementation to work. This utility does exist - "cylc_submit". Please inquire.
+
+As of this writing, the HTML CSS file must be customized and put into place for any new installment of a mission. The css files can be further abstracted to remove this dependency (i.e. install a cental css file for all missions and remove references to mission-dependent banner files etc.).

@@ -1,0 +1,46 @@
+handlers: 'copy:arunwrfchem'
+
+tau_start: 0
+tau_end: 96 
+tau_inc: 1
+
+copy:
+
+  machine:
+  login:
+  password:
+  remote_dir: /discover/nobackup/projects/firechem/ASIA-AQ/ARUN_WRF_forecast/%iy4%im2%id2
+  local_dir: $WXMODEL_NATIVE_DIR/ARUNWRFchem/Y%iy4/M%im2/D%id2/H%ih2
+
+  sockets: 4
+
+  tau_start: 0
+  tau_end: 96
+  tau_inc: 1
+
+  remote_files: &FILENAMES
+
+    - arun_wrf_%h3.nc 
+
+arunwrfchem:
+
+  tau_start: 0
+  tau_end: 96
+  tau_inc: 1
+
+  tasks: 4
+
+  input_dir: $WXMODEL_NATIVE_DIR/ARUNWRFchem/Y%iy4/M%im2/D%id2/H%ih2
+  output_dir: $WXMODEL_DATA_DIR/ARUNWRFchem/Y%iy4/M%im2/D%id2/H%ih2
+  output_file: arunwrfchem.llp.%iy4%im2%id2_%f3z.nc4
+
+  grads_dir: $WXMODEL_OPENDAP_DIR/ARUNWRFchem
+  grads_file: ARUNWRFchem.%iy4%im2%id2_%ih2.ddf
+  grads_latest: ARUNWRFchem.latest.ddf
+  dummy_file: $WXMODEL_DATA_DIR/dummy.ddf
+  files: *FILENAMES
+
+  grads_records:
+      - DSET $output_dir/$output_file
+      - OPTIONS template
+      - TDEF time 96 linear %ih2:00z%id2%imc%iy4 1hr

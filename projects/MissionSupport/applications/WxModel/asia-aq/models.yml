@@ -1,0 +1,7 @@
+#WXMODEL_NATIVE_DIR: /discover/nobackup/projects/gmao/merra2/data/pub/supplemental/ASIA-AQ/native
+#WXMODEL_DATA_DIR: /discover/nobackup/projects/gmao/merra2/data/pub/supplemental/ASIA-AQ/data
+#WXMODEL_OPENDAP_DIR: /discover/nobackup/projects/gmao/merra2/data/pub/supplemental/ASIA-AQ/opendap
+
+WXMODEL_NATIVE_DIR: /discover/nobackup/projects/gmao/asia_aq/native
+WXMODEL_DATA_DIR: /discover/nobackup/projects/gmao/asia_aq/pub/data
+WXMODEL_OPENDAP_DIR: /discover/nobackup/projects/gmao/asia_aq/pub/opendap

@@ -1,0 +1,9 @@
+/discover/nobackup/pcastell/workspace/flextra/flextra/options/
+/discover/nobackup/pcastell/workspace/flextra/flextra/output/
+/discover/nobackup/projects/gmao/gmao_ops/pub//f5295_fp/forecast/Y2023/M08/D01/H12/
+/discover/nobackup/pcastell/workspace/flextra/flextra/AVAILABLE
+/discover/nobackup/projects/gmao/gmao_ops/pub//f5295_fp/forecast/Y2023/M08/D01/H12/
+/discover/nobackup/pcastell/workspace/flextra/flextra/AVAILABLE
+/discover/nobackup/projects/gmao/gmao_ops/pub//f5295_fp/forecast/Y2023/M08/D01/H12/
+/discover/nobackup/pcastell/workspace/flextra/flextra/AVAILABLE
+============================================

@@ -1,0 +1,157 @@
+#! /usr/bin/env python
+
+import os
+import re
+import sys
+import glob
+import shutil
+import argparse
+import datetime as dt
+
+from myutils import read_yaml, str_replace, parse_duration, make_dirs
+from taskmanager import *
+
+# Get command-line arguments
+
+parser = argparse.ArgumentParser(description='Weather Flights')
+
+parser.add_argument('datetime', metavar='datetime', type=str,
+       help='ISO datetime as ccyy-mm-ddThh:mm:ss')
+
+args = parser.parse_args()
+
+dattim = re.sub('[^0-9]', '', args.datetime+'000000')[0:14]
+idate = int(dattim[0:8])
+itime = int(dattim[8:14])
+fcst_dt = dt.datetime.strptime(dattim,'%Y%m%d%H%M%S')
+fcst_date = dt.datetime.strptime(dattim[0:8],'%Y%m%d')
+
+# Set up environment based on field campaign
+
+campaign_name = os.environ.get('WX_CAMPAIGN', 'default')
+bin_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+root_path = os.path.dirname(bin_path)
+campaign_path = os.path.join(root_path, campaign_name)
+resource_file = os.path.join(campaign_path, 'default.yml')
+collection_file = os.path.join(campaign_path, 'collection.rc')
+flight_plan_dir = os.path.join(campaign_path, 'flight_plans')
+flight_schedule_file = os.path.join(campaign_path, 'flight_schedule.yml')
+
+resource = read_yaml(resource_file)
+
+# Create the output flight directories
+
+out_dir = fcst_dt.strftime(resource['WX_FLIGHT_PATH'])
+src_out_dir = os.path.join(out_dir, 'src')
+data_out_dir = os.path.join(out_dir, 'data')
+
+make_dirs(src_out_dir)
+make_dirs(data_out_dir)
+
+# Get the latest flight schedule
+
+schedule = read_yaml(flight_schedule_file)
+record = schedule.get('schedule', {})
+
+idate = int(fcst_date.strftime('%Y%m%d'))
+for period, sched in record.items():
+
+    start_date = period.split('-')[0]
+    end_date = period.split('-')[-1]
+
+    if not end_date:
+        end_date = 20991231
+
+    print(start_date, end_date, idate)
+
+    if idate >= int(start_date) and idate <= int(end_date):
+        schedule.update(sched)
+
+print(schedule['aircraft'])
+print(schedule['flight_times'])
+print(schedule['flight_plans'])
+
+aircraft = schedule.get('aircraft', ['DC8', 'snapshot'])
+flight_times = schedule.get('flight_times', ['PT0H'])
+flight_plans = schedule.get('flight_plans', ['default'])
+
+# Generate flight times
+
+times = []
+for tod in flight_times:
+
+    departure = fcst_date+parse_duration(tod)
+    if departure < fcst_dt: continue
+
+    times.append(departure.strftime("%Y-%m-%dT%H:%M:%S"))
+
+# Generate flight paths based on the specified time. 
+
+task = TaskManager()
+os.chdir(data_out_dir)
+
+for plan in flight_plans:
+
+    dir = os.path.join(flight_plan_dir, plan, '*.csv')
+    filelist = glob.glob(dir)
+
+    for flight_plan in filelist:
+
+        shutil.copy(flight_plan, src_out_dir)
+
+        for plane in aircraft:
+
+            cmd = []
+            cmd.append('-v -p')
+            cmd.append(plane)
+            cmd.append(flight_plan)
+            cmd.append(' '.join(times))
+
+            print('wp2traj.py ' + ' '.join(cmd))
+            task.spawn('wp2traj.py ' + ' '.join(cmd))
+
+task.wait()
+
+# Create input collection names based on the current forecast
+# time and the prior forecast time (assuming forecasts are issued
+# every 12-hours). The earier forecast time is needed if the starting
+# flight time is before the current forecast start time.
+
+os.chdir(data_out_dir)
+
+with open(collection_file, 'r') as f:
+    buf = f.read()
+
+with open('collection-12.rc', 'w') as f:
+    f.write((fcst_dt-dt.timedelta(hours=12)).strftime(buf))
+
+with open('collection-00.rc', 'w') as f:
+    f.write(fcst_dt.strftime(buf))
+
+# Interpolate model data collections in space and time to each point along
+# the flight paths.
+
+pattern = os.path.join(data_out_dir, '*.csv')
+filelist = glob.glob(pattern)
+
+for file in filelist:
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    mintime = lines[1].split(',')[0]
+    dattim = re.sub('[^0-9]', '', mintime+'000000')[0:14]
+    min_dt = dt.datetime.strptime(dattim,'%Y%m%d%H%M%S')
+
+    cfile = 'collection-00.rc'
+    if min_dt < fcst_dt:
+        cfile = 'collection-12.rc'
+
+    name, ext = os.path.splitext(file)
+    out_file = name + '.nc'
+    cmd = ['-d 60 -o', out_file, '-v -t csv -I -r', cfile, file]
+    task.spawn('trj_sampler.py ' + ' '.join(cmd))
+
+task.wait()
+
+sys.exit(0)

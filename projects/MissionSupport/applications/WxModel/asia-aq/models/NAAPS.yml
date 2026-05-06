@@ -1,0 +1,48 @@
+handlers: 'sftp:naaps'
+
+tau_start: 0
+tau_end: 150
+tau_inc: 6
+
+sftp:
+
+  machine: portal.nrlmry.navy.mil
+  login: ftp
+  password: none
+  remote_dir: /pub/receive/hyer/naaps_verify_examples/%iy4%im2/%iy4%im2%id2%ih2
+# remote_dir: /ftp/receive/lambert/naaps_verify_asia_aq/%iy4%im2/%iy4%im2%id2%ih2
+  local_dir: $WXMODEL_NATIVE_DIR/NAAPS/Y%iy4/M%im2/D%id2/H%ih2
+
+  sockets: 4
+
+  tau_start: 0
+  tau_end: 150
+  tau_inc: 6
+
+  remote_files: &FILENAMES
+
+    - '%iy4%im2%id2%ih2_%h3_000_nap044o_000_verify.nc'
+
+naaps:
+
+    tasks: 4
+
+    tau_start: 0
+    tau_end: 150
+    tau_inc: 6
+
+    input_dir: $WXMODEL_NATIVE_DIR/NAAPS/Y%iy4/M%im2/D%id2/H%ih2
+    output_dir: $WXMODEL_DATA_DIR/NAAPS/Y%iy4/M%im2/D%id2/H%ih2
+
+    grads_dir: $WXMODEL_OPENDAP_DIR/NAAPS
+    grads_file: NAAPS.%iy4%im2%id2_%ih2.ddf
+    grads_latest: NAAPS.latest.ddf
+    dummy_file: $WXMODEL_DATA_DIR/dummy.ddf
+    files: *FILENAMES
+
+    grads_records:
+
+     - dset $output_dir/%iy4%im2%id2%ih2_%f3_000_nap044o_000_verify.nc
+     - options template
+     - tdef time 26 linear %ih2z%id2%imc%iy4 6hr
+     - edef species 5 names so2 abf dust smoke salt

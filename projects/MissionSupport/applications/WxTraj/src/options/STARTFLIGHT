@@ -1,0 +1,51 @@
+**********************************************************************
+*              TRAJECTORY MODEL                                      *
+*              DEFINITION OF STARTING/ENDING POINTS IN FLIGHT MODE   *
+*  This file defines starting points separated non-uniformly in      *
+*  space as well as in time. Thus, both starting times AND starting  *
+*  coordinates must be given.                                        *
+*  The starting times must be strictly in temporal order.            *
+*  For backward trajectories, the temporal order must be reversed.   *
+*  In line #28 of this file, the name of the output file must be     *
+*  indicated. Lines #29 and #30 must contain kind of trajectory and  *
+*  the unit of the z coordinate to be used. Line #31 is arbitrary,   *
+*  then follows a sequence of points.                                *
+*  Kind of trajectory: 1 = 3 dimensional                             *
+*                      2 = on model layers                           *
+*                      3 = mixing layer                              *
+*                      4 = isobaric                                  *
+*                      5 = isentropic                                *
+**********************************************************************
+*                                                                    *
+*  Unit of z coordinate: 1 = Meters above sea level                  *
+*                        2 = Meters above ground                     *
+*                        3 = Hectopascal                             *
+*                                                                    *
+*  For mixing layer trajectories (kind 3), the z coordinate must be  *
+*  given in m.a.g.l. (option 2)                                      *
+*                                                                    *
+**********************************************************************
+'Flight#7'
+1                          I Kind of trajectory (see file header)
+1                          I Unit of z coordinate
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+19980404 000000           2I Starting date and time 
+  34.0                     F Longitude [DEG]
+  72.0                     F Latitude [DEG]
+1000.0                     F z-coordinate (see file header)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+19980404 140000           2I Starting date and time 
+ -15.0                     F Longitude [DEG]
+  48.0                     F Latitude [DEG]
+2000.0                     F z-coordinate (see file header)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+19980405 130000           2I Starting date and time 
+  10.0                     F Longitude [DEG]
+  48.0                     F Latitude [DEG]
+3500.0                     F z-coordinate (see file header)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+19980406 130000           2I Starting date and time 
+  10.0                     F Longitude [DEG]
+  48.0                     F Latitude [DEG]
+3000.0                     F z-coordinate (see file header)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

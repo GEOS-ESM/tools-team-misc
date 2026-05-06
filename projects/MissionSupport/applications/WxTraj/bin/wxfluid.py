@@ -1,0 +1,196 @@
+#! /usr/bin/env python
+
+import os
+import re
+import sys
+import yaml
+import json
+import glob
+import errno
+import argparse
+import datetime as dt
+
+from myutils import read_yaml, str_replace
+from taskmanager import *
+
+# Get command-line arguments
+
+parser = argparse.ArgumentParser(description='Weather Trajectories')
+
+parser.add_argument('datetime', metavar='datetime', type=str,
+       help='ISO datetime as ccyy-mm-ddThh:mm:ss')
+
+args = parser.parse_args()
+
+dattim = re.sub('[^0-9]', '', args.datetime+'000000')[0:14]
+idate = int(dattim[0:8])
+itime = int(dattim[8:14])
+time_dt = dt.datetime.strptime(dattim,'%Y%m%d%H%M%S')
+isodattim = time_dt.strftime('%Y-%m-%dT%H')
+
+# Set up environment based on field campaign
+
+campaign_name = os.environ.get('WXTRAJ_CAMPAIGN', 'default')
+bin_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+root_path = os.path.dirname(bin_path)
+campaign_path = os.path.join(root_path, campaign_name)
+tmpl_path = os.path.join(root_path, 'templates')
+resource_file = os.path.join(campaign_path, 'trajectory.yml')
+start_points = os.path.join(campaign_path, 'start_points', '*.csv')
+#lib_path = os.path.join(campaign_path, 'lib')
+#bin_path = os.path.join(campaign_path, 'bin')
+#sys.path.append(lib_path)
+#sys.path.append(bin_path)
+
+resource = read_yaml(resource_file)
+opt = resource.get('options', {})
+
+# Create the output trajectory directory
+
+out_dir = time_dt.strftime(opt['outputs'])
+
+try:
+    os.makedirs(out_dir, 0755)
+except:
+    pass
+
+# Create a stable seamless control file based on a collection template.
+# We only need a window big enough to span the trajectories (usually
+# +-2days.)
+
+tmplFile = opt.get('tmplFile', None)
+tmplFile = os.path.join(tmpl_path, tmplFile)
+
+if tmplFile:
+
+    if not os.path.isfile(tmplFile):
+        tmplFile = os.path.join(root_path, tmplFile)
+
+    if not os.path.isfile(tmplFile):
+        errstr = 'Cannot locate template file: "{}" and "{}" do not exist.'
+        errstr = errstr.format(opt['tmplFile'], tmplFile)
+        print(errstr)
+        sys.exit(2)
+
+    start_dt = time_dt - dt.timedelta(days=3)
+    end_dt = time_dt + dt.timedelta(days=3)
+
+    tdef_das = int((time_dt - start_dt).total_seconds() / 3600)
+    tdef_total = int((end_dt - start_dt).total_seconds() / 3600)
+
+    defs = {}
+    defs['T1'] = str(1)
+    defs['T2'] = str(tdef_das / 3 + 1)
+    defs['T3'] = str(tdef_das / 3 + 2)
+    defs['T4'] = str(tdef_total / 3 + 1)
+    defs['START_DATE'] = start_dt.strftime('%HZ%d%b%Y')
+
+    with open(tmplFile, 'r') as f:
+        buf = f.read()
+
+    buf = time_dt.strftime(buf)
+    buf = str_replace(buf, **defs)
+
+    ctlFile, ext = os.path.splitext(os.path.basename(tmplFile))
+    ctlFile = os.path.join(out_dir, ctlFile + '.%Y%m%d_%H')
+    ctlFile = time_dt.strftime(ctlFile)
+    opt['ctlFile'] = ctlFile
+
+    with open(ctlFile, 'w') as f:
+        f.write(buf)
+
+    del opt['tmplFile']
+
+# Execute the trajectory calculator for all start points.
+
+options = ' '.join(['--'+k+' '+v for k,v in opt.items() if v])
+options += ' ' + ' '.join(['--'+k for k,v in opt.items() if not v])
+options = time_dt.strftime(options)
+
+filelist = glob.glob(start_points)
+task = TaskManager()
+                
+for pathname in filelist:
+    if os.path.isfile(pathname):
+        print(pathname)
+
+    cmd = []
+    cmd.append(isodattim)
+    cmd.append(pathname)
+    cmd.append(options)
+
+    os.chdir(campaign_path)
+    print('flextra_run_ops.py ' + ' '.join(cmd))
+ #  task.spawn('flextra_run_ops.py ' + ' '.join(cmd))
+
+task.wait()
+
+# Create FLUID version of the JSON files including a 3-day history
+# of trajectories.
+
+forward = {}
+backward = {}
+current = time_dt.strftime('%Y%m%d%H')
+
+t_dt = time_dt - dt.timedelta(days=3)
+while t_dt <= time_dt:
+
+    dattim = t_dt.strftime('%Y%m%d%H')
+    input_dir = t_dt.strftime(opt['outputs'])
+    files = glob.glob(os.path.join(input_dir, '*_[b,f].json'))
+
+    for pathname in files:
+
+        with open(pathname, 'r') as f:
+            trajectory = json.load(f)
+
+        basename = os.path.basename(pathname)
+        type, ext = os.path.splitext(basename.split('_')[-1])
+        level  = basename.split('_')[-2]
+        region = '_'.join(basename.split('_')[1:-4])
+        id = region + '_' + level
+
+        for name, record in trajectory.items():
+
+            name += '-' + level
+
+            for rec in record:
+                
+                rec[0] = time_dt.year
+                rec[1] = time_dt.month
+                rec[2] = time_dt.day
+                rec[3] = time_dt.hour
+                rec[4] = 'XX'
+     
+        if type == 'f':
+            d = forward.get(id, {})
+            forward[id] = d
+        else:
+            d = backward.get(id, {})
+            backward[id] = d
+
+        d[dattim+'_'+id] = record
+
+    t_dt += dt.timedelta(days=1)
+
+# Create FLUID JSON files.
+    
+for name, buf in forward.items():
+
+    outname = os.path.join(out_dir, name+'_history_f.fluid') 
+    with open(outname, 'w') as f:
+        json.dump(buf, f)
+
+    outname = os.path.join(out_dir, name+'_f.fluid') 
+    with open(outname, 'w') as f:
+        json.dump({current+'_'+name: buf[current+'_'+name]}, f)
+
+for name, buf in backward.items():
+        
+    outname = os.path.join(out_dir, name+'_history_b.fluid')
+    with open(outname, 'w') as f:
+        json.dump(buf, f)
+
+    outname = os.path.join(out_dir, name+'_b.fluid')
+    with open(outname, 'w') as f:
+        json.dump({current+'_'+name: buf[current+'_'+name]}, f)
