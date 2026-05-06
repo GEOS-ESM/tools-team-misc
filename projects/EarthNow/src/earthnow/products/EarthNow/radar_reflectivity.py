@@ -7,6 +7,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
+import logging
 import sys
 
 # ------------------------------------------------------------------
@@ -62,23 +63,29 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     """
     Plot radar reflectivity (dBZ)
     """
+    # Initialize logger
+    logger = logging.getLogger(__name__)
+
     # ========
     # Reflectivity
     # ========
     # Read from reader (reader decides the collection)
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["REFC"]
+        args.fdate,
+        args.pdate,
+        variables=["REFC", "HGT_SFC", "SNOW", "RAIN", "ICE", "TMP_2M"],
     )
+    logger.debug("variables in data: ", [print(v) for v in data.variables])
+    logger.debug("meta :", meta)
 
     data = data.astype(np.float32)
 
     # Mask invalid reflectivity
     data = np.ma.masked_where(data < 0.0, data)
     data = np.ma.masked_where(data > 80.0, data)
-    print("rain refl min: ", data.min())
-    print("rain refl max: ", data.max())
-    print("rain refl mean: ", data.mean())
-    print("meta :", meta)
+    logger.debug("refl min: ", data.min())
+    logger.debug("refl max: ", data.max())
+    logger.debug("refl mean: ", data.mean())
     # sys.exit()
 
     # ------------------------------------------------------------
