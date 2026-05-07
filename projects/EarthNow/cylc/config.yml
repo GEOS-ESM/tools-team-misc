@@ -1,36 +1,35 @@
 BASE_PATH: /discover/nobackup/dao_ops/jardizzo/EarthNow/plots
 NPROC: 28
 
-plot_surface_from_geos_cycled_replay:
-  products: [T2M, Radar]
-  data_readers: [geos_cycled_replay]
-  regions: [global, conus]
-  nproc: $NPROC
-
-plot_upper_from_geos_cycled_replay:
-  products: [VORT500]
+plot_current:
+  products: [RainSnow, T2m, Vort500, Wind10m, Wind250]
   data_readers: [geos_cycled_replay]
   regions: [global, conus]
   nproc: $NPROC
 
 products:
-  SLP:
-    product: sea_level_pressure
+  RainSnow:
+    product: rain_snow_accumulation_total_EarthNow
     style: light
     driver: "plotall.py"
     base-path: $BASE_PATH
-  Radar:
-    product: max_reflectivity
+  T2m:
+    product: temperature_2m_EarthNow
     style: light
     driver: "plotall.py"
     base-path: $BASE_PATH
-  T2M:
-    product: temperature_2m
+  Vort500:
+    product: vorticity_heights_500mb_EarthNow
     style: light
     driver: "plotall.py"
     base-path: $BASE_PATH
-  VORT500:
-    product: vorticity_heights_500mb
+  Wind10m:
+    product: winds_10m_EarthNow
+    style: light
+    driver: "plotall.py"
+    base-path: $BASE_PATH
+  Wind250:
+    product: winds_heights_250mb_EarthNow
     style: light
     driver: "plotall.py"
     base-path: $BASE_PATH
