@@ -9,7 +9,7 @@
     [[dependencies]]
         [[[T00]]] # validity (hours)
             graph = """
-                @clock => plot_upper_from_geos_cycled_replay
+                @clock => plot_current
             """
 [runtime]
     [[root]] # suite defaults
@@ -31,7 +31,7 @@
         script = "earthnow.py $datetime $config --task $taskname"
         [[[job]]]
             batch system = slurm
-            execution time limit = PT30M
+            execution time limit = PT1H
         [[[directives]]]
             --account = g2538
             --qos = daohi
@@ -39,11 +39,5 @@
             --ntasks = 28
             --job-name = EarthNow
 
-    [[plot_radar_from_geos_cycled_replay]]
-        inherit = plotTask
-
-    [[plot_surface_from_geos_cycled_replay]]
-        inherit = plotTask
-
-    [[plot_upper_from_geos_cycled_replay]]
+    [[plot_current]]
         inherit = plotTask
