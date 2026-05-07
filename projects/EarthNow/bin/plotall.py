@@ -31,6 +31,13 @@ def setup_logger(logger_level, enabled=True):
     from colorlog import ColoredFormatter
     from pathlib import Path
 
+    project_root = Path(__file__).resolve().parent.parent
+    log_dir = project_root / "logs"
+    log_dir.mkdir(exist_ok=True)  # create logs/ dir if it doesn't exist yet
+    logfile_path = log_dir / "plotall.log"
+    # just testing for now - logfile_path should be dynamic user input,
+    # i.e. slurm job number or something
+
     # Set logger name to the script name for clarity in logs
     script_name = Path(__file__).stem
     logger = logging.getLogger(script_name)
@@ -206,6 +213,21 @@ def parse_args():
         "--nws-shapefile-base",
         default="/discover/nobackup/projects/gmao/osse2/TSE_staging/SHAPE_FILES/ALL",
     )
+
+    # -------------------------------------------------------------------------
+    # Logger config
+    # -------------------------------------------------------------------------
+    valid_levels = ["Debug", "Info", "Warning", "Error", "Critical"]
+    parser.add_arument("--console-level", default="Info", choices=valid_levels)
+
+    parser.add_argument(
+        "--log-file",
+        nargs="?",
+        default=None,
+        const="plotall.log",
+        help="Outputs a log file to root_dir/logs/, a directory which will be created if it does not yet exist. Provide an optional filename, or leave blank for default of plotall.log.",
+    )
+    parser.add_argument("--logfile-level", default="Info", choices=valid_levels)
 
     # -------------------------------------------------------------------------
     return parser.parse_args()
