@@ -16,6 +16,7 @@ from enum import Enum
 class BaseImageType(Enum):
     """Predefined base image types"""
 
+    NATURAL_EARTH_GREY = "natural_earth_grey"
     NATURAL_EARTH_GREYBLUE = "natural_earth_greyblue"
     NATURAL_EARTH_LIGHT = "natural_earth_light"
     GEOCOLOR_LIGHT = "geocolor_light"
@@ -32,6 +33,12 @@ class BaseImageConfig:
 
     # Predefined image paths
     IMAGES = {
+        "natural_earth_grey": {
+            "path": "natural_earth_grey_noice_16200x8100.jpg",
+            "extent": [-180, 180, -90, 90],
+            "description": "Natural Earth Greyscale Blue (no arctic ice)",
+            "projection": "platecarree",
+        },
         "natural_earth_greyblue": {
             "path": "natural_earth_greyblue_noice_16200x8100.jpg",
             "extent": [-180, 180, -90, 90],

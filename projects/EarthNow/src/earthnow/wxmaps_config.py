@@ -300,17 +300,11 @@ class StyleConfig:
     def grey_topo() -> "StyleConfig":
         """Testing to create grey topo style"""
         return StyleConfig(
-            # Currently don't have the correct grey_topo base image
-            # so testing using only shapes
-            # Eventually we can put the base image here
-            # use_base_image=True,
-            # base_image_type="natural_earth_greyblue",
-            background_color="white",
-            text_color="black",
+            use_base_image=True,
+            base_image_type="custom",
             use_gshhs=False,
-            ocean_color="#E6E6E6",
-            land_color="#FFFFFF",
-            show_timestamp=True,  # Defaults to False now, add it in your style for testing
+            ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
+            show_timestamp=True,  # Defaults is False now, add it in your style for testing
         )
 
     @staticmethod
@@ -322,6 +316,7 @@ class StyleConfig:
             base_image_type="natural_earth_greyblue",
             use_gshhs=False,
         )
+
 
 
 @dataclass
