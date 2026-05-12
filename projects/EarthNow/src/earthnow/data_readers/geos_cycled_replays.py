@@ -329,6 +329,9 @@ class GEOSDataReader:
                     try:
                         t = os.path.basename(f).split(".")[2].replace("z", "")
                         times.append(datetime.strptime(t, "%Y%m%d_%H%M"))
+                        # Drop 15 mins for CONUS collections
+                        times = [dt for dt in times if dt.minute % 30 == 0]
+
                     except Exception:
                         continue
 
