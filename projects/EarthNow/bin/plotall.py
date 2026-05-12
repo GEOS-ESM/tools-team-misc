@@ -24,44 +24,38 @@ from earthnow.products import PRODUCTS
 
 import logging
 
+from pathlib import Path
+
+script_name = Path(__file__).stem
+logger = logging.getLogger(script_name)  # Set logger name to the script name
+
+# Silence matplotlib debug logs
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+
 
 # Create logger and colored handler function
-def setup_logger(logger_level, enabled=True):
+def setup_root_logger(logger_level, enabled=True):
     import logging
     from colorlog import ColoredFormatter
-    from pathlib import Path
 
-    # Set logger name to the script name for clarity in logs
-    script_name = Path(__file__).stem
-    logger = logging.getLogger(script_name)
+    # root logger
+    root_logger = logging.getLogger()
 
     if not enabled:
-        logger.disabled = True
-        return logger
-
-    logging.basicConfig(
-        # Change this based on what level you want to see
-        # level=logging.DEBUG,
-        level=logger_level,
-    )
-
+        root_logger.disabled = True
+        return
     handler = logging.StreamHandler()
     handler.setFormatter(
         ColoredFormatter("\n%(log_color)s %(levelname)s: %(name)s: %(message)s\n")
     )
-    logger.propagate = (
-        False  # Prevent logs from duplicating when using the colored formatting
-    )
-    logger.addHandler(handler)
+    root_logger.addHandler(handler)
+    root_logger.setLevel(logger_level)
 
-    # Silence matplotlib debug logs
-    logging.getLogger("matplotlib").setLevel(logging.WARNING)
-
-    return logger
+    return
 
 
 # Change this to logging.WARNING or logging.DEBUG to see more logs, or set enabled=False to disable all logging
-logger = setup_logger(logging.DEBUG, enabled=False)
+setup_root_logger(logging.DEBUG, enabled=True)
 
 # -----------------------------------------------------------------------------
 # ARGPARSE
