@@ -310,6 +310,7 @@ class StyleConfig:
             use_gshhs=False,
             ocean_color="#E6E6E6",
             land_color="#FFFFFF",
+            show_timestamp=True,  # Defaults to False now, add it in your style for testing
         )
 
     @staticmethod
