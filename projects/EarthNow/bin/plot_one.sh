@@ -1,22 +1,63 @@
 #!/bin/bash
 
-#NOTE: Running using the uv python config
+# 5/12/26 Recent changes to input args: see example syntax below: 
+# plot_one.sh global grey_topo 20260508_00z "vorticity_heights_500mb_EarthNow" single -p  20260508_0000z  -l "INFO"
 
-# Add input arg to run various tests
-# Check if arguments are provided
-if [ "$#" -lt 5 ] || [ "$#" -gt 6 ]; then
-  echo "Error: Incorrect number of arguments."
-  echo "Usage: ${BASH_SOURCE[0]} <conus|global> <Style> <forecast time as YYYYMMDD_HHz> <product_name> <single|all> [frame time as YYYYMMDD_HHHHz]"
-  echo "where frame time is only required if 'single' is specified"
+# Usage function for clean error handling
+usage() {
+  echo "Usage: ${BASH_SOURCE[0]} <conus|global> <Style> <forecast time> <product_name> <single|all> [OPTIONS]"
+  echo ""
+  echo "Required arguments:"
+  echo "  1. Region         : conus or global"
+  echo "  2. Style          : Style name"
+  echo "  3. Forecast time  : YYYYMMDD_HHz"
+  echo "  4. Product name   : Name of the product"
+  echo "  5. Frames           : single or all"
+  echo ""
+  echo "Optional arguments:"
+  echo "  -p, --pdate: Frame time as YYYYMMDD_HHHHz (Required if Mode is 'single')"
+  echo "  -l, --logger-opt: Logger option (e.g., DEBUG, INFO)"
+  echo "  -h, --help: Display this help message"
   exit 1
+}
+
+# Check if we have at least the 5 required arguments
+if [ "$#" -lt 5 ]; then
+  echo "Error: Missing required arguments."
+  usage
 fi
 
-REGION="${1,,}"
+# Assign required positional arguments
+REGION="$1"
 STYLE="$2"
-FDATE="${3,,}"
+FDATE="$3"
 PRODUCT="$4"
-FRAMES="${5,,}"
-PDATE="${6,,}"
+FRAMES="$5"
+
+# Shift the first 5 arguments out of the way so we can parse the optionals
+shift 5
+
+# Parse remaining optionall arguments using a while/case loop
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -p|--pdate)
+      PDATE="$2"
+      shift 2 # Shift past the flag and its value
+      ;;
+    -l|--logger-opt)
+      LOGGER="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      echo "Error: Unknown parameter passed: $1"
+      usage
+      ;;
+  esac
+done
+
 
 # Argument validation
 # ===================
@@ -35,7 +76,8 @@ if [[ "$FRAMES" == "single" ]]; then
     fi
 elif [[ "$FRAMES" == "all" ]]; then 
     if [ -n "$PDATE" ]; then 
-        echo "Note: PDATE ($PDATE) not in use when 'all' is specified."
+        echo "Note: PDATE ($PDATE) not in use when 'all' is specified and is ignored."
+        unset PDATE
     fi
 else
     echo "Error: Invalid argument 5. Valid args: 'single', 'all'."
@@ -55,35 +97,35 @@ if [[ ! $FDATE =~ ^[0-9]{8}_[0-9]{2}z$ ]]; then
   exit 1
 fi
 
-# Call plotall.py 
+# Create Python command
 # ===================
-#
-bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-if [[ "$FRAMES" = "single" ]]; then
-  # Generate single plot
-  uv run "$bindir/plotall.py" \
-    --product "$PRODUCT" \
-    --nproc 1 \
-    --fdate "$FDATE" \
-    --pdate "$PDATE" \
-    --map-type "$REGION" \
-    --base-path /discover/nobackup/"$USER"/EarthNow/plots \
-    --style "$STYLE"
-  exit 0
-else
-  # Generate all plots
-  if  [[ -n "$SLURM_CPUS_PER_TASK" ]]; then
-    nproc="$SLURM_CPUS_PER_TASK"
+# Determine the number of processors to use based on SLURM environment variable, if running login, default to 1
+ if  [[ -n "$SLURM_CPUS_PER_TASK" ]]; then
+    NPROC="$SLURM_CPUS_PER_TASK"
   else
-    nproc=1
+    NPROC=1
   fi
-  uv run "$bindir/plotall.py" \
-    --product "$PRODUCT" \
-    --nproc "$nproc" \
-    --fdate "$FDATE" \
-    --map-type "$REGION" \
-    --base-path /discover/nobackup/"$USER"/EarthNow/plots \
+
+bindir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_CMD=(
+  uv run "$bindir/plotall.py"
+    --product "$PRODUCT"
+    --nproc "$NPROC" 
+    --fdate "$FDATE"
+    --map-type "$REGION"
+    --base-path /discover/nobackup/"$USER"/EarthNow/plots
     --style "$STYLE"
-  exit
+)
+# Optional arguments
+if [[ -n "$PDATE" ]]; then
+  # Append the flag and the value to the array
+  PYTHON_CMD+=(--pdate "$PDATE")
 fi
+
+if [[ -n "$LOGGER" ]]; then
+  PYTHON_CMD+=(--logger "$LOGGER")
+fi
+
+# 3. Execute the array
+echo "Executing: ${PYTHON_CMD[*]}"
+"${PYTHON_CMD[@]}"
