@@ -135,7 +135,7 @@ class StyleConfig:
     title_fontsize: Optional[int] = None  # Auto-scaled if None
 
     # Timestamp
-    show_timestamp: bool = True
+    show_timestamp: bool = False
     timestamp_location: str = "lower left"
     timestamp_fontsize: Optional[int] = None  # Auto-scaled if None
     timestamp_format: str = "detailed"  # 'detailed' or 'simple'
