@@ -28,22 +28,17 @@ from pathlib import Path
 
 script_name = Path(__file__).stem
 logger = logging.getLogger(script_name)  # Set logger name to the script name
-
-# Silence matplotlib debug logs
-logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logger.addHandler(logging.NullHandler())  # Add this line to ignore if no logger passed
 
 
 # Create logger and colored handler function
-def setup_root_logger(logger_level, enabled=True):
+def setup_root_logger(logger_level):
     import logging
     from colorlog import ColoredFormatter
 
     # root logger
     root_logger = logging.getLogger()
 
-    if not enabled:
-        root_logger.disabled = True
-        return
     handler = logging.StreamHandler()
     handler.setFormatter(
         ColoredFormatter("\n%(log_color)s %(levelname)s: %(name)s: %(message)s\n")
@@ -53,9 +48,6 @@ def setup_root_logger(logger_level, enabled=True):
 
     return
 
-
-# Change this to logging.WARNING or logging.DEBUG to see more logs, or set enabled=False to disable all logging
-setup_root_logger(logging.DEBUG, enabled=True)
 
 # -----------------------------------------------------------------------------
 # ARGPARSE
@@ -200,6 +192,17 @@ def parse_args():
         "--nws-shapefile-base",
         default="/discover/nobackup/projects/gmao/osse2/TSE_staging/SHAPE_FILES/ALL",
     )
+    parser.add_argument(
+        "--logger",
+        choices=[
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+        ],
+        type=str.upper,
+        help="Enable logging with specified level.",
+    )
 
     # -------------------------------------------------------------------------
     return parser.parse_args()
@@ -219,7 +222,7 @@ def create_data_reader(args):
     ReaderClass = DATA_READERS[
         args.data_reader
     ]  # FIX: He returns the reader twice? Here and in the if statement
-    logger.debug(f"Initial Reader: {ReaderClass=}")
+    logger.info(f"Initial Reader: {ReaderClass=}")
 
     # FIX: # I think this is if you put all the option fields: data-reader, exp_id, and collection - but if you only specify the data reader and nothing else it will still use defaults. So it will never have a args.data_reader be fp since its set via defaults...
     # Ok for geos replay: this is the default inputs, but isn't this just duplicating what is already in the reader?
@@ -325,12 +328,10 @@ def plot_single_pdate(pdate, args, style, map_config):
 
     # Create reader for this worker
     reader = create_data_reader(local_args)
-    logger.debug(
-        f"Reader returned: {reader=}"
-    )  # This returns GEOS replay reader always
+    logger.info(f"Reader returned: {reader=}")  # This returns GEOS replay reader always
 
     # Test reader returns a valid directory
-    logger.debug(return_valid_directory(reader, local_args))
+    logger.info(return_valid_directory(reader, local_args))
 
     # Call product function
     local_args.contour_label_size = map_config.contour_label_size
@@ -378,6 +379,9 @@ def plot_single_pdate(pdate, args, style, map_config):
 
 def main():
     args = parse_args()
+
+    if args.logger:
+        setup_root_logger(args.logger)
 
     # -------------------------------------------------------------------------
     # Map config
@@ -484,6 +488,7 @@ def main():
         # If pdate not provided, plot ALL available times
         pdates = reader.find_available_times(args.fdate)
         pdates = [dt.strftime("%Y%m%d_%H%Mz") for dt in pdates]
+        logger.info(f"Available pdates for fdate {args.fdate}: {pdates}")
     else:
         pdates = [args.pdate]
 
