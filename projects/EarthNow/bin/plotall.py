@@ -312,6 +312,12 @@ def build_style(args):
 
 def plot_single_pdate(pdate, args, style, map_config):
     import copy
+    import multiprocessing_logging
+
+    # Reinitalize root logger for mp handler, idk why this works it just does
+    if args.logger:
+        setup_root_logger(args.logger)
+        multiprocessing_logging.install_mp_handler()
 
     local_args = copy.copy(args)
     local_args.pdate = pdate

@@ -412,6 +412,7 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "ipykernel" },
+    { name = "multiprocessing-logging" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -431,6 +432,7 @@ requires-dist = [
     { name = "geopandas" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=7.2.0" },
     { name = "matplotlib", specifier = ">=3.7" },
+    { name = "multiprocessing-logging", marker = "extra == 'dev'", specifier = ">=0.3.4" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.7" },
     { name = "netcdf4", specifier = ">=1.6.0" },
     { name = "numpy", specifier = ">=1.23" },
@@ -941,6 +943,14 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c7/74/97e72a36efd4ae2bccb3463284300f8953f199b5ffbc04cbbb0ec78f74b1/matplotlib_inline-0.2.1.tar.gz", hash = "sha256:e1ee949c340d771fc39e241ea75683deb94762c8fa5f2927ec57c83c4dffa9fe", size = 8110, upload-time = "2025-10-23T09:00:22.126Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/af/33/ee4519fa02ed11a94aef9559552f3b17bb863f2ecfe1a35dc7f548cde231/matplotlib_inline-0.2.1-py3-none-any.whl", hash = "sha256:d56ce5156ba6085e00a9d54fead6ed29a9c47e215cd1bba2e976ef39f5710a76", size = 9516, upload-time = "2025-10-23T09:00:20.675Z" },
+]
+
+[[package]]
+name = "multiprocessing-logging"
+version = "0.3.4"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9e/fe/32bd864bcb604b0607924a4cf618ed267a0ef21ac9c3e255109256046e1f/multiprocessing_logging-0.3.4-py2.py3-none-any.whl", hash = "sha256:8a5be02b02edbd6fa6e3e89499af7680db69db9e2d8707fcd28d445fa248f23e", size = 8770, upload-time = "2023-02-05T17:06:20.632Z" },
 ]
 
 [[package]]
