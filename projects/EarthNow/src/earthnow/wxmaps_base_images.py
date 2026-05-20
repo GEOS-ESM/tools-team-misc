@@ -12,6 +12,10 @@ from pathlib import Path
 from typing import Optional, Tuple
 from enum import Enum
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class BaseImageType(Enum):
     """Predefined base image types"""
@@ -335,10 +339,18 @@ class BaseImagePlotter:
             fill_value=0,
             flip_source_y=True,  # Flip source from origin='upper' to origin='lower' before interpolation
         )
+        logger.info(f"Image dims: {warped_img.shape}")
 
         # Automatic limb darkening for full disk GEO
         if isinstance(ax.projection, ccrs.Geostationary):
             warped_img = BaseImagePlotter.apply_limb_darkening(warped_img)
+
+        # Fix for greyscale imagery
+        if warped_img.ndim == 3 and warped_img.shape[2] == 2:
+            rgb_array = warped_img[:, :, 0]
+            a_array = warped_img[:, :, 1]
+            warped_img = np.dstack((rgb_array, rgb_array, rgb_array, a_array))
+        logger.info("Img dimension fixed: {warped_img.shape}")
 
         # Plot the transformed image
         # The warped_img array is constructed with row 0 = bottom (target_extent[2])
