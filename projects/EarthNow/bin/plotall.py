@@ -23,52 +23,65 @@ from earthnow.data_readers import DATA_READERS
 from earthnow.products import PRODUCTS
 
 import logging
+from pathlib import Path
+
+# Set logger name to the script name for clarity in logs
+script_name = Path(__file__).stem
+logger = logging.getLogger(script_name)
 
 
 # Create logger and colored handler function
-def setup_logger(logger_level, enabled=True):
+def setup_logger(console_level, logfile, logfile_level, enabled=True):
     import logging
     from colorlog import ColoredFormatter
-    from pathlib import Path
 
-    project_root = Path(__file__).resolve().parent.parent
-    log_dir = project_root / "logs"
-    log_dir.mkdir(exist_ok=True)  # create logs/ dir if it doesn't exist yet
-    logfile_path = log_dir / "plotall.log"
-    # just testing for now - logfile_path should be dynamic user input,
-    # i.e. slurm job number or something
-
-    # Set logger name to the script name for clarity in logs
-    script_name = Path(__file__).stem
-    logger = logging.getLogger(script_name)
+    # Calling logging.getLogger() with no arguments makes sure that
+    # logs bubble up from proceeding scripts in the run.
+    root_logger = logging.getLogger()
 
     if not enabled:
-        logger.disabled = True
-        return logger
+        root_logger.disabled = True
+        return
 
-    logging.basicConfig(
-        # Change this based on what level you want to see
-        # level=logging.DEBUG,
-        level=logger_level,
-    )
+    # Convert level string to upper case
+    console_level = console_level.upper()
+    # Get integer value for ease of finding lowest level
+    console_level_int = getattr(logging, console_level)
+    levels = [console_level_int]
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(
+    if logfile:
+        logfile_level = logfile_level.upper()
+        logfile_level_int = getattr(logging, logfile_level)
+        levels.append(logfile_level_int)
+        # Define/create log directory
+        project_root = Path(__file__).resolve().parent.parent
+        log_dir = project_root / "logs"
+        log_dir.mkdir(exist_ok=True)  # create logs/ dir if it doesn't exist yet
+        logfile_path = log_dir / logfile
+
+    # Set minimum log level for root
+    root_logger.setLevel(min(levels))
+
+    # Console logger setup
+    console = logging.StreamHandler()
+    console.setLevel(console_level_int)
+    console.setFormatter(
         ColoredFormatter("\n%(log_color)s %(levelname)s: %(name)s: %(message)s\n")
     )
-    logger.propagate = (
-        False  # Prevent logs from duplicating when using the colored formatting
-    )
-    logger.addHandler(handler)
+    root_logger.addHandler(console)
 
     # Silence matplotlib debug logs
     logging.getLogger("matplotlib").setLevel(logging.WARNING)
 
-    return logger
+    # File logger setup
+    if logfile:
+        file_handler = logging.FileHandler(logfile_path)
+        file_handler.setLevel(logfile_level_int)
+        file_handler.setFormatter(
+            logging.Formatter("%(levelname)s: %(name)s: %(message)s\n")
+        )
+        root_logger.addHandler(file_handler)
 
-
-# Change this to logging.WARNING or logging.DEBUG to see more logs, or set enabled=False to disable all logging
-logger = setup_logger(logging.DEBUG, enabled=False)
 
 # -----------------------------------------------------------------------------
 # ARGPARSE
@@ -218,13 +231,13 @@ def parse_args():
     # Logger config
     # -------------------------------------------------------------------------
     valid_levels = ["Debug", "Info", "Warning", "Error", "Critical"]
-    parser.add_arument("--console-level", default="Info", choices=valid_levels)
+    parser.add_argument("--console-level", default="Info", choices=valid_levels)
 
     parser.add_argument(
         "--log-file",
         nargs="?",
         default=None,
-        const="plotall.log",
+        const="EarthNow_plotall.log",
         help="Outputs a log file to root_dir/logs/, a directory which will be created if it does not yet exist. Provide an optional filename, or leave blank for default of plotall.log.",
     )
     parser.add_argument("--logfile-level", default="Info", choices=valid_levels)
@@ -406,6 +419,14 @@ def plot_single_pdate(pdate, args, style, map_config):
 
 def main():
     args = parse_args()
+
+    # -------------------------------------------------------------------------
+    # Initialize Logger
+    #  ------------------------------------------------------------------------
+    # Change this to logging.WARNING or logging.DEBUG to see more logs, or set enabled=False to disable all logging
+    logger = setup_logger(
+        args.console - level, args.log - file, args.logfile - level, enabled=False
+    )
 
     # -------------------------------------------------------------------------
     # Map config
