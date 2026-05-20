@@ -12,6 +12,10 @@ from typing import Tuple, List, Dict, Optional
 from functools import lru_cache
 from .registry import register
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @register("geos_cycled_replays")
 class GEOSDataReader:
@@ -117,7 +121,7 @@ class GEOSDataReader:
         pdate: str,
         variables=None,
         var_type="inst",
-        raise_on_missing=False,
+        raise_on_missing=True,
     ):
         """
         Resolve the best available GEOS file.
@@ -139,16 +143,21 @@ class GEOSDataReader:
 
         pdate_dt = parse_date_string(pdate)
         timestamp = pdate_dt.strftime("%Y%m%d_%H%M")
+        logger.info(f"timestamp={timestamp}")
 
         for forecast_dir in self._forecast_dirs(fdate):
+            logger.info(f"Forecast dir: {forecast_dir}")
             if not os.path.isdir(forecast_dir):
+                logger.info(f"{forecast_dir} is not a directory")
                 continue
 
             for collection in self._candidate_collections(var_type=var_type):
                 filename = f"GEOS.{collection}.{timestamp}z.nc4"
                 path = os.path.join(forecast_dir, filename)
+                logger.info(f"\nAbs path: {path}.")
 
                 if not os.path.exists(path):
+                    logger.info(f"{path} does not exist, continue")
                     continue
 
                 if variables is None:
@@ -193,7 +202,7 @@ class GEOSDataReader:
         return path
 
     def read_variable(
-        self, fdate: str, pdate: str, variables, var_type="inst", raise_on_missing=False
+        self, fdate: str, pdate: str, variables, var_type="inst", raise_on_missing=True
     ):
         """
         Read the first available variable from a prioritized list.
@@ -213,6 +222,7 @@ class GEOSDataReader:
         )
 
         # Handle missing file gracefully
+        # Why would you want it to keep going if it doesn't return anything?
         if path is None:
             return None, None, None, None
 
