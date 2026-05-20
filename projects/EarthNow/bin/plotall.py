@@ -492,6 +492,7 @@ def main():
     # -------------------------------------------------------------------------
     # Determine pdates
     # -------------------------------------------------------------------------
+    single = None
     if args.pdate is None:
         # If pdate not provided, plot ALL available times
         pdates = reader.find_available_times(args.fdate)
@@ -499,6 +500,7 @@ def main():
         logger.info(f"Available pdates for fdate {args.fdate}: {pdates}")
     else:
         pdates = [args.pdate]
+        single = "True"
 
     print(f"Processing {len(pdates)} plot times on {args.nproc} CPUs")
 
@@ -515,8 +517,12 @@ def main():
         map_config=map_config,
     )
 
-    with ProcessPoolExecutor(max_workers=args.nproc) as exe:
-        list(exe.map(worker, pdates))
+    # Testing a non-mapped run (if we are doing all PDATES then maybe we reformulate this anyway)
+    if single is not None:
+        worker(pdates[0])
+    else:
+        with ProcessPoolExecutor(max_workers=args.nproc) as exe:
+            list(exe.map(worker, pdates))
 
 
 if __name__ == "__main__":
