@@ -32,7 +32,7 @@ class SimpleNetCDFDataService(object):
 
     def get_coords(self):
 
-        if self.stream.grid != 'lcc':
+        if self.stream.grid != "lcc":
             lats = self.nc.variables["lat"][:]
             lons = self.nc.variables["lon"][:]
             return lats, lons
@@ -79,9 +79,8 @@ class SimpleNetCDFDataService(object):
 
             return data, lats, lons, metadata
 
-
     def resolve_file(self, fdate, pdate, **kwargs):
-        return 'none', 'none', 'none'
+        return "none", "none", "none"
 
 
 DataService = SimpleNetCDFDataService
