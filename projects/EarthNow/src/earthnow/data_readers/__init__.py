@@ -8,5 +8,10 @@ from .registry import DATA_READERS
 from . import geos_cycled_replays
 from . import geos_forward_processing
 from . import gencast_geos_fp
+from . import conus2kmfc
+from . import conus2kmrp
+from . import conus2kmfc_lcc
+from . import conus2kmrp_lcc
+from . import merra2
 
 __all__ = ["DATA_READERS"]
