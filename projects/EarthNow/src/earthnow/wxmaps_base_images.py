@@ -168,6 +168,8 @@ class BaseImageCache:
             print(
                 f"  Original size: {orig_width}x{orig_height} ({orig_pixels:.1f}M pixels)"
             )
+            # Convert to RBGA if in greyscale luminance alpha
+            img = img.convert("RGBA")
 
             # Only downsample if image is larger than target
             if orig_width > target_width:
@@ -192,6 +194,7 @@ class BaseImageCache:
 
         # Cache it
         cls._cache[cache_key] = img_array
+        logger.info(f"Image converted: {img_array.shape}")
 
         return img_array
 
@@ -344,13 +347,6 @@ class BaseImagePlotter:
         # Automatic limb darkening for full disk GEO
         if isinstance(ax.projection, ccrs.Geostationary):
             warped_img = BaseImagePlotter.apply_limb_darkening(warped_img)
-
-        # Fix for greyscale imagery
-        if warped_img.ndim == 3 and warped_img.shape[2] == 2:
-            rgb_array = warped_img[:, :, 0]
-            a_array = warped_img[:, :, 1]
-            warped_img = np.dstack((rgb_array, rgb_array, rgb_array, a_array))
-        logger.info("Img dimension fixed: {warped_img.shape}")
 
         # Plot the transformed image
         # The warped_img array is constructed with row 0 = bottom (target_extent[2])
