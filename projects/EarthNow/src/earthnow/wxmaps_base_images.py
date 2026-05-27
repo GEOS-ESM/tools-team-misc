@@ -12,10 +12,15 @@ from pathlib import Path
 from typing import Optional, Tuple
 from enum import Enum
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class BaseImageType(Enum):
     """Predefined base image types"""
 
+    NATURAL_EARTH_GREY = "natural_earth_grey"
     NATURAL_EARTH_GREYBLUE = "natural_earth_greyblue"
     NATURAL_EARTH_LIGHT = "natural_earth_light"
     GEOCOLOR_LIGHT = "geocolor_light"
@@ -32,6 +37,12 @@ class BaseImageConfig:
 
     # Predefined image paths
     IMAGES = {
+        "natural_earth_grey": {
+            "path": "natural_earth_grey_noice_16200x8100.jpg",
+            "extent": [-180, 180, -90, 90],
+            "description": "Natural Earth Greyscale Blue (no arctic ice)",
+            "projection": "platecarree",
+        },
         "natural_earth_greyblue": {
             "path": "natural_earth_greyblue_noice_16200x8100.jpg",
             "extent": [-180, 180, -90, 90],
@@ -157,6 +168,8 @@ class BaseImageCache:
             print(
                 f"  Original size: {orig_width}x{orig_height} ({orig_pixels:.1f}M pixels)"
             )
+            # Convert to RBGA if in greyscale luminance alpha
+            img = img.convert("RGBA")
 
             # Only downsample if image is larger than target
             if orig_width > target_width:
@@ -181,6 +194,7 @@ class BaseImageCache:
 
         # Cache it
         cls._cache[cache_key] = img_array
+        logger.info(f"Image converted: {img_array.shape}")
 
         return img_array
 
@@ -328,6 +342,7 @@ class BaseImagePlotter:
             fill_value=0,
             flip_source_y=True,  # Flip source from origin='upper' to origin='lower' before interpolation
         )
+        logger.info(f"Image dims: {warped_img.shape}")
 
         # Automatic limb darkening for full disk GEO
         if isinstance(ax.projection, ccrs.Geostationary):
