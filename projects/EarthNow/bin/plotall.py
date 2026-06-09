@@ -155,11 +155,6 @@ def parse_args():
     # -------------------------------------------------------------------------
     # Map features
     # -------------------------------------------------------------------------
-    parser.add_argument(
-        "--boundaries",
-        nargs="+",
-        choices=["coastlines", "countries", "states", "counties", "rivers"],
-    )
     parser.add_argument("--boundaries_color", type=parse_color_arg)
 
     parser.add_argument(
@@ -285,6 +280,7 @@ def return_valid_directory(reader, args):
 # -----------------------------------------------------------------------------
 
 
+# These allow you to override the style in the call but do we even need this?
 def build_style(args):
     style = STYLES[args.style]()
 
@@ -328,7 +324,6 @@ def plot_single_pdate(pdate, args, style, map_config):
     plotter = WxMapPlotter(map_config, resolution=local_args.resolution, style=style)
 
     fig, ax = plotter.create_basemap(
-        boundaries=local_args.boundaries or [],
         feature_resolution=local_args.feature_resolution,
     )
 

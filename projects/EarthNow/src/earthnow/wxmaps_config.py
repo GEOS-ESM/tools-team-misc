@@ -92,23 +92,28 @@ class StyleConfig:
     nws_custom_status: Optional[str] = None  # Single status: 'W', 'A', 'Y', 'S'
     nws_severe_only: bool = False  # Show only tornado and severe thunderstorm warnings
 
-    # Boundary styles
+    # Boundaries
+    coastlines: bool = False
     coastline_color: str = "#333333"
     coastline_width: float = 1.0
     coastline_alpha: float = 1.0
 
+    countries: bool = False
     country_color: str = "#666666"
     country_width: float = 0.6
     country_alpha: float = 0.8
 
+    states: bool = False
     state_color: str = "#999999"
     state_width: float = 0.4
     state_alpha: float = 0.6
 
+    counties: bool = False
     county_color: str = "#CCCCCC"
     county_width: float = 0.2
     county_alpha: float = 0.4
 
+    rivers: bool = False
     river_color: str = "#5AA0D0"
     river_width: float = 0.2
     river_alpha: float = 0.6
@@ -315,6 +320,34 @@ class StyleConfig:
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
             use_gshhs=False,
+        )
+
+    @staticmethod
+    @register_style("helicity")
+    def helicity() -> "StyleConfig":
+        """Style used for 2-5 KM Max Updraft Helicity w Radar Reflectivity Plots"""
+        return StyleConfig(
+            ocean_color="#EEEEEE",
+            land_color="#FFFFFF",
+            coastlines=True,
+            coastline_color="black",
+            coastline_width=0.5,
+            coastline_alpha=0.8,
+            countries=True,
+            country_color="black",
+            country_width=0.5,
+            country_alpha=0.8,
+            states=True,
+            state_color="black",
+            state_width=0.3,
+            state_alpha=0.8,
+            counties=True,
+            show_nws_warnings=True,
+            nws_severe_only=True,
+            show_timestamp=True,
+            show_frame=False,
+            show_gridlines=False,
+            show_title=False,
         )
 
 

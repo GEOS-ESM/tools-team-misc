@@ -27,6 +27,9 @@ from earthnow.wxmaps_config import (
     ResolutionConfig,
     StyleConfig,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # Boundary draw order (bottom → top)
@@ -97,12 +100,24 @@ class WxMapPlotter:
         )
 
     def create_basemap(
-        self, boundaries: Optional[List[str]] = None, feature_resolution: str = "50m"
+        self, feature_resolution: str = "50m"
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
-        if boundaries is None:
-            boundaries = ["coastlines", "countries", "states"]
+        boundaries_list = np.array(
+            ["coastlines", "countries", "states", "counties", "rivers"]
+        )
+        boundaries_bool = np.array(
+            [
+                self.style.coastlines,
+                self.style.countries,
+                self.style.states,
+                self.style.counties,
+                self.style.rivers,
+            ]
+        )
+        boundaries = boundaries_list[boundaries_bool].tolist()
+        logger.info(boundaries)
 
         # Create figure with high DPI
         self.fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
