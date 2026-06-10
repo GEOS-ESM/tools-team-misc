@@ -135,7 +135,7 @@ class StyleConfig:
     title_fontsize: Optional[int] = None  # Auto-scaled if None
 
     # Timestamp
-    show_timestamp: bool = True
+    show_timestamp: bool = False
     timestamp_location: str = "lower left"
     timestamp_fontsize: Optional[int] = None  # Auto-scaled if None
     timestamp_format: str = "detailed"  # 'detailed' or 'simple'
@@ -300,16 +300,11 @@ class StyleConfig:
     def grey_topo() -> "StyleConfig":
         """Testing to create grey topo style"""
         return StyleConfig(
-            # Currently don't have the correct grey_topo base image
-            # so testing using only shapes
-            # Eventually we can put the base image here
-            # use_base_image=True,
-            # base_image_type="natural_earth_greyblue",
-            background_color="white",
-            text_color="black",
+            use_base_image=True,
+            base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
             use_gshhs=False,
-            ocean_color="#E6E6E6",
-            land_color="#FFFFFF",
+            # ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
+            show_timestamp=True,  # Defaults is False now, add it in your style for testing
         )
 
     @staticmethod

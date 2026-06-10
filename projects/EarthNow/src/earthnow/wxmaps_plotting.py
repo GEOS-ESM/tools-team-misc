@@ -1540,7 +1540,7 @@ class WxMapPlotter:
             "dpi": self.dpi,
             "facecolor": self.style.background_color,
             "edgecolor": "none",
-            "bbox_inches": None,
+            "bbox_inches": "tight",
             "pad_inches": 0,
         }
 
