@@ -27,6 +27,7 @@ from earthnow.wxmaps_config import (
     ResolutionConfig,
     StyleConfig,
 )
+from earthnow import paths
 
 # =============================================================================
 # Boundary draw order (bottom → top)
@@ -998,15 +999,15 @@ class WxMapPlotter:
 
         if "maryland" in map_name or "midatlantic" in map_name:
             if "maryland" in map_name:
-                cityfile = "/home/wputman/IDL_BASE/CITIES/all_cities_md.txt"
+                cityfile = paths.city_file("all_cities_md.txt")
                 size_multiplier = 1.5
                 spacing_multiplier = 0.75
             else:
-                cityfile = "/home/wputman/IDL_BASE/CITIES/all_cities.txt"
+                cityfile = paths.city_file("all_cities.txt")
                 size_multiplier = 1.0
                 spacing_multiplier = 1.0
         else:
-            cityfile = "/home/wputman/IDL_BASE/CITIES/world_cities.csv"
+            cityfile = paths.city_file("world_cities.csv")
             size_multiplier = 1.0
             spacing_multiplier = 1.0
 
@@ -1210,15 +1211,15 @@ class WxMapPlotter:
 
         if "maryland" in map_name or "midatlantic" in map_name:
             if "maryland" in map_name:
-                cityfile = "/home/wputman/IDL_BASE/CITIES/all_cities_md.txt"
+                cityfile = paths.city_file("all_cities_md.txt")
                 size_multiplier = 1.5
                 spacing_multiplier = 0.75
             else:
-                cityfile = "/home/wputman/IDL_BASE/CITIES/all_cities.txt"
+                cityfile = paths.city_file("all_cities.txt")
                 size_multiplier = 1.0
                 spacing_multiplier = 1.0
         else:
-            cityfile = "/home/wputman/IDL_BASE/CITIES/world_cities.csv"
+            cityfile = paths.city_file("world_cities.csv")
             size_multiplier = 1.0
             spacing_multiplier = 1.0
 

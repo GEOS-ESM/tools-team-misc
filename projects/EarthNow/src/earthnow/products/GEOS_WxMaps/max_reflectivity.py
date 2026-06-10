@@ -7,6 +7,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -122,7 +123,7 @@ def generate_colorbar():
     """Generate colorbar for max reflectivity"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/max_reflectivity.png"
+    output = paths.colorbar_output("max_reflectivity.png")
     save_colorbar_single(
         REFL_COLORS,
         REFL_LEVELS,

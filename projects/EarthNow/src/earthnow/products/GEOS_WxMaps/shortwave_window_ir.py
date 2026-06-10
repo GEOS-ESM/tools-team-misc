@@ -8,14 +8,13 @@ import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Colormap + levels
 # ------------------------------------------------------------------
 
-COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_3p9micron.txt"
-)
+COLORS = load_color_table(paths.colortable("NESDIS_IR_3p9micron.txt"))
 
 clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
@@ -62,7 +61,7 @@ def generate_colorbar():
     """Generate colorbar for shortwave window IR"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/shortwave_window_ir.png"
+    output = paths.colorbar_output("shortwave_window_ir.png")
     save_colorbar_single(
         COLORS,
         LEVELS,

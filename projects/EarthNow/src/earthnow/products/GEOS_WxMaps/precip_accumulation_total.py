@@ -6,6 +6,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -117,7 +118,7 @@ def generate_colorbar():
     """Generate colorbar for precipitation accumulation"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/precip_accumulation_total.png"
+    output = paths.colorbar_output("precip_accumulation_total.png")
     save_colorbar_single(
         COLORS,
         LEVELS,

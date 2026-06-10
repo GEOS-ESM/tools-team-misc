@@ -8,6 +8,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -433,5 +434,5 @@ def generate_colorbar():
 
     title = "Precipitation Type by Reflectivity\n(1000-500mb Thickness: Blue dashed <=5400m, Red dashed >5400m)"
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/wxmap.png"
+    output = paths.colorbar_output("wxmap.png")
     save_colorbar_grid(specs, output, title=title, grid_shape=(2, 2))

@@ -6,6 +6,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -154,7 +155,7 @@ def generate_colorbar():
     """Generate colorbar for snow accumulation"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/snow_accumulation_total.png"
+    output = paths.colorbar_output("snow_accumulation_total.png")
     save_colorbar_single(
         COLORS, LEVELS, output, label="Total Snow Accumulation (inches)", extend="max"
     )

@@ -9,6 +9,7 @@ from matplotlib.colors import LinearSegmentedColormap, Normalize
 import matplotlib.pyplot as plt
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 import sys
 from earthnow.products.EarthNow.vorticity_heights_500mb import boxcar_smooth_2D
 
@@ -159,9 +160,7 @@ def generate_colorbar():
     """Generate colorbar for 250mb winds/heights"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = (
-        "/discover/nobackup/eibell/EarthNow/colorbars/winds_heights_250mb_EarthNow.png"
-    )
+    output = paths.colorbar_output("winds_heights_250mb_EarthNow.png")
     save_colorbar_single(
         wCOLORS,
         wLEVELS,

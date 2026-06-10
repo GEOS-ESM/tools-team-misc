@@ -10,6 +10,7 @@ from matplotlib import cm
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 from typing import Tuple, Optional
 import datetime
 
@@ -545,7 +546,7 @@ class DaytimeRGB:
 # ------------------------------------------------------------------
 
 COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_10p3micron.txt"
+    paths.colortable("NESDIS_IR_10p3micron.txt")
 )
 
 clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
@@ -573,7 +574,7 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     # Colormap + normalization
     # ------------------------------------------------------------
     COLORS = load_color_table(
-        "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_IR_10p3micron.txt"
+        paths.colortable("NESDIS_IR_10p3micron.txt")
     )
     clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
     LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
@@ -656,7 +657,7 @@ def generate_colorbar():
     # Use representative tick levels instead of all 256
     tick_levels = np.array([-110, -80, -50, -20, 0, 20, 40, 57])
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/longwave_window_ir.png"
+    output = paths.colorbar_output("longwave_window_ir.png")
     save_colorbar_single(
         COLORS,
         LEVELS,

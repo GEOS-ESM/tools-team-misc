@@ -9,6 +9,8 @@ from typing import Tuple, Optional, List, Dict, Any
 import cartopy.crs as ccrs
 import numpy as np
 
+from earthnow import paths
+
 # Create a STYLE registry to import style names
 STYLES = {}
 
@@ -67,7 +69,7 @@ class StyleConfig:
 
     # GSHHS options
     use_gshhs: bool = False
-    gshhs_path: str = "/discover/nobackup/projects/gmao/osse2/GSHHG/v2.3.7"
+    gshhs_path: str = str(paths.GSHHS_DIR)
     gshhs_resolution: str = "h"  # f, h, i, l, c
     gshhs_min_area: float = 1.0  # km^2
     gshhs_max_level: int = 2  # 1=land, 2=land+lakes, 3=+islands, 4=+ponds
@@ -77,9 +79,7 @@ class StyleConfig:
 
     # NWS Warnings options
     show_nws_warnings: bool = False
-    nws_shapefile_base: str = (
-        "/discover/nobackup/projects/gmao/osse2/TSE_staging/SHAPE_FILES/ALL"
-    )
+    nws_shapefile_base: str = str(paths.NWS_SHAPEFILE_DIR)
     nws_warning_types: Optional[List[Tuple[str, str]]] = (
         None  # List of (type, status) tuples: [('TO', 'W'), ('SV', 'W')]
     )

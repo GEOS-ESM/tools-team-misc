@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Tuple, List, Dict, Optional
 from functools import lru_cache
 from .registry import register
+from earthnow import paths
 
 
 @register("geos_cycled_replays")
@@ -27,16 +28,14 @@ class GEOSDataReader:
     ACCUM_COLLECTION = "tavg1_2d_flx_Nx"
     PRES_COLLECTION = "geosgcm_fcst"
 
-    LCC_GRID_FILE = (
-        "/discover/nobackup/projects/gmao/osse2/" "stage/BCS_FILES/lambert_grid.nc4"
-    )
+    LCC_GRID_FILE = paths.LCC_GRID_FILE
 
     # ------------------------------------------------------------------
     # Initialization
     # ------------------------------------------------------------------
     def __init__(
         self,
-        exp_path="/discover/nobackup/projects/gmao/osse2/HWT",
+        exp_path=paths.DEFAULT_HWT_EXP_PATH,
         exp_res="CONUS02KM",
         exp_id="Feature-c2160_L137",
         collection=None,

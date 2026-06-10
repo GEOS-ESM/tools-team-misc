@@ -13,6 +13,7 @@ import cartopy.crs as ccrs  # ADD THIS LINE
 import numpy as np
 
 from earthnow.wxmaps_config import WxMapsConfig, StyleConfig, STYLES
+from earthnow import paths
 from earthnow.wxmaps_plotting import WxMapPlotter
 from earthnow.wxmaps_utils import (
     get_output_filepath,
@@ -128,7 +129,7 @@ def parse_args():
     # -------------------------------------------------------------------------
     parser.add_argument(
         "--exp-path",
-        default="/discover/nobackup/projects/gmao/osse2/HWT",
+        default=paths.DEFAULT_HWT_EXP_PATH,
         help="Experiment path (for cycled replays)",
     )
     parser.add_argument(
@@ -146,12 +147,12 @@ def parse_args():
     # Forward Processing specific
     parser.add_argument(
         "--fp-base-path",
-        default="/discover/nobackup/projects/gmao/gmao_ops/pub",
+        default=paths.DEFAULT_GEOS_FP_BASE,
         help="Base path for Forward Processing data",
     )
 
     parser.add_argument(
-        "--base-path", default="/discover/nobackup/projects/gmao/g6dev/pub/WxMaps"
+        "--base-path", default=paths._G6DEV_PUB / "WxMaps"
     )
 
     parser.add_argument(
@@ -198,7 +199,7 @@ def parse_args():
     parser.add_argument("--show-nws-warnings", action="store_true")
     parser.add_argument(
         "--nws-shapefile-base",
-        default="/discover/nobackup/projects/gmao/osse2/TSE_staging/SHAPE_FILES/ALL",
+        default=paths.NWS_SHAPEFILE_DIR,
     )
 
     # -------------------------------------------------------------------------

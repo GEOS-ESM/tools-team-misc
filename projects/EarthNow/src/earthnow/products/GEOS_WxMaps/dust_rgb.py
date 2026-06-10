@@ -7,6 +7,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Main product function
@@ -138,7 +139,7 @@ def generate_colorbar():
     # Use representative tick levels instead of all 256
     tick_levels = np.array([-110, -80, -50, -20, 0, 20, 40, 57])
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/dust_rgb.png"
+    output = paths.colorbar_output("dust_rgb.png")
     save_colorbar_single(
         COLORS,
         LEVELS,

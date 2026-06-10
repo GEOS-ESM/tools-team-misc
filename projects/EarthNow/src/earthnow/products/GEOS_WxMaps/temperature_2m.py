@@ -6,6 +6,7 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -131,9 +132,7 @@ def generate_colorbar():
     """Generate colorbar for 2m temperature"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = (
-        "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/temperature_2m.png"
-    )
+    output = paths.colorbar_output("temperature_2m.png")
     save_colorbar_single(
         COLORS, LEVELS, output, label="2-Meter Temperature (°F)", extend="both"
     )

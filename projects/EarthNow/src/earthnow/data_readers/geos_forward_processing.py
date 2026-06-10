@@ -13,6 +13,7 @@ from netCDF4 import Dataset
 import numpy as np
 
 from .registry import register
+from earthnow import paths
 
 
 @register("geos_forward_processing")
@@ -35,7 +36,7 @@ class GEOSForwardProcessingReader:
 
     def __init__(
         self,
-        base_path="/discover/nobackup/projects/gmao/gmao_ops/pub",
+        base_path=paths.DEFAULT_GEOS_FP_BASE,
         exp_id="f5295_fp",
         collection=None,
         target_resolution="0.25deg",
