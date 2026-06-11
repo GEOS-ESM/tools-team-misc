@@ -209,7 +209,7 @@ class WxMapPlotter:
                 print("  Adding US State dept country borders")
                 self.ax.add_feature(countries_feature)
 
-            except:
+            except Exception:
                 print("  Adding Cartopy country borders")
                 self.ax.add_feature(
                     cfeature.BORDERS.with_scale(feature_resolution),
@@ -241,7 +241,7 @@ class WxMapPlotter:
                 print("  Adding US Census state borders")
                 self.ax.add_feature(states_feature)
 
-            except:
+            except Exception:
                 print("  Adding Cartopy state borders")
                 self.ax.add_feature(
                     cfeature.STATES.with_scale(feature_resolution),
@@ -273,7 +273,7 @@ class WxMapPlotter:
                 )
                 self.ax.add_feature(counties_feature)
 
-            except:
+            except Exception:
                 print("Warning: Could not load county boundaries")
 
         if "rivers" in boundaries:
@@ -941,7 +941,7 @@ class WxMapPlotter:
         valid_time : datetime
             Valid time for warnings
         """
-        # turn of nws warnings for "global"
+        # turn off nws warnings for "global"
         if not self.style.show_nws_warnings or self.config.name == "global":
             return
 
