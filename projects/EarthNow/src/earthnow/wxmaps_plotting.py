@@ -101,7 +101,7 @@ class WxMapPlotter:
         )
 
     def create_basemap(
-        self, feature_resolution: str = "50m"
+        self, boundaries: Optional[list[str]] = None, feature_resolution: str = "50m"
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
@@ -110,7 +110,9 @@ class WxMapPlotter:
             boundaries = []
         else:
             boundaries = self.style.boundaries
-        logger.info(boundaries)
+        logger.debug(
+            f"Boundaries plotting: {boundaries}\nNote that boundaries defined in style may be overridden by runtime args or optional function call"
+        )
 
         # Create figure with high DPI
         self.fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
