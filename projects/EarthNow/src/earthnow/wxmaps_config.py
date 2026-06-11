@@ -105,7 +105,7 @@ class StyleConfig:
     state_width: float = 0.4
     state_alpha: float = 0.6
 
-    county_color: str = "#CCCCCC"
+    county_color: str = "#B0B0B0"
     county_width: float = 0.2
     county_alpha: float = 0.4
 
@@ -315,6 +315,22 @@ class StyleConfig:
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
             use_gshhs=False,
+        )
+
+    @staticmethod
+    @register_style("helicity")
+    def helicity() -> "StyleConfig":
+        """Style used for 2-5 KM Max Updraft Helicity w Radar Reflectivity Plots"""
+        return StyleConfig(
+            boundaries=["coastlines", "countries", "states", "counties"],
+            ocean_color="#c8c8c8",
+            land_color="#FFFFFF",
+            coastline_width=0.4,
+            country_color="#333333",
+            state_color="#333333",
+            show_nws_warnings=True,
+            nws_severe_only=True,
+            show_timestamp=True,  # Take this out once finished
         )
 
 
