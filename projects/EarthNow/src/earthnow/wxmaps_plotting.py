@@ -183,27 +183,72 @@ class WxMapPlotter:
                 zorder=6,
             )
 
+        # US gov compliant shape files
+        shapefiles_path = "/discover/nobackup/hzafar/boundary_files/"
         if "countries" in boundaries:
-            print("  Adding Cartopy country borders")
-            self.ax.add_feature(
-                cfeature.BORDERS.with_scale(feature_resolution),
-                linewidth=self.style.country_width,
-                edgecolor=self.style.country_color,
-                alpha=self.style.country_alpha,
-                facecolor="none",
-                zorder=5,
-            )
+            try:
+                from cartopy.io.shapereader import Reader
+                from cartopy.feature import ShapelyFeature
+
+                countries_path = (
+                    shapefiles_path
+                    + "state_dep_files/data/DoS_LSIB_v11_4_24Feb2025.shp"
+                )
+                countries_feature = ShapelyFeature(
+                    Reader(countries_path).geometries(),
+                    crs=ccrs.PlateCarree(),
+                    linewidth=self.style.country_width,
+                    edgecolor=self.style.country_color,
+                    alpha=self.style.country_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
+
+                print("  Adding US State dept country borders")
+                self.ax.add_feature(countries_feature)
+
+            except:
+                print("  Adding Cartopy country borders")
+                self.ax.add_feature(
+                    cfeature.BORDERS.with_scale(feature_resolution),
+                    linewidth=self.style.country_width,
+                    edgecolor=self.style.country_color,
+                    alpha=self.style.country_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
 
         if "states" in boundaries:
-            print("  Adding Cartopy state borders")
-            self.ax.add_feature(
-                cfeature.STATES.with_scale(feature_resolution),
-                linewidth=self.style.state_width,
-                edgecolor=self.style.state_color,
-                alpha=self.style.state_alpha,
-                facecolor="none",
-                zorder=5,
-            )
+            try:
+                from cartopy.io.shapereader import Reader
+                from cartopy.feature import ShapelyFeature
+
+                states_path = (
+                    shapefiles_path + "US_census_files/cb_2018_us_state_5m.shp"
+                )
+                states_feature = ShapelyFeature(
+                    Reader(states_path).geometries(),
+                    crs=ccrs.PlateCarree(),
+                    linewidth=self.style.state_width,
+                    edgecolor=self.style.state_color,
+                    alpha=self.style.state_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
+
+                print("  Adding US Census state borders")
+                self.ax.add_feature(states_feature)
+
+            except:
+                print("  Adding Cartopy state borders")
+                self.ax.add_feature(
+                    cfeature.STATES.with_scale(feature_resolution),
+                    linewidth=self.style.state_width,
+                    edgecolor=self.style.state_color,
+                    alpha=self.style.state_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
 
         if "counties" in boundaries:
             # Counties require additional Natural Earth data
@@ -211,10 +256,21 @@ class WxMapPlotter:
                 from cartopy.io.shapereader import Reader
                 from cartopy.feature import ShapelyFeature
 
-                # This would need the counties shapefile
-                print(
-                    "Warning: County boundaries require additional Natural Earth data"
+                print("  Adding US Census counties")
+                counties_path = (
+                    shapefiles_path + "US_census_files/cb_2018_us_county_5m.shp"
                 )
+                counties_feature = ShapelyFeature(
+                    Reader(counties_path).geometries(),
+                    crs=ccrs.PlateCarree(),
+                    linewidth=self.style.county_width,
+                    edgecolor=self.style.county_color,
+                    alpha=self.style.county_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
+                self.ax.add_feature(counties_feature)
+
             except:
                 print("Warning: Could not load county boundaries")
 
