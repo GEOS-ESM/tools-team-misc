@@ -17,6 +17,7 @@ usage() {
   echo "Optional arguments:"
   echo "  -p, --pdate: Frame time as YYYYMMDD_HHHHz (Required if Mode is 'single')"
   echo "  -l, --logger-opt: Logger option (e.g., DEBUG, INFO)"
+  echo "  -b, --boundaries: List of boundaries to plot"
   echo "  -h, --help: Display this help message"
   exit 1
 }
@@ -47,6 +48,15 @@ while [[ "$#" -gt 0 ]]; do
     -l|--logger-opt)
       LOGGER="$2"
       shift 2
+      ;;
+    -b|--boundaries)
+      BOUNDARIES_LIST=()
+      # Check if a list follows, then loop to grab everything until the next flag
+      shift
+      while [[ $# -gt 0 && ! "$1" =~ ^- ]]; do
+        BOUNDARIES_LIST+=("$1")
+        shift
+      done
       ;;
     -h|--help)
       usage
@@ -124,6 +134,10 @@ fi
 
 if [[ -n "$LOGGER" ]]; then
   PYTHON_CMD+=(--logger "$LOGGER")
+fi
+
+if [[ -n "$BOUNDARIES_LIST" ]]; then
+  PYTHON_CMD+=(--boundaries "${BOUNDARIES_LIST[@]}")
 fi
 
 # 3. Execute the array

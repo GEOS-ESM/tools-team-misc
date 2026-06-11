@@ -28,6 +28,9 @@ from earthnow.wxmaps_config import (
     StyleConfig,
 )
 from earthnow import paths
+import logging
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # Boundary draw order (bottom → top)
@@ -98,12 +101,16 @@ class WxMapPlotter:
         )
 
     def create_basemap(
-        self, boundaries: Optional[List[str]] = None, feature_resolution: str = "50m"
+        self, feature_resolution: str = "50m"
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
-        if boundaries is None:
-            boundaries = ["coastlines", "countries", "states"]
+        # Turn off boundaries for all global views
+        if self.config.name == "global":
+            boundaries = []
+        else:
+            boundaries = self.style.boundaries
+        logger.info(boundaries)
 
         # Create figure with high DPI
         self.fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
@@ -876,7 +883,8 @@ class WxMapPlotter:
         valid_time : datetime
             Valid time for warnings
         """
-        if not self.style.show_nws_warnings:
+        # turn of nws warnings for "global"
+        if not self.style.show_nws_warnings or self.config.name == "global":
             return
 
         try:

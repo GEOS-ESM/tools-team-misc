@@ -4,7 +4,7 @@ Defines standard projections, extents, and map parameters for weather visualizat
 with support for HD, 4K, and 8K resolutions at 16:9 aspect ratio
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Tuple, Optional, List, Dict, Any
 import cartopy.crs as ccrs
 import numpy as np
@@ -92,7 +92,7 @@ class StyleConfig:
     nws_custom_status: Optional[str] = None  # Single status: 'W', 'A', 'Y', 'S'
     nws_severe_only: bool = False  # Show only tornado and severe thunderstorm warnings
 
-    # Boundary styles
+    boundaries: list[str] = field(default_factory=list)  # Defaults to empty I think
     coastline_color: str = "#333333"
     coastline_width: float = 1.0
     coastline_alpha: float = 1.0
