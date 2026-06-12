@@ -15,21 +15,20 @@ from earthnow.products.registry import register
 REFL_COLORS = (
     np.array(
         [
-            [0, 224, 227],  # Light cyan
-            [0, 141, 243],  # Blue
-            [0, 12, 243],  # Dark blue
-            [0, 239, 8],  # Bright green
-            [0, 183, 0],  # Green
-            [0, 123, 0],  # Dark green
-            [255, 246, 0],  # Yellow
-            [228, 173, 0],  # Gold
-            [255, 129, 0],  # Orange
-            [255, 0, 0],  # Red
-            [209, 0, 0],  # Dark red
-            [180, 0, 0],  # Darker red
-            [249, 7, 253],  # Magenta
-            [133, 67, 186],  # Purple
-            [245, 245, 245],  # White
+            [108, 237, 239],
+            [50, 129, 246],
+            [0, 33, 245],
+            [117, 250, 76],
+            [86, 187, 55],
+            [55, 125, 34],
+            [255, 253, 84],
+            [246, 192, 66],
+            [239, 134, 51],
+            [234, 57, 36],
+            [175, 35, 24],
+            [117, 20, 12],
+            [230, 61, 244],
+            [134, 106, 198],
         ]
     )
     / 255.0
@@ -43,7 +42,7 @@ REFL_LEVELS = np.arange(5.0, 80.0, 5.0)  # 5–75 dBZ
 # ------------------------------------------------------------------
 
 
-@register("max_reflectivity")
+@register("max_reflectivity_EarthNow")
 def plot_max_reflectivity(fig, ax, plotter, reader, args):
     """
     Plot maximum composite radar reflectivity (dBZ)
@@ -56,15 +55,17 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
     data = data.astype(np.float32)
 
     # Mask invalid reflectivity
-    data = np.ma.masked_where(data < 0.0, data)
-    data = np.ma.masked_where(data > 80.0, data)
+    data = np.ma.masked_where(data < REFL_LEVELS[0], data)
+    data = np.ma.masked_where(data > REFL_LEVELS[-1], data)
 
     # ------------------------------------------------------------
     # Report data resolution
     # ------------------------------------------------------------
     data_shape = data.shape
-    print(f"Data resolution: {data_shape[0]} x {data_shape[1]} (height x width)")
-    print(f"  Total data points: {data_shape[0] * data_shape[1]:,}")
+    print(
+        f"Reflectivity data resolution: {data_shape[0]} x {data_shape[1]} (height x width)"
+    )
+    print(f"  Reflectivity total data points: {data_shape[0] * data_shape[1]:,}")
 
     # Calculate approximate grid spacing
     if lons.ndim == 1 and lats.ndim == 1:
@@ -87,6 +88,7 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
+    # Plot Radar Reflectivity
     ax.pcolormesh(
         lons,
         lats,
