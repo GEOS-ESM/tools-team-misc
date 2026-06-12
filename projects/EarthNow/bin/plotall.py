@@ -143,9 +143,7 @@ def parse_args():
         help="Base path for Forward Processing data",
     )
 
-    parser.add_argument(
-        "--base-path", default=paths._G6DEV_PUB / "WxMaps"
-    )
+    parser.add_argument("--base-path", default=paths._G6DEV_PUB / "WxMaps")
 
     parser.add_argument(
         "--resolution", choices=["hd", "fhd", "2k", "4k", "8k"], default="4k"

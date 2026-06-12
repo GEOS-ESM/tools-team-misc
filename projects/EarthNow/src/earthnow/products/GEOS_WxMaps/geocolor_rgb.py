@@ -545,9 +545,7 @@ class DaytimeRGB:
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
 
-COLORS = load_color_table(
-    paths.colortable("NESDIS_IR_10p3micron.txt")
-)
+COLORS = load_color_table(paths.colortable("NESDIS_IR_10p3micron.txt"))
 
 clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
@@ -573,9 +571,7 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
-    COLORS = load_color_table(
-        paths.colortable("NESDIS_IR_10p3micron.txt")
-    )
+    COLORS = load_color_table(paths.colortable("NESDIS_IR_10p3micron.txt"))
     clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
     LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
     cmap = cm.get_cmap("gray_r", 256)  # discrete 256 colors
