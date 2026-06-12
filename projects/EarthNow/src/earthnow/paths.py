@@ -18,9 +18,11 @@ CONFIG_DIR = Path(__file__).resolve().parent
 load_dotenv(CONFIG_DIR / ".env")
 
 
-def env_path(name: str, default: str | Path) -> Path:
-    return Path(os.environ.get(name, default))
+def env_check(name: str, default: str | Path) -> str:
+    return str(os.environ.get(name, default))
 
+def env_path(name: str, default: str | Path) -> Path:
+    return Path(env_check(name, default))
 
 # ---------------------------------------------------------------------------
 # DATA URIS
