@@ -28,22 +28,23 @@ def env_path(name: str, default: str | Path) -> Path:
 # DATA URIS
 # ---------------------------------------------------------------------------
 
-MERRA2_URI = env_path(
+# Note - uris are currently not used
+MERRA2_URI = env_check(
     "EARTHNOW_MERRA2_URI",
     "/discover/nobackup/projects/gmao/merra2/data/pub/products/MERRA2_all/Y%Y/M%m/MERRA2.$collection.%Y%m%d.nc4",
 )
 
-CONUS2KMRP_URI = env_path(
+CONUS2KMRP_URI = env_check(
     "EARTHNOW_CONUS2KMRP_URI",
     "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/holding/$collection/%Y%m/Feature-c2160_L137.$collection.%Y%m%d_%H%Mz.nc4",
 )
 
-CONUS2KMFC_URI = env_path(
+CONUS2KMFC_URI = env_check(
     "EARTHNOW_CONUS2KMFC_URI",
     "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/forecasts/CYCLED_REPLAY_P10800_C21600_T21600_%%Y%%m%%d_%%Hz/GEOS.$collection.%Y%m%d_%H%Mz.nc4",
 )
 
-GEOS_FP_URI = env_path(
+GEOS_FP_URI = env_check(
     "EARTHNOW_GEOS_FP_URI", "/discover/nobackup/projects/gmao/gmao_ops/pub"
 )
 

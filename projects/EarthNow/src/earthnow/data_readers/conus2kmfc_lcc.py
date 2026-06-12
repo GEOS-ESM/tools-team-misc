@@ -17,7 +17,7 @@ CONUS2KMFC_LCC_VARS = dict(
 )
 
 CONUS2KMFC_LCC = SimpleNamespace(
-    uri=CONUS2KMFC_LCC_COORDS,
+    uri=CONUS2KMFC_LCC_URI,
     description="GEOS_based_on_Feature-c2160_L137",
     type="forecast",
     title="CONUS 2KM Forecast",
