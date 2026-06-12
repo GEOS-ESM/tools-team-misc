@@ -2,8 +2,6 @@ from types import SimpleNamespace
 from .dataservice import DataService
 from .registry import register
 
-# from earthnow import paths
-
 MERRA2_URI = "/discover/nobackup/projects/gmao/merra2/data/pub/products/MERRA2_all/Y%Y/M%m/MERRA2.$collection.%Y%m%d.nc4"
 
 MERRA2_VARS = dict(

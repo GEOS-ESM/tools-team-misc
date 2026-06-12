@@ -2,8 +2,6 @@ from types import SimpleNamespace
 from .dataservice import DataService
 from .registry import register
 
-# from earthnow import paths
-
 CONUS2KMFC_URI = "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/forecasts/CYCLED_REPLAY_P10800_C21600_T21600_%%Y%%m%%d_%%Hz/GEOS.$collection.%Y%m%d_%H%Mz.nc4"
 
 CONUS2KMFC_VARS = dict(

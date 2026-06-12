@@ -2,8 +2,6 @@ from types import SimpleNamespace
 from .dataservice import DataService
 from .registry import register
 
-# from earthnow import paths
-
 CONUS2KMRP_LCC_URI = "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/holding/$collection/%Y%m/Feature-c2160_L137.$collection.%Y%m%d_%H%Mz.nc4"
 
 CONUS2KMRP_LCC_COORDS = (
