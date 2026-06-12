@@ -20,4 +20,13 @@ For more information on how CODEOWNERS works, see the [GitHub documentation on c
 
 ### Git hooks
 
-## Other Tools Project Repos
+## Other Tools-Related Project Repos
+
+* SWELL: [Github](https://github.com/GEOS-ESM/swell) | [Documentation](https://geos-esm.github.io/swell/#/?id=swell-workflow-ecosystem-layout-and-launcher)
+* WxMap: [Github](https://github.com/GEOS-ESM/WxMap) | [Documentation](https://portal.nccs.nasa.gov/datashare/gmao/geos-fp/.internal/WxMap/) | [Config Github](https://github.com/GEOS-ESM/WxMap-Config)
+* MERRA-2 FLUID: [Github](https://github.com/GEOS-ESM/MERRA-2_FLUID)
+* Scorecard: [Github](https://github.com/GEOS-ESM/scorecard)
+* M21C Tools: [Github](https://github.com/GEOS-ESM/m21ctools)
+* JEDI: [Github](https://github.com/GEOS-ESM/jedi_bundle) | [Documentation](https://geos-esm.github.io/jedi_bundle/#/?id=introduction)
+* QuADS [Github](https://github.com/sabin413/quads/tree/main)
+* FLUID: [Gitlab](https://gitlab.nccs.nasa.gov/gmao/fluid_dev) (Login required)
