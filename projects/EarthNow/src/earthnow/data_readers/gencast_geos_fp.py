@@ -12,6 +12,7 @@ from netCDF4 import Dataset
 import numpy as np
 
 from .registry import register
+from earthnow import paths
 
 
 @register("gencast_geos_fp")
@@ -26,7 +27,7 @@ class GenCastGEOSFPReader:
 
     def __init__(
         self,
-        exp_path="/discover/nobackup/projects/gmao/osse2/GenCast_FP",
+        exp_path=paths.DEFAULT_GENCAST_EXP_PATH,
         exp_id="GenCast-f5421_fpp",
         exp_res="100KM",
         ensemble_member="mean",

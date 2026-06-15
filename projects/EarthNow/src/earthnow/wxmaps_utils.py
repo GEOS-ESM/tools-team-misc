@@ -431,7 +431,14 @@ def save_colorbar_grid(
 
 
 def save_colorbar_single(
-    colors, levels, output_path, label="", width=6600, height=600, extend="neither", ticks=None
+    colors,
+    levels,
+    output_path,
+    label="",
+    width=6600,
+    height=600,
+    extend="neither",
+    ticks=None,
 ):
     """
     Generate a single horizontal colorbar PNG.

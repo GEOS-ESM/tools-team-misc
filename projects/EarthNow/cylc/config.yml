@@ -1,5 +1,7 @@
-BASE_PATH: /discover/nobackup/dao_ops/jardizzo/EarthNow/plots
-NPROC: 28
+#BASE_PATH: /discover/nobackup/dao_ops/jardizzo/EarthNow/plots
+#NPROC: 28
+BASE_PATH: /discover/nobackup/$USER/EarthNow/plots
+NPROC: 1
 
 plot_current:
   products: [RainSnow, T2m, Vort500, Wind10m, Wind250]

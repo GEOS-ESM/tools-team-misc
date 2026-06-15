@@ -8,14 +8,13 @@ import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Colormap + levels
 # ------------------------------------------------------------------
 
-COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/ColorBar450Band16_horz.txt"
-)
+COLORS = load_color_table(paths.colortable("ColorBar450Band16_horz.txt"))
 
 clevs = [-87.0, -60, -30, -15, 0, 4, 12, 24]  # Celsius
 LEVELS = np.interp(7 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
@@ -62,7 +61,7 @@ def generate_colorbar():
     """Generate colorbar for CO2 longwave IR"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/co2_longwave_ir.png"
+    output = paths.colorbar_output("co2_longwave_ir.png")
     save_colorbar_single(
         COLORS,
         LEVELS,

@@ -16,6 +16,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from earthnow import paths
+
 
 class BaseImageType(Enum):
     """Predefined base image types"""
@@ -33,7 +35,7 @@ class BaseImageType(Enum):
 class BaseImageConfig:
     """Configuration for base images"""
 
-    BASE_IMAGE_DIR = "/discover/nobackup/projects/gmao/g6dev/pub/BMNG"
+    BASE_IMAGE_DIR = paths.BASE_IMAGE_DIR
 
     # Predefined image paths
     IMAGES = {

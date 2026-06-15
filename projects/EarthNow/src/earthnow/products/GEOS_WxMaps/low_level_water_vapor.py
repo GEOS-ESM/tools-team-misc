@@ -8,14 +8,13 @@ import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Colormap + levels
 # ------------------------------------------------------------------
 
-COLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/NESDIS_WV_7p3micron.txt"
-)
+COLORS = load_color_table(paths.colortable("NESDIS_WV_7p3micron.txt"))
 
 clevs = [-93.0, -54, -30, -18, -5, 7]  # Celcius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
@@ -62,7 +61,7 @@ def generate_colorbar():
     """Generate colorbar for low-level water vapor"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/low_level_water_vapor.png"
+    output = paths.colorbar_output("low_level_water_vapor.png")
     save_colorbar_single(
         COLORS,
         LEVELS,

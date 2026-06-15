@@ -7,15 +7,14 @@ import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 from scipy.ndimage import gaussian_filter
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
 
-vCOLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/idl_colortable_5_reversed.txt"
-)
+vCOLORS = load_color_table(paths.colortable("idl_colortable_5_reversed.txt"))
 
 vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
 
@@ -104,7 +103,7 @@ def generate_colorbar():
     """Generate colorbar for 850mb vorticity/SLP"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/vorticity_slp_850mb.png"
+    output = paths.colorbar_output("vorticity_slp_850mb.png")
     save_colorbar_single(
         vCOLORS,
         vLEVELS,
