@@ -67,26 +67,63 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     logger = logging.getLogger(__name__)
 
     # ========
-    # Reflectivity
+    # Read all variables
     # ========
     # Read from reader (reader decides the collection)
-    data, lats, lons, meta = reader.read_variable(
+    refl, lats, lons, meta = reader.read_variable(
         args.fdate,
         args.pdate,
-        variables=["REFC", "HGT_SFC", "SNOW", "RAIN", "ICE", "TMP_2M"],
+        variables=["REFC"],
+    )
+    phis, lats, lons, meta = reader.read_variable(
+        args.fdate,
+        args.pdate,
+        variables=["HGT_SFC"],
+    )
+    phis = phis / 9.81
+    snow, lats, lons, meta = reader.read_variable(
+        args.fdate,
+        args.pdate,
+        variables=["SNOW"],
+    )
+    rain, lats, lons, meta = reader.read_variable(
+        args.fdate,
+        args.pdate,
+        variables=["RAIN"],
+    )
+    ice, lats, lons, meta = reader.read_variable(
+        args.fdate,
+        args.pdate,
+        variables=["ICE"],
+    )
+    t2m, lats, lons, meta = reader.read_variable(
+        args.fdate,
+        args.pdate,
+        variables=["TMP_2M"],
     )
     logger.debug("variables in data: ", [print(v) for v in data.variables])
     logger.debug("meta :", meta)
 
-    data = data.astype(np.float32)
+    refl = data.astype(np.float32)
 
     # Mask invalid reflectivity
-    data = np.ma.masked_where(data < 0.0, data)
-    data = np.ma.masked_where(data > 80.0, data)
+    refl = np.ma.masked_where(data < 0.0, data)
+    refl = np.ma.masked_where(data > 80.0, data)
     logger.debug("refl min: ", data.min())
     logger.debug("refl max: ", data.max())
     logger.debug("refl mean: ", data.mean())
     # sys.exit()
+
+    # Only keep nonzero snow values where there's snow
+    # and t2m is below freezing
+    # Convert snow kg m-2 s-1 to inches hr-1
+    condition = (snow * 3600.0 / 25.4 > 0) & (t2m <= 276.483)
+    snow[~condition] = 0.0
+
+    # Only keep nonzero ice values where there's ice
+    # and t2m is below freezing
+    condition = (ice * 3600.0 / 25.4 > 0) & (twm <= 276.483)
+    ice[~condition] = 0.0
 
     # ------------------------------------------------------------
     # Report data resolution
