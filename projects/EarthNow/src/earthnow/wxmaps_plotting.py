@@ -27,7 +27,8 @@ from earthnow.wxmaps_config import (
     ResolutionConfig,
     StyleConfig,
 )
-from earthnow import paths
+from earthnow.paths import COUNTRY_BORDERS, STATE_BORDERS_5M, COUNTY_BORDERS_5M
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -185,19 +186,14 @@ class WxMapPlotter:
                 zorder=6,
             )
 
-        # US gov compliant shape files
-        shapefiles_path = "/discover/nobackup/hzafar/boundary_files/"
+        # Using US gov compliant shape files
         if "countries" in boundaries:
             try:
                 from cartopy.io.shapereader import Reader
                 from cartopy.feature import ShapelyFeature
 
-                countries_path = (
-                    shapefiles_path
-                    + "state_dep_files/data/DoS_LSIB_v11_4_24Feb2025.shp"
-                )
                 countries_feature = ShapelyFeature(
-                    Reader(countries_path).geometries(),
+                    Reader(COUNTRY_BORDERS).geometries(),
                     crs=ccrs.PlateCarree(),
                     linewidth=self.style.country_width,
                     edgecolor=self.style.country_color,
@@ -209,6 +205,7 @@ class WxMapPlotter:
                 print("  Adding US State dept country borders")
                 self.ax.add_feature(countries_feature)
 
+            # Fall back to cartopy if fails
             except Exception:
                 print("  Adding Cartopy country borders")
                 self.ax.add_feature(
@@ -229,7 +226,7 @@ class WxMapPlotter:
                     shapefiles_path + "US_census_files/cb_2018_us_state_5m.shp"
                 )
                 states_feature = ShapelyFeature(
-                    Reader(states_path).geometries(),
+                    Reader(STATE_BORDERS_5M).geometries(),
                     crs=ccrs.PlateCarree(),
                     linewidth=self.style.state_width,
                     edgecolor=self.style.state_color,
@@ -241,6 +238,7 @@ class WxMapPlotter:
                 print("  Adding US Census state borders")
                 self.ax.add_feature(states_feature)
 
+            # Fall back to Cartopy if failing
             except Exception:
                 print("  Adding Cartopy state borders")
                 self.ax.add_feature(
@@ -259,11 +257,8 @@ class WxMapPlotter:
                 from cartopy.feature import ShapelyFeature
 
                 print("  Adding US Census counties")
-                counties_path = (
-                    shapefiles_path + "US_census_files/cb_2018_us_county_5m.shp"
-                )
                 counties_feature = ShapelyFeature(
-                    Reader(counties_path).geometries(),
+                    Reader(COUNTY_BORDERS_5M).geometries(),
                     crs=ccrs.PlateCarree(),
                     linewidth=self.style.county_width,
                     edgecolor=self.style.county_color,

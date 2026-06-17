@@ -21,8 +21,10 @@ load_dotenv(CONFIG_DIR / ".env")
 def env_check(name: str, default: str | Path) -> str:
     return str(os.environ.get(name, default))
 
+
 def env_path(name: str, default: str | Path) -> Path:
     return Path(env_check(name, default))
+
 
 # ---------------------------------------------------------------------------
 # DATA URIS
@@ -62,6 +64,10 @@ _GMAO_OPS = env_path(
 )
 _CITIES_DIR = env_path("EARTHNOW_CITIES_DIR", "/home/wputman/IDL_BASE/CITIES")
 
+SHAPEFILES_PATH = env_path(
+    "SHAPEFILES_PATH", "/discover/swdev/gmao-tools/Visualization/shapefiles"
+)
+
 # ---------------------------------------------------------------------------
 # Derived constants
 # ---------------------------------------------------------------------------
@@ -84,6 +90,21 @@ DEFAULT_GENCAST_EXP_PATH = env_path(
     "EARTHNOW_DEFAULT_GENCAST_EXP_PATH", _OSSE2_ROOT / "GenCast_FP"
 )
 DEFAULT_GEOS_FP_BASE = env_path("EARTHNOW_DEFAULT_GEOS_FP_BASE", _GMAO_OPS)
+
+COUNTRY_BORDERS = env_path(
+    "COUNTRY_BORDERS",
+    SHAPEFILES_PATH / "state_dep_files" / "data" / "DoS_LSIB_v11_4_24Feb2025.shp",
+)
+
+STATE_BORDERS_5M = env_path(
+    "COUNTRY_BORDERS",
+    SHAPEFILES_PATH / "US_census_files" / "cb_2018_us_state_5m.shp",
+)
+
+COUNTY_BORDERS_5M = env_path(
+    "COUNTRY_BORDERS",
+    SHAPEFILES_PATH / "US_census_files" / "cb_2018_us_county_5m.shp",
+)
 
 # ---------------------------------------------------------------------------
 # Helper functions
