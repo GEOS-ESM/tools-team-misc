@@ -43,7 +43,7 @@ Accumulated Precip [Rain & Snow]
 `ploteic_winds`
 Near Surface Winds
 - Assignee: Emily
-- Status: Done! 
+- Status: Done!
 
 `ploteic_t2m`
 2-meter Temperature
@@ -52,13 +52,14 @@ Near Surface Winds
 
 `ploteic_cape`
 Convective Available Potential Energy
-- Assignee:
+- Assignee: Hannah
 - Status:
 
 `ploteic_helicity`
 2-5km Helicity and Radar Reflectivity
 - Assignee: Hannah
-- Status:
+- Status: Complete but do not have existing animation to compare (see emails with Bill)
+- Function call: plotall.py --product "max_reflectivity_EarthNow" --style "helicity"
 
 
 ## Composition
@@ -78,6 +79,7 @@ Carbon Aerosol Optical Thickness
 500-mb Vorticity and Heights
 - Assignee:Hannah
 - Status: Done! Except for locating the identical basemap that the IDL code uses.
+- Function call: plotall.py --product "vorticity_heights_500mb_EarthNow"  --style "grey_topo"
 
 `ploteic_wind250`
 250-mb Wind Speed and MSLP
