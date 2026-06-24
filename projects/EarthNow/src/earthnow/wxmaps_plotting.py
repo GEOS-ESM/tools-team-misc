@@ -27,7 +27,11 @@ from earthnow.wxmaps_config import (
     ResolutionConfig,
     StyleConfig,
 )
-from earthnow import paths
+from earthnow.paths import COUNTRY_BORDERS, STATE_BORDERS_5M, COUNTY_BORDERS_5M
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # Boundary draw order (bottom → top)
@@ -98,12 +102,18 @@ class WxMapPlotter:
         )
 
     def create_basemap(
-        self, boundaries: Optional[List[str]] = None, feature_resolution: str = "50m"
+        self, boundaries: Optional[list[str]] = None, feature_resolution: str = "50m"
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
-        if boundaries is None:
-            boundaries = ["coastlines", "countries", "states"]
+        # Turn off boundaries for all global views
+        if self.config.name == "global":
+            boundaries = []
+        else:
+            boundaries = self.style.boundaries
+        logger.debug(
+            f"Boundaries plotting: {boundaries}\nNote that boundaries defined in style may be overridden by runtime args or optional function call"
+        )
 
         # Create figure with high DPI
         self.fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
@@ -176,27 +186,69 @@ class WxMapPlotter:
                 zorder=6,
             )
 
+        # Using US gov compliant shape files
         if "countries" in boundaries:
-            print("  Adding Cartopy country borders")
-            self.ax.add_feature(
-                cfeature.BORDERS.with_scale(feature_resolution),
-                linewidth=self.style.country_width,
-                edgecolor=self.style.country_color,
-                alpha=self.style.country_alpha,
-                facecolor="none",
-                zorder=5,
-            )
+            try:
+                from cartopy.io.shapereader import Reader
+                from cartopy.feature import ShapelyFeature
+
+                countries_feature = ShapelyFeature(
+                    Reader(COUNTRY_BORDERS).geometries(),
+                    crs=ccrs.PlateCarree(),
+                    linewidth=self.style.country_width,
+                    edgecolor=self.style.country_color,
+                    alpha=self.style.country_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
+
+                print("  Adding US State dept country borders")
+                self.ax.add_feature(countries_feature)
+
+            # Fall back to cartopy if fails
+            except Exception:
+                print("  Adding Cartopy country borders")
+                self.ax.add_feature(
+                    cfeature.BORDERS.with_scale(feature_resolution),
+                    linewidth=self.style.country_width,
+                    edgecolor=self.style.country_color,
+                    alpha=self.style.country_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
 
         if "states" in boundaries:
-            print("  Adding Cartopy state borders")
-            self.ax.add_feature(
-                cfeature.STATES.with_scale(feature_resolution),
-                linewidth=self.style.state_width,
-                edgecolor=self.style.state_color,
-                alpha=self.style.state_alpha,
-                facecolor="none",
-                zorder=5,
-            )
+            try:
+                from cartopy.io.shapereader import Reader
+                from cartopy.feature import ShapelyFeature
+
+                states_path = (
+                    shapefiles_path + "US_census_files/cb_2018_us_state_5m.shp"
+                )
+                states_feature = ShapelyFeature(
+                    Reader(STATE_BORDERS_5M).geometries(),
+                    crs=ccrs.PlateCarree(),
+                    linewidth=self.style.state_width,
+                    edgecolor=self.style.state_color,
+                    alpha=self.style.state_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
+
+                print("  Adding US Census state borders")
+                self.ax.add_feature(states_feature)
+
+            # Fall back to Cartopy if failing
+            except Exception:
+                print("  Adding Cartopy state borders")
+                self.ax.add_feature(
+                    cfeature.STATES.with_scale(feature_resolution),
+                    linewidth=self.style.state_width,
+                    edgecolor=self.style.state_color,
+                    alpha=self.style.state_alpha,
+                    facecolor="none",
+                    zorder=5,
+                )
 
         if "counties" in boundaries:
             # Counties require additional Natural Earth data
@@ -204,11 +256,19 @@ class WxMapPlotter:
                 from cartopy.io.shapereader import Reader
                 from cartopy.feature import ShapelyFeature
 
-                # This would need the counties shapefile
-                print(
-                    "Warning: County boundaries require additional Natural Earth data"
+                print("  Adding US Census counties")
+                counties_feature = ShapelyFeature(
+                    Reader(COUNTY_BORDERS_5M).geometries(),
+                    crs=ccrs.PlateCarree(),
+                    linewidth=self.style.county_width,
+                    edgecolor=self.style.county_color,
+                    alpha=self.style.county_alpha,
+                    facecolor="none",
+                    zorder=5,
                 )
-            except:
+                self.ax.add_feature(counties_feature)
+
+            except Exception:
                 print("Warning: Could not load county boundaries")
 
         if "rivers" in boundaries:
@@ -876,7 +936,8 @@ class WxMapPlotter:
         valid_time : datetime
             Valid time for warnings
         """
-        if not self.style.show_nws_warnings:
+        # turn off nws warnings for "global"
+        if not self.style.show_nws_warnings or self.config.name == "global":
             return
 
         try:

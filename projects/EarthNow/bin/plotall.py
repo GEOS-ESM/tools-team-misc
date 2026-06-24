@@ -154,6 +154,7 @@ def parse_args():
     # -------------------------------------------------------------------------
     # Map features
     # -------------------------------------------------------------------------
+    # Left these args still so you can specify if you need
     parser.add_argument(
         "--boundaries",
         nargs="+",
@@ -284,6 +285,7 @@ def return_valid_directory(reader, args):
 # -----------------------------------------------------------------------------
 
 
+# Note that these override the style arguments
 def build_style(args):
     style = STYLES[args.style]()
 
@@ -291,6 +293,9 @@ def build_style(args):
         style.ocean_color = args.ocean_color
     if args.land_color:
         style.land_color = args.land_color
+
+    if args.boundaries:
+        style.boundaries = args.boundaries
 
     if args.boundaries_color:
         style.coastline_color = args.boundaries_color
@@ -327,7 +332,6 @@ def plot_single_pdate(pdate, args, style, map_config):
     plotter = WxMapPlotter(map_config, resolution=local_args.resolution, style=style)
 
     fig, ax = plotter.create_basemap(
-        boundaries=local_args.boundaries or [],
         feature_resolution=local_args.feature_resolution,
     )
 
