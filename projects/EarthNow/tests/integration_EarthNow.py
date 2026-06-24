@@ -31,6 +31,13 @@ def parse_args():
         help="Run only first N products",
     )
     parser.add_argument(
+        "--product",
+        type=str,
+        choices=PRODUCTS.keys(),
+        default=None,
+        help="Run only one product by name",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print commands without executing",
@@ -46,17 +53,19 @@ def main():
 
     # With GEOS_WxMaps import commented out in src/earthnow/products/__init__.py,
     # PRODUCTS should already contain only EarthNow products.
-    earthnow_products = list(PRODUCTS.keys())
+    if args.product:
+        earthnow_products = [args.product]
+    else:
+        earthnow_products = list(PRODUCTS.keys())
+        # If GEOS_WxMaps import is enabled again later, uncomment this filtered line:
+        # earthnow_products = sorted(k for k in PRODUCTS if k.endswith("_EarthNow"))
 
-    # If GEOS_WxMaps import is enabled again later, uncomment this filtered line:
-    # earthnow_products = sorted(k for k in PRODUCTS if k.endswith("_EarthNow"))
+        if args.limit is not None:
+            earthnow_products = earthnow_products[: args.limit]
 
-    if args.limit is not None:
-        earthnow_products = earthnow_products[: args.limit]
-
-    if not earthnow_products:
-        print("No products found to run.")
-        return 2
+        if not earthnow_products:
+            print("No products found to run.")
+            return 2
 
     print(f"Running {len(earthnow_products)} product(s)")
     print(
