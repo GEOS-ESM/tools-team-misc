@@ -16,8 +16,7 @@ from .cfmap_config import dict2df, file_template, FILE_OUTPUT_DIR
 
 ISO_FMT = "%Y-%m-%dT%H:%M:%S"
 FileFormat = Literal["csv", "ascii", "txt", "xlsx", "excel", "json"]
-logger = logging.getLogger("cf_map.file_maker")
-
+logger = logging.getLogger('cf_map.file_maker')
 
 def _parse_time_list(times: Sequence[Union[str, dt.datetime]]) -> List[dt.datetime]:
     """
@@ -38,10 +37,10 @@ def _parse_time_list(times: Sequence[Union[str, dt.datetime]]) -> List[dt.dateti
             out.append(dt.datetime.strptime(s, ISO_FMT))
     return out
 
-
-def is_fill(x, fill):
+def is_fill(x,fill):
     return isinstance(x, (float, int)) and math.isclose(x, fill, rel_tol=1e-6)
 
+    
 
 class CFFile:
     """
@@ -63,9 +62,7 @@ class CFFile:
         Base output directory; defaults to FILE_OUTPUT_DIR.
     """
 
-    def __init__(
-        self, data: Mapping[str, Any], products: Sequence[str] | str, **kwargs: Any
-    ) -> None:
+    def __init__(self, data: Mapping[str, Any], products: Sequence[str]|str, **kwargs: Any) -> None:
         if isinstance(products, str):
             products = [products]
         # Required components
@@ -74,26 +71,22 @@ class CFFile:
         self.time: List[Union[str, dt.datetime]] = list(data.get("time", []))
 
         if not self.schema or not self.values or not self.time:
-            raise ValueError(
-                "data must include non-empty 'schema', 'values', and 'time'."
-            )
+            raise ValueError("data must include non-empty 'schema', 'values', and 'time'.")
 
         self.dt_list: List[dt.datetime] = _parse_time_list(self.time)
-        if "pm25" in [p.lower() for p in products]:
-            products += ["PM25_RH35_GCC", "PM25_RH35"]
+        if 'pm25' in [p.lower() for p in products]:
+            products += ['PM25_RH35_GCC', 'PM25_RH35']
         self.products: List[str] = [str(p) for p in products]
         self.nan_val: Union[float, str] = kwargs.get("nan", 1.0e15)
 
         # Choose keys to write
         if self.products and self.products[0].upper() == "MET":
-            self.keys: List[str] = list(self.values.keys())
+            self.keys: List[str] = list(self.values.keys()) 
         else:
             prod_lower = {p.lower() for p in self.products}
             self.keys = [k for k in self.values.keys() if str(k).lower() in prod_lower]
         if not self.keys:
-            raise ValueError(
-                f"No matching product keys found in values for {self.products!r}"
-            )
+            raise ValueError(f"No matching product keys found in values for {self.products!r}")
 
         # Build DataFrame
         self.df: pd.DataFrame = dict2df(self.values, self.dt_list, self.keys)
@@ -182,12 +175,8 @@ class CFFile:
             info.description = "Replay of " + ", ".join(self.keys)
         else:
             info.collection = "fcst"
-            info.time = (
-                f'Forecast init time: {self.schema.get("forecast initialization time")}'
-            )
-            info.description = "5-day forecast of hourly values of " + ", ".join(
-                self.keys
-            )
+            info.time = f'Forecast init time: {self.schema.get("forecast initialization time")}'
+            info.description = "5-day forecast of hourly values of " + ", ".join(self.keys)
 
         return info
 
@@ -211,24 +200,22 @@ class CFFile:
             f"FLUID API output for {', '.join(self.info.prods)} at lat: {self.info.lat}, lon: {self.info.lon}",
         ]
         headers = [f"{len(variables)},{len(info_lines) + 1}"] + info_lines
-        fill = self.nan_val
-        fmt_str = "%.1e"
+        fill = self.nan_val               
+        fmt_str = "%.1e"                     
         df_out = self.df.copy()
-        df_out = df_out.map(lambda x: fmt_str % fill if is_fill(x, fill) else x)
+        df_out = df_out.map(lambda x: fmt_str % fill if is_fill(x,fill) else x)
         file_out = self.output_dir / self.filename.format(ext="txt")
         with file_out.open("w", encoding="utf-8") as f:
             for line in headers:
                 f.write(line + "\n")
-            self.df.to_csv(f, header=False, na_rep=str(self.nan_val), float_format=None)
+            self.df.to_csv(f, header=False, na_rep=str(self.nan_val),float_format=None)
         try:
             os.chmod(file_out, 0o664)
         except Exception:
             pass
         return file_out
 
-    def write_slv_xlsx(
-        self, products: Sequence[str], header: Dict[str, Any], writer: pd.ExcelWriter
-    ) -> None:
+    def write_slv_xlsx(self, products: Sequence[str], header: Dict[str, Any], writer: pd.ExcelWriter) -> None:
         """Write single-level (surface) variables into one sheet."""
         header = {**header, "Product": ", ".join(products)}
         title = "Sheet1"
@@ -247,18 +234,14 @@ class CFFile:
         for col_idx, prod in enumerate(products, start=1):
             ws.write(start_row - 1, col_idx, str(self.info.units.get(prod)))
 
-    def write_levs_xlsx(
-        self, product: str, header: Dict[str, Any], writer: pd.ExcelWriter
-    ) -> None:
+    def write_levs_xlsx(self, product: str, header: Dict[str, Any], writer: pd.ExcelWriter) -> None:
         """Write a pressure/levelized variable into its own sheet (lev->columns)."""
         header = {**header, "Product": product, "Units": self.info.units.get(product)}
         title = product
         start_row = len(header) + 2
 
         df_out = self.df[product].unstack(level="lev")  # rows=time, columns=lev
-        df_out.fillna(self.nan_val).to_excel(
-            writer, sheet_name=title, header=True, startrow=start_row
-        )
+        df_out.fillna(self.nan_val).to_excel(writer, sheet_name=title, header=True, startrow=start_row)
 
         ws = writer.sheets[title]
         for i, (k, v) in enumerate(header.items()):
@@ -302,11 +285,7 @@ class CFFile:
                 "description": self.info.description,
             }
         )
-        d_out = {
-            "schema": header,
-            "values": {k: self.values.get(k) for k in self.keys},
-            "time": self.time,
-        }
+        d_out = {"schema": header, "values": {k: self.values.get(k) for k in self.keys}, "time": self.time}
 
         with file_out.open("w", encoding="utf-8") as fp:
             json.dump(d_out, fp, ensure_ascii=False)
@@ -321,32 +300,30 @@ class CFFile:
 # Convenience helpers
 # ---------------------------
 
-
 def infer_inputs(
-    collection: str,
-    dataset: str,
-    products: Sequence[str],
-):
+        collection: str, 
+        dataset: str,
+        products: Sequence[str],
+        ):
     """
     Chooses the internal plot_type to build plotter &
     dataset key used by your plotter.data bundle.
     """
-    if collection in ["assim", "replay", "assimilation"]:
-        plot_type = "replay"
-        ds = "aqc_slv"
-    elif "p23" in dataset or "v72" in dataset:
-        plot_type = "pres"
-        if "v72" in dataset:
-            ds = "chm_v72"
+    if collection in ['assim','replay','assimilation']:
+        plot_type = 'replay'
+        ds = 'aqc_slv'
+    elif 'p23' in dataset or 'v72' in dataset:
+        plot_type = 'pres'
+        if 'v72' in dataset:
+            ds = 'chm_v72'
         else:
-            ds = "chm_p23"
+            ds = 'chm_p23'
     else:
-        plot_type = "surf"
-        ds = "chm_slv"
-    if products[0].lower() == "met":
-        ds = "met_slv"
+        plot_type = 'surf'
+        ds = 'chm_slv'
+    if products[0].lower() == 'met':
+        ds = 'met_slv'
     return plot_type, ds
-
 
 def raw_get_data_file(
     lat: float,
@@ -371,9 +348,7 @@ def raw_get_data_file(
     return get_data_file(data, products, fmt)
 
 
-def get_data_file(
-    data: Mapping[str, Any], products: Sequence[str], fmt: FileFormat
-) -> Path:
+def get_data_file(data: Mapping[str, Any], products: Sequence[str], fmt: FileFormat) -> Path:
     """
     Build a CFFile from a data bundle and write to the requested format.
     """
@@ -399,3 +374,4 @@ def get_data_file(
 
 #     file_out = get_data_file(data, cfg.product, cfg.format)
 #     print(f"Datafile saved to {str(file_out)}")
+

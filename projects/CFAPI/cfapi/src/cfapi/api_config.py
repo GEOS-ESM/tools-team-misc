@@ -7,18 +7,14 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Literal, Mapping, Optional, Tuple, Any
 import yaml
 from cfapi.config import loader
-from .aliases import (
-    Aliases,
-    make_aliases_from_dict,
-    _dedup_keep_order,
-    parse_list_value,
-)
+from .aliases import (Aliases, make_aliases_from_dict,
+                     _dedup_keep_order, parse_list_value)
 
-__all__ = ["CONFIG_DIR", "ROOT", "versionConfig", "ProductAliases"]
+__all__ = ['CONFIG_DIR', 'ROOT', 'versionConfig', 'ProductAliases']
 here = Path(__file__).parent
-CONFIG_DIR = here / "config_files"
+CONFIG_DIR = here / 'config_files'
 ROOT = here.parent
-logger = logging.getLogger("cfapi.api_config")
+_log = logging.getLogger('cfapi')
 
 
 def _dedup_preserve_order(seq: Iterable[str]) -> List[str]:
@@ -30,75 +26,74 @@ def _dedup_preserve_order(seq: Iterable[str]) -> List[str]:
             out.append(x)
     return out
 
-
 class versionConfig:
     def __init__(
-        self,
-        version: Literal["v1", "v2"] = "v2",
-        config_data: Optional[dict] = None,
-        config_params: Optional[dict] = None,
-        config_dir: Optional[Path | str] = None,
-        dataset_key: Optional[str] = None,
-    ):
+            self, 
+            version: Literal['v1','v2'] = 'v2',
+            config_data: Optional[dict] = None,
+            config_params: Optional[dict] = None,
+            config_dir: Optional[Path|str]=None,
+            dataset_key: Optional[str]=None):
         config_dir = config_dir or CONFIG_DIR
-        config_dir = Path(config_dir)
-        self.config_dir = config_dir
+        self.config_dir = Path(config_dir)
+        version = version or 'v2'
         if not config_data:
             config_data = loader.load_yaml("config_data.yml")
         if not config_params:
-            config_params = loader.load_yaml("config_params.yml")
+            config_params = loader.load_yaml(f"config_params_{version}.yml")
 
-        data = self._check_version(config_data, version)
-        params_in = self._check_version(config_params, version)
+        data = self._check_version(config_data,version)
+        params_in = config_params
         if dataset_key and dataset_key in params_in.keys():
             params_in = params_in.get(dataset_key)
-        self.dataset = data.get("dataset", {})
+        self.dataset = data.get('dataset',{})
         self.data = data
-        self.formats = data.get("format", {})
+        self.formats = data.get('format',{})
         self.params_in = params_in
         self.params = self._normalize_params(params_in)
         self.version = version
 
     def _parse_ds_fields(self, ds_dict):
         fields = {}
-        for k, v in ds_dict.items():
-            if k == "basic_fields":
-                basic_d = {f: {"title": f, "fields": [f]} for f in v}
+        for k,v in ds_dict.items():
+            if k == 'basic_fields':
+                basic_d = {f:{'title':f,'fields':[f]} for f in v}
                 fields.update(basic_d)
-            elif k == "default":
-                fields.update({k: v})
+            elif k == 'default':
+                fields.update({k:v})
             else:
-                fields[k] = {"title": v.get("title", k), "fields": v.get("fields", [k])}
+                fields[k] = {'title': v.get('title',k), 'fields': v.get('fields',[k])}
         return fields
-
+    
     def _parse_defs(self, fields):
         defs = {}
-        for k, v in fields.items():
-            defs[k] = {
-                "units": v.get("units", ""),
-                "scaling": v.get("scaling", "1"),
-                "var": v.get("var", k),
-            }
-        return defs
+        for k,v in fields.items():
+            defs[k] = {'units':v.get('units',''),
+                    'scaling': v.get('scaling','1'),
+                    'var': v.get('var',k),
+                    }    
+        return defs    
 
     def _normalize_params(self, params):
         params_norm = {}
-        for k, v in params.items():
-            if k == "fields":
+        for k,v in params.items():
+            if k.startswith('_'):
+                continue
+            elif k == 'fields':
                 params_norm[k] = self._parse_defs(v)
             else:
                 params_norm[k] = self._parse_ds_fields(v)
         return params_norm
 
-    def _check_version(self, config: dict | None, version: str) -> dict:
+    def _check_version(self, config: dict|None, version: str) -> dict:
         if version in config:
             return config.get(version)
         else:
             return config
-
+    
     @property
     def latest_dir(self) -> Path:
-        return Path(self.dataset.get("latest")).resolve()
+        return Path(self.dataset.get('latest')).resolve()
 
     @property
     def base_dir(self) -> Path:
@@ -112,8 +107,7 @@ class ProductAliases(Aliases):
       - expose `opts` (dataset -> list of canonical product names)
       - customize help_suffix() to show per-dataset options
     """
-
-    def __init__(self, products_config: Any, dataset_key: Optional[list | str] = None):
+    def __init__(self, products_config: Any, dataset_key: Optional[list|str]=None):
 
         # keep a reference for later if you want
         self.config = products_config
@@ -126,11 +120,11 @@ class ProductAliases(Aliases):
         groups = list(products_config.tups.values())
         super().__init__(groups=groups)  # builds the LUT
 
-    def get_default(self, ds: str, backup: str = "NO2") -> str:
-        return self.defaults.get(ds, backup)
+    def get_default(self, ds:str, backup: str='NO2') -> str:
+        return self.defaults.get(ds,backup)
 
-    def get_opts(self, ds: str, backup: list = []) -> str:
-        return self.opts.get(ds, backup)
+    def get_opts(self, ds:str, backup: list=[]) -> str:
+        return self.opts.get(ds,backup)
 
     # You can reuse Aliases._info_help; just customize the suffix:
     def help_suffix(self) -> str:
@@ -150,7 +144,6 @@ class ProductAliases(Aliases):
         """Canonical choices limited to a dataset key present in self.opts."""
         return list(self.opts.get(dataset, []))
 
-
 class ProductConfig(versionConfig):
     """
     Build product alias groups from versioned config and an aliases.yml.
@@ -165,19 +158,16 @@ class ProductConfig(versionConfig):
       - to_aliases() -> Aliases               # baseline Aliases
       - to_product_aliases() -> ProductAliases# dataset-aware help + opts
     """
-
     def __init__(
         self,
-        version: Optional[Literal["v1", "v2"]] = None,
+        version: Optional[Literal['v1', 'v2']] = None,
         config_dir: Optional[Path | str] = None,
         dataset_key: Optional[str] = None,
     ):
         config_dir = Path(config_dir or CONFIG_DIR)
         self.version = version
-        version = version or "v2"
-        super().__init__(
-            version=version, config_dir=config_dir, dataset_key=dataset_key
-        )
+        version = version or 'v2'
+        super().__init__(version=version, config_dir=config_dir,dataset_key=dataset_key)
 
         # ---- load alias definitions ----
         aliases_doc: Dict[str, Any] = loader.load_yaml("aliases.yml")
@@ -188,12 +178,10 @@ class ProductConfig(versionConfig):
         self._def_aliases: Dict[str, List[str]] = {
             k: (v or []) for k, v in products_aliases.items() if k != "global_subs"
         }
-        self._global_subs: Dict[str, List[str]] = (
-            products_aliases.get("global_subs", {}) or {}
-        )
+        self._global_subs: Dict[str, List[str]] = products_aliases.get("global_subs", {}) or {}
 
         # ---- pull defaults for datasets ----
-        self.defaults = {k: v.get("default", "NO2") for k, v in self.params.items()}
+        self.defaults = {k:v.get('default', 'NO2') for k,v in self.params.items()}
 
         # ---- derive dataset -> allowed canonicals (opts) without mutation ----
         self.all_opts: Dict[str, List[str]] = self._get_all_allowed(self.params)
@@ -214,46 +202,47 @@ class ProductConfig(versionConfig):
         # sanity checks
         self._validate_alias_integrity()
         self.set_attrs(dataset_key)
-
     # --------------------------
     # Key helpers
     # --------------------------
-    def set_attrs(self, dataset_key: Optional[str] = None):
+    def set_attrs(self, dataset_key: Optional[str]=None):
         if not dataset_key:
             self.opts = self.all_opts
             self.keys = self.all_keys
             self.tups = self.all_tups
             self.groups = self.all_groups
         else:
-            self.opts = {
-                k: v for k, v in self.all_opts.items() if k.startswith(dataset_key)
-            }
+            self.opts = {k:v for k,v in self.all_opts.items() if k.startswith(dataset_key)}
             self.keys = self._set_keys(self.opts)
             self.tups = self._set_tups(self.keys)
             self.groups = self.tups
         self.dataset_keys = list(self.opts.keys())
 
     def _set_keys(self, opts):
-        return _dedup_preserve_order(x for vals in opts.values() for x in vals)
-
+        return _dedup_preserve_order(
+            x for vals in opts.values() for x in vals
+        )
+    
     def _set_tups(self, keys):
-        return {field: self._make_alias_tuple(field) for field in keys}
+        return {
+            field: self._make_alias_tuple(field) for field in keys
+        }
 
     # --------------------------
     # Construction helpers
     # --------------------------
     def _get_all_allowed(self, params: Mapping[str, Any]) -> Dict[str, List[str]]:
         opts = self._get_allowed(params)
-        if self.version in ["v1", "v2"]:
+        if self.version in ['v1','v2']:
             return opts
-        self.version = "universal"
-        v1 = versionConfig("v1", self.config_dir)
+        self.version = 'universal'
+        v1 = versionConfig('v1',self.config_dir)
         optsv1 = self._get_allowed(v1.params)
-        keys = _dedup_preserve_order(list(opts.keys()) + list(optsv1.keys()))
+        keys = _dedup_preserve_order(list(opts.keys())+list(optsv1.keys()))
 
         opts_out = {}
         for key in keys:
-            opts_out[key] = _dedup_preserve_order(opts.get(key) + optsv1.get(key))
+            opts_out[key] = _dedup_preserve_order(opts.get(key)+optsv1.get(key))
         return opts_out
 
     def _get_allowed(self, params: Mapping[str, Any]) -> Dict[str, List[str]]:
@@ -351,34 +340,28 @@ class ProductConfig(versionConfig):
                 elif prev != canon:
                     collisions.append((alias, prev, canon))
         if collisions:
-            details = "; ".join(
-                f"{a!r} -> {p!r} vs {c!r}" for a, p, c in collisions[:5]
-            )
-            raise ValueError(
-                f"Alias collisions detected: {details} (and possibly more)"
-            )
-
+            details = "; ".join(f"{a!r} -> {p!r} vs {c!r}" for a, p, c in collisions[:5])
+            raise ValueError(f"Alias collisions detected: {details} (and possibly more)")
+ 
 
 class apiAliases:
-    def __init__(
-        self, version: Optional[str] = None, config_dir: Optional[str | Path] = None
-    ):
+    def __init__(self, version: Optional[str]=None, config_dir: Optional[str|Path]=None):
         config_dir = Path(config_dir or CONFIG_DIR)
-        data = loader.load_yaml("options.yml")
-        aliases_in = data.get("aliases", {})
+        data = loader.load_yaml('options.yml')
+        aliases_in = data.get('aliases',{})
         self.config_dir = config_dir
-        self.legacy_opts = data.get("options", {})
-        self.DEFAULTS = data.get("defaults")
-        self.COLLECTIONS = make_aliases_from_dict(aliases_in, "collections")
-        self.DATASETS = make_aliases_from_dict(aliases_in, "datasets")
-        self.LEVELS = make_aliases_from_dict(aliases_in, "levels")
-        self.LEGACY_PRODS = make_aliases_from_dict(aliases_in, "legacy_products")
-        self.VERSIONS = make_aliases_from_dict(aliases_in, "versions")
+        self.legacy_opts = data.get('options',{})
+        self.DEFAULTS = data.get('defaults')
+        self.COLLECTIONS = make_aliases_from_dict(aliases_in, 'collections')
+        self.DATASETS = make_aliases_from_dict(aliases_in, 'datasets')
+        self.LEVELS = make_aliases_from_dict(aliases_in, 'levels')
+        self.LEGACY_PRODS = make_aliases_from_dict(aliases_in, 'legacy_products')
+        self.VERSIONS = make_aliases_from_dict(aliases_in, 'versions')
         self.set_version(version)
 
-    def set_version(self, version: Optional[str] = None):
+    def set_version(self,version: Optional[str]=None):
         pconfig = ProductConfig(version=version)
         self.PRODUCTS = pconfig.to_product_aliases()
 
-
+    
 aliases = apiAliases()
