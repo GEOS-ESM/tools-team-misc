@@ -329,7 +329,6 @@ class StyleConfig:
             state_color="#333333",
             show_nws_warnings=True,
             nws_severe_only=True,
-            show_timestamp=True,  # Take this out once finished
         )
 
 
