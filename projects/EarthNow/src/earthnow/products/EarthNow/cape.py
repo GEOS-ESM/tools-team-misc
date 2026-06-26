@@ -114,17 +114,7 @@ def plot_cape(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    plot = ax.pcolormesh(
-        lons,
-        lats,
-        data,
-        cmap=cmap,
-        norm=norm,
-        transform=ccrs.PlateCarree(),
-        shading="nearest",
-        zorder=4,
-        rasterized=True,
-    )
+    plot = ax.contourf(lons, lats, data, cmap=cmap, norm=norm, levels=CAPE_LEVELS)
     # fig.colorbar(plot)  # Confirm plot colorbar matches
 
     generate_colorbar()
@@ -136,8 +126,6 @@ def generate_colorbar():
 
     # Reflectivity colorbar
     refl_output = "/discover/nobackup/hzafar/EarthNow/plots/cape_colorbar.png"
-
-    import numpy as np
 
     save_colorbar_single(
         CAPE_COLORS,
