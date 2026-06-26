@@ -334,6 +334,14 @@ class StyleConfig:
             nws_severe_only=True,
         )
 
+    @staticmethod
+    @register_style("empty")
+    def empty() -> "StyleConfig":
+        return StyleConfig(
+            ocean_color="#808080",
+            land_color="#808080",
+        )
+
 
 @dataclass
 class ResolutionConfig:

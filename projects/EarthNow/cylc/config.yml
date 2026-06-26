@@ -17,7 +17,7 @@ products:
   #   base-path: $BASE_PATH
   T2m:
     product: temperature_2m_EarthNow
-    style: light # Create "Blank" style?
+    style: empty
     driver: "plotall.py"
     base-path: $BASE_PATH
   Vort500:
