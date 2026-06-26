@@ -49,7 +49,6 @@ CAPE_ALPHA = np.ones(CAPE_RGB.shape[0])
 
 CAPE_COLORS = np.column_stack((CAPE_RGB, CAPE_ALPHA))
 
-# CAPE_LEVELS = np.arange(100, 9500 + (225 / 2), 225)  # 100 - 9500 J/kg
 CAPE_LEVELS = np.array(
     [
         100,
@@ -99,8 +98,7 @@ def plot_cape(fig, ax, plotter, reader, args):
     logger.info(f"CAPE min: {data.min()}")
     # breakpoint()
 
-    # TODO: check if data is out of extents -- or just figure out what to do with above and below in cbar
-    # # Mask invalid
+    # Mask values below 100
     data = np.ma.masked_where(data < CAPE_LEVELS[0], data)
     # data = np.ma.masked_where(data > CAPE_LEVELS[-1], data) # Don't mask out above values, will default to top color
 
@@ -127,7 +125,7 @@ def plot_cape(fig, ax, plotter, reader, args):
         zorder=4,
         rasterized=True,
     )
-    fig.colorbar(plot)  # Confirm plot colorbar matches
+    # fig.colorbar(plot)  # Confirm plot colorbar matches
 
     generate_colorbar()
 
