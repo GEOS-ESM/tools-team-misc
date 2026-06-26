@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # ------------------------------------------------------------------
 # CAPE colormap + levels
 # ------------------------------------------------------------------
-CAPE_COLORS = (
+CAPE_RGB = (
     np.array(
         [
             [200, 200, 200],
@@ -39,12 +39,15 @@ CAPE_COLORS = (
             [170, 70, 170],
             [129, 39, 129],
             [90, 10, 90],
+            [50, 10, 60],
         ]
     )
     / 255.0
 )
-# TODO: Need to obtain alpha from original IDL plots to include it
-# Bills alphas for vort: alevs= [99,100], Match this
+CAPE_ALPHA = np.ones(CAPE_RGB.shape[0])
+# NOTE: Alpha values from IDL: alevs= [99,100] - I don't really know what this means I just clipped below 100?
+
+CAPE_COLORS = np.column_stack((CAPE_RGB, CAPE_ALPHA))
 
 # CAPE_LEVELS = np.arange(100, 9500 + (225 / 2), 225)  # 100 - 9500 J/kg
 CAPE_LEVELS = np.array(
@@ -71,7 +74,7 @@ CAPE_LEVELS = np.array(
         8000,
         9000,
         10000,
-        # TODO: Colorbar needs out of range value -- dark, almost black purple
+        11000,
     ]
 )
 
@@ -93,17 +96,22 @@ def plot_cape(fig, ax, plotter, reader, args):
     )
 
     data = data.astype(np.float32)
+    logger.info(f"CAPE min: {data.min()}")
+    # breakpoint()
 
     # TODO: check if data is out of extents -- or just figure out what to do with above and below in cbar
     # # Mask invalid
-    # data = np.ma.masked_where(data < CAPE_LEVELS[0], data)
-    # data = np.ma.masked_where(data > CAPE_LEVELS[-1], data)
+    data = np.ma.masked_where(data < CAPE_LEVELS[0], data)
+    # data = np.ma.masked_where(data > CAPE_LEVELS[-1], data) # Don't mask out above values, will default to top color
+
+    logger.info(f"CAPE min: {data.min()}")
+    logger.info(f"CAPE max: {data.max()}")
 
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
     cmap = ListedColormap(CAPE_COLORS)
-    norm = BoundaryNorm(CAPE_LEVELS, ncolors=cmap.N, clip=True)
+    norm = BoundaryNorm(CAPE_LEVELS, ncolors=cmap.N, clip=False)
 
     # ------------------------------------------------------------
     # Plot field
