@@ -18,3 +18,4 @@ from . import co2_longwave_ir
 from . import longwave_window_ir
 from . import radar_reflectivity
 from . import geocolor_rgb
+from . import radar_reflectivity
