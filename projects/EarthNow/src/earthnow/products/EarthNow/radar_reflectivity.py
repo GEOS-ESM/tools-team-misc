@@ -184,10 +184,30 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     frzr = rain
     frzr[t2m > 273.15] = 0.0
 
+
+    # ========
+    # Reflectivity
+    # ========
+    # Read from reader (reader decides the collection)
+    data, lats, lons, meta = reader.read_variable(
+        args.fdate, args.pdate, variables=["REFC"]
+    )
+
+    data = data.astype(np.float32)
+
+    # Mask invalid reflectivity
+    data = np.ma.masked_where(data < 0.0, data)
+    data = np.ma.masked_where(data > 80.0, data)
+    print("rain refl min: ", data.min())
+    print("rain refl max: ", data.max())
+    print("rain refl mean: ", data.mean())
+    print("meta :", meta)
+    # sys.exit()
+
     # ------------------------------------------------------------
     # Report data resolution
     # ------------------------------------------------------------
-    refl_shape = refl.shape
+    data_shape = data.shape
     #    print(f"Data resolution: {data_shape[0]} x {data_shape[1]} (height x width)")
     #    print(f"  Total data points: {data_shape[0] * data_shape[1]:,}")
     #
