@@ -208,32 +208,14 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     logger.debug("refl min: ", refl.min())
     logger.debug("refl max: ", refl.max())
     logger.debug("refl mean: ", refl.mean())
-    # sys.exit()
 
+    # Colormap + normalization
     # ------------------------------------------------------------
-    # Report data resolution
-    # ------------------------------------------------------------
-    ##data_shape = data.shape
-    #    print(f"Data resolution: {data_shape[0]} x {data_shape[1]} (height x width)")
-    #    print(f"  Total data points: {data_shape[0] * data_shape[1]:,}")
-    #
-    #    # Calculate approximate grid spacing
-    #    if lons.ndim == 1 and lats.ndim == 1:
-    #        lon_spacing = (lons.max() - lons.min()) / (len(lons) - 1)
-    #        lat_spacing = (lats.max() - lats.min()) / (len(lats) - 1)
-    #        print(f"  Grid spacing: {lon_spacing:.4f}° lon x {lat_spacing:.4f}° lat")
-    #    elif lons.ndim == 2 and lats.ndim == 2:
-    #        lon_spacing = np.median(np.diff(lons[0, :]))
-    #        lat_spacing = np.median(np.diff(lats[:, 0]))
-    #        print(
-    #            f"  Grid spacing (median): {lon_spacing:.4f}° lon x {lat_spacing:.4f}° lat"
-    #        )
-
-    # ------------------------------------------------------------
-    # Base Reflectivity
     cmap = ListedColormap(REFL_COLORS)
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
 
+    # ------------------------------------------------------------
+    # Plot rain reflectivity
     ax.pcolormesh(
         lons,
         lats,
