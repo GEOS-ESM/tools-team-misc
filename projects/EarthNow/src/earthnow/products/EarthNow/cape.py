@@ -117,7 +117,7 @@ def plot_cape(fig, ax, plotter, reader, args):
     plot = ax.contourf(lons, lats, data, cmap=cmap, norm=norm, levels=CAPE_LEVELS)
     # fig.colorbar(plot)  # Confirm plot colorbar matches
 
-    generate_colorbar()
+    # generate_colorbar()
 
 
 def generate_colorbar():
