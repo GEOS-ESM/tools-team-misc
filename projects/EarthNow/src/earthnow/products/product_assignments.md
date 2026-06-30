@@ -53,7 +53,8 @@ Near Surface Winds
 `ploteic_cape`
 Convective Available Potential Energy
 - Assignee: Hannah
-- Status:
+- Status: Done
+- Function call: plotall.py --product "cape_EarthNow" --style "greyblue"
 
 `ploteic_helicity`
 2-5km Helicity and Radar Reflectivity
