@@ -6,4 +6,4 @@ install_path=`dirname $bin_path`/src
 
 export PYTHONPATH=${install_path}:${install_path}/wxv/user_themes
 
-python $bin_path/wxvis.py $*
+python $bin_path/run_wxvis.py $*
