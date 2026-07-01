@@ -101,8 +101,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         args.pdate,
         variables=["TMP_2M"],
     )
-    logger.debug("variables in data: ", [print(v) for v in data.variables])
-    logger.debug("meta :", meta)
 
     refl = data.astype(np.float32)
 
