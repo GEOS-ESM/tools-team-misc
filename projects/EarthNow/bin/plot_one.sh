@@ -16,6 +16,7 @@ usage() {
   echo ""
   echo "Optional arguments:"
   echo "  -p, --pdate: Frame time as YYYYMMDD_HHHHz (Required if Mode is 'single')"
+  echo "  -r, --data-reader: Name of reader to use, specific to data stream"
   echo "  -l, --logger-opt: Logger option (e.g., DEBUG, INFO)"
   echo "  -b, --boundaries: List of boundaries to plot"
   echo "  -h, --help: Display this help message"
@@ -24,29 +25,33 @@ usage() {
 
 # Check if we have at least the 5 required arguments
 if [ "$#" -lt 5 ]; then
-  echo "Error: Missing required arguments."
+  echo "!! Error: Missing required arguments."
   usage
 fi
 
 # Assign required positional arguments
-REGION="$1"
+REGION="${1,,}"
 STYLE="$2"
-FDATE="$3"
+FDATE="${3,,}"
 PRODUCT="$4"
-FRAMES="$5"
+FRAMES="${5,,}"
 
 # Shift the first 5 arguments out of the way so we can parse the optionals
 shift 5
 
-# Parse remaining optionall arguments using a while/case loop
+# Parse remaining optional arguments using a while/case loop
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -p|--pdate)
-      PDATE="$2"
+      PDATE="${2,,}"
       shift 2 # Shift past the flag and its value
       ;;
+    -r|--data-reader)
+      READER="${2,,}"
+      shift 2
+      ;;
     -l|--logger-opt)
-      LOGGER="$2"
+      LOGGER="$3"
       shift 2
       ;;
     -b|--boundaries)
@@ -80,8 +85,8 @@ if [[ "$FRAMES" == "single" ]]; then
     fi
 
     # PDATE defines the frame/timestamp
-    if [[ ! $PDATE =~ ^[0-9]{8}_[0-9]{4}z$ ]]; then
-        echo "Error: Invalid PDATE format. Must be YYYYMMDD_HHHHz"
+    if [[ ! $PDATE =~ ^[0-9]{8}_[0-9]{2}z$ ]]; then
+        echo "Error: Invalid PDATE format. Must be YYYYMMDD_HHz"
     exit 1
     fi
 elif [[ "$FRAMES" == "all" ]]; then 
@@ -132,6 +137,10 @@ if [[ -n "$PDATE" ]]; then
   PYTHON_CMD+=(--pdate "$PDATE")
 fi
 
+if [[ -n "$READER" ]]; then
+  PYTHON_CMD+=(--data-reader "$READER")
+fi
+
 if [[ -n "$LOGGER" ]]; then
   PYTHON_CMD+=(--logger "$LOGGER")
 fi
@@ -140,6 +149,7 @@ if [[ -n "$BOUNDARIES_LIST" ]]; then
   PYTHON_CMD+=(--boundaries "${BOUNDARIES_LIST[@]}")
 fi
 
-# 3. Execute the array
+# Execute the array
+# ===================
 echo "Executing: ${PYTHON_CMD[*]}"
 "${PYTHON_CMD[@]}"
