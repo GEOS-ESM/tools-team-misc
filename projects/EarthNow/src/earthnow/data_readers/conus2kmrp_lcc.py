@@ -25,7 +25,7 @@ CONUS2KMRP_LCC = SimpleNamespace(
 )
 
 
-@register("CONUS2KMRP_LCC")
+@register("conus2kmrp_lcc")
 class conus2kmrp_lcc(DataService):
     def __init__(self, **kwargs):
         super().__init__(CONUS2KMRP_LCC)
