@@ -50,6 +50,10 @@ Near Surface Winds
 - Assignee: Sandra
 - Status: Done!
 
+`ploteic_tanom`
+2-meter Temperature Anomaly (1-day running mean)
+- Assignee:
+
 `ploteic_cape`
 Convective Available Potential Energy
 - Assignee: Hannah
@@ -65,7 +69,7 @@ Convective Available Potential Energy
 ## Composition
 `ploteic_aerosols`
 Aerosol Optical Thickness [SS, DU, SU, NI]
-- Assignee: Sandra
+- Assignee: Sandra / Hannah
 - Status:
 
 `ploteic_carbon`
