@@ -20,7 +20,7 @@ CONUS2KMRP = SimpleNamespace(
 )
 
 
-@register("conus2kmrp")
+@register("CONUS2KMRP")
 class conus2kmrp(DataService):
     def __init__(self, **kwargs):
         super().__init__(CONUS2KMRP)

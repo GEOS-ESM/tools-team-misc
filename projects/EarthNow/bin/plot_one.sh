@@ -47,7 +47,7 @@ while [[ "$#" -gt 0 ]]; do
       shift 2 # Shift past the flag and its value
       ;;
     -r|--data-reader)
-      READER="${2,,}"
+      READER=$2
       shift 2
       ;;
     -l|--logger-opt)
