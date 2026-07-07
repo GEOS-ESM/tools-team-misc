@@ -1,0 +1,42 @@
+dset /discover/nobackup/projects/gmao/gmao_ops/pub//f5295_fp//%%ch
+CHSUB $T1 $T2 das/Y%%y4/M%%m2/D%%d2/GEOS.fp.asm.inst3_3d_asm_Nv.%%y4%%m2%%d2_%%h2%%n2.V01.nc4
+CHSUB $T3 $T4 forecast/Y%Y/M%m/D%d/H%H/GEOS.fp.fcst.inst3_3d_asm_Nv.%Y%m%d_%H+%%y4%%m2%%d2_%%h2%%n2.V01.nc4
+OPTIONS template
+title GEOS5 FP 3d assimilated state on native levels
+undef 1e+15
+dtype netcdf
+xdef 1152 linear -180 0.3125
+ydef 721 linear -90 0.25
+zdef 72 levels 1 2 3 4 5 6 7 
+ 8 9 10 11 12 13 14 
+ 15 16 17 18 19 20 21 
+ 22 23 24 25 26 27 28 
+ 29 30 31 32 33 34 35 
+ 36 37 38 39 40 41 42 
+ 43 44 45 46 47 48 49 
+ 50 51 52 53 54 55 56 
+ 57 58 59 60 61 62 63 
+ 64 65 66 67 68 69 70 
+ 71 72 
+tdef $T3 linear $START_DATE 180mn
+vars 19
+EPV=>epv 72 t,z,y,x ertels_potential_vorticity
+U=>u 72 t,z,y,x eastward_wind
+O3=>o3 72 t,z,y,x ozone_mass_mixing_ratio
+V=>v 72 t,z,y,x northward_wind
+T=>t 72 t,z,y,x air_temperature
+RH=>rh 72 t,z,y,x relative_humidity_after_moist
+QL=>ql 72 t,z,y,x mass_fraction_of_cloud_liquid_water
+QR=>qr 72 t,z,y,x mass_fraction_of_falling_rain
+QI=>qi 72 t,z,y,x mass_fraction_of_cloud_ice_water
+PHIS=>phis 0 t,y,x surface geopotential height
+PL=>pl 72 t,z,y,x mid_level_pressure
+OMEGA=>omega 72 t,z,y,x vertical_pressure_velocity
+QV=>qv 72 t,z,y,x specific_humidity
+QS=>qs 72 t,z,y,x mass_fraction_of_falling_snow
+SLP=>slp 0 t,y,x sea_level_pressure
+CLOUD=>cloud 72 t,z,y,x cloud_fraction_for_radiation
+H=>h 72 t,z,y,x mid_layer_heights
+PS=>ps 0 t,y,x surface_pressure
+DELP=>delp 72 t,z,y,x pressure_thickness
+endvars

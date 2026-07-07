@@ -1,0 +1,43 @@
+handlers: 'copy:geosfp'
+model: GEOS
+
+tau_start: 0
+tau_end: 120
+tau_inc: 3
+
+copy:
+
+  machine:
+  login:
+  password:
+  remote_dir: /discover/nobackup/projects/gmao/merra2/data/pub/supplemental/fp_Np/forecast/Y%iy4/M%im2/D%id2/H%ih2
+  local_dir: $WXMODEL_DATA_DIR/GEOS-FP_private/Y%iy4/M%im2/D%id2/H%ih2
+
+  sockets: 4
+
+  inst3:
+
+    tau_start: 0
+    tau_end: 120
+    tau_inc: 3
+
+    remote_files:
+
+      - GEOS.fp.fcst.inst3_3d_aer_Np.%iy4%im2%id2_%ih2+%y4%m2%d2_%h2%n2.V01.nc4
+
+geosfp:
+
+  tasks: 1
+
+  tau_start: 0
+  tau_end: 0
+  tau_inc: 3
+
+  data_dir: $WXMODEL_DATA_DIR/GEOS-FP_private/Y%iy4/M%im2/D%id2/H%ih2
+  input_dir: /discover/nobackup/projects/gmao/merra2/data/pub/supplemental/fp_Np/opendap/fcast
+  output_dir: $WXMODEL_OPENDAP_DIR/GEOS-FP_private
+  dummy_file: $WXMODEL_DATA_DIR/dummy.ctl
+
+  collections:
+
+    - inst3_3d_aer_Np

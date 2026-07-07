@@ -10,6 +10,7 @@ from matplotlib.colors import Normalize, LinearSegmentedColormap
 import matplotlib.pyplot as plt
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 from scipy.ndimage import gaussian_filter
 from matplotlib.colors import LinearSegmentedColormap
 
@@ -118,7 +119,7 @@ def generate_colorbar():
     """Generate colorbar for SLP/winds at 10m"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/winds_10m_EarthNow.png"
+    output = paths.colorbar_output("winds_10m_EarthNow.png")
 
     save_colorbar_single(
         colors_256,

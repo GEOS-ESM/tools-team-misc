@@ -14,29 +14,30 @@ dependencies = [
   "numpy>=1.23",
   "netCDF4>=1.6.0",
   "scipy>=1.10",
-]
-
-[project.optional-dependencies]
-plotting = [
+  "pytz",
+  "pillow>=10",
   "matplotlib>=3.7",
   "cartopy>=0.22",
   "astropy",
   "shapely",
-  "geopandas", #pandas only used with geopandas
-  "pytz",
+  "pandas",
+  "geopandas",
+  "python_dotenv",
+  "wxvis",
 ]
 
-images = [
-  "pillow>=10",
-]
 
+[dependency-groups]
 dev = [
   "pytest>=7",
   "ruff>=0.3",
   "mypy>=1.7",
   "ipykernel>=7.2.0",
-  "xarray>=2026.2.0",
+  "xarray>=2026.2.0", # This is just for testing right now, but move to main dependencies if we transition to xarray reading
   "pre-commit>=4.5.1",
+  "multiprocessing-logging>=0.3.4",
+  "colorlog>=6.10.1",
+  "taskipy>=1.14.1",
 ]
 
 # uv_build file selection (recommended for flat layout repos)
@@ -48,3 +49,10 @@ exclude = [
   "**/.DS_Store",
   "test*.py",
 ]
+
+[tool.uv.sources]
+wxvis = {git = "https://github.com/GEOS-ESM/tools-team-misc.git", branch = "main", subdirectory = "projects/WxVis" }
+
+[tool.taskipy.tasks]
+mytest = "./bin/scratch/plot_one_single_wrapper.sh"
+

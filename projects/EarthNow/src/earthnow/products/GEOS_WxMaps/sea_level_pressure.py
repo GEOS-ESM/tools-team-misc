@@ -8,6 +8,7 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib.pyplot as plt
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 from scipy.ndimage import minimum_filter, gaussian_filter
 
 
@@ -234,7 +235,7 @@ def generate_colorbar():
     """Generate colorbar for SLP"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/sea_level_pressure.png"
+    output = paths.colorbar_output("sea_level_pressure.png")
     save_colorbar_single(
         COLORS,
         LEVELS,

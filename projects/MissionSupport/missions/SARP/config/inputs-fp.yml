@@ -1,0 +1,102 @@
+
+# Directory path to gridded forecast files (NetCDF)
+FC_FILE_PATH: /discover/nobackup/projects/gmao/gmao_ops/pub/fp/forecast/Y%iy4/M%im2/D%id2/H%ih2
+
+# Directory path to gridded forecast control files
+FC_GRID_PATH: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast
+
+collections: &COLLECTIONS
+
+  inst3_2d_met_Nx:
+
+    src: $FC_FILE_PATH
+    min_count: 41
+    vars: [CLDLOW,CLDMID,CLDHGH,PRECTOT,PRECCON,PRECSNO]
+
+    files:
+
+      - "GEOS.fp.fcst.inst3_2d_met_Nx.%iy4%im2%id2_%ih2+*nc4"
+
+  tavg1_2d_slv_Nx:
+
+    src: $FC_FILE_PATH
+    min_count: 123
+    vars: [U2M,V2M,T2M,SLP]
+    offset: 30
+
+    files:
+
+      - "GEOS.fp.fcst.tavg1_2d_slv_Nx.%iy4%im2%id2_%ih2+*nc4"
+
+  inst1_2d_hwl_Nx:
+
+    src: $FC_FILE_PATH
+    min_count: 123
+    vars: [SSEXTTAU,DUEXTTAU,BCEXTTAU,OCEXTTAU,SUEXTTAU,NIEXTTAU, DUSMASS25,SSSMASS25,OCSMASS,BCSMASS,NISMASS25,SO4SMASS,COSC]
+
+    files:
+
+      - "GEOS.fp.fcst.inst1_2d_hwl_Nx.%iy4%im2%id2_%ih2+*nc4"
+
+  inst3_3d_ext_Np:
+
+    src: $FC_FILE_PATH
+    min_count: 41
+    vars: [BCEXT,OCEXT,SSEXT,SUEXT,DUEXT]
+    levs: 950-300
+
+    files:
+
+      - "GEOS.fp.fcst.inst3_3d_ext_Np.%iy4%im2%id2_%ih2+*nc4"
+
+  inst3_3d_aer_Np:
+
+    src: $FC_FILE_PATH
+    min_count: 41
+    vars: [BC,OC,SS,SO4,DU,NI]
+    levs: 950-300
+
+    files:
+
+      - "GEOS.fp.fcst.inst3_3d_aer_Np.%iy4%im2%id2_%ih2+*nc4"
+
+  inst3_3d_chm_Np:
+
+    src: $FC_FILE_PATH
+    min_count: 41
+    vars: [CO,CO2,AIRDENS]
+    levs: 950-300
+
+    files:
+
+      - "GEOS.fp.fcst.inst3_3d_chm_Np.%iy4%im2%id2_%ih2+*nc4"
+
+  inst3_3d_asm_Np:
+
+    src: $FC_FILE_PATH
+    min_count: 41
+    vars: [U,V,RH]
+    levs: 950-300
+
+    files:
+
+      - "GEOS.fp.fcst.inst3_3d_asm_Np.%iy4%im2%id2_%ih2+*nc4"
+
+get_data:
+
+  <<: *COLLECTIONS
+
+  opendap:
+
+    src: $FC_GRID_PATH
+    min_count: 7
+
+    files:
+
+      - $FC_GRID_PATH/inst3_2d_met_Nx/inst3_2d_met_Nx.%iy4%im2%id2_%ih2
+      - $FC_GRID_PATH/tavg1_2d_slv_Nx/tavg1_2d_slv_Nx.%iy4%im2%id2_%ih2
+      - $FC_GRID_PATH/inst1_2d_hwl_Nx/inst1_2d_hwl_Nx.%iy4%im2%id2_%ih2
+      - $FC_GRID_PATH/inst3_3d_ext_Np/inst3_3d_ext_Np.%iy4%im2%id2_%ih2
+      - $FC_GRID_PATH/inst3_3d_aer_Np/inst3_3d_aer_Np.%iy4%im2%id2_%ih2
+      - $FC_GRID_PATH/inst3_3d_chm_Np/inst3_3d_chm_Np.%iy4%im2%id2_%ih2
+      - $FC_GRID_PATH/inst3_3d_asm_Np/inst3_3d_asm_Np.%iy4%im2%id2_%ih2

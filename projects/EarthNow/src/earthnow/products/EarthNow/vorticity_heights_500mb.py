@@ -8,14 +8,13 @@ from matplotlib.colors import BoundaryNorm, ListedColormap
 
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
+from earthnow import paths
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
 
-vCOLORS = load_color_table(
-    "/discover/nobackup/projects/gmao/g6dev/pub/ColorTables/idl_colortable_5_reversed.txt"
-)
+vCOLORS = load_color_table(paths.colortable("idl_colortable_5_reversed.txt"))
 
 vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
 
@@ -171,9 +170,7 @@ def generate_colorbar(colors, levels, ticks):
     """Generate colorbar for 500mb vorticity/heights"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    # NOTE: Temp output location until we determine a central location
-    output = "/discover/nobackup/hzafar/EarthNow/plots/vorticity_heights_500mb.png"
-    # output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/vorticity_heights_500mb.png"
+    output = paths.colorbar_output("vorticity_heights_500mb.png")
     save_colorbar_single(
         colors,
         levels,

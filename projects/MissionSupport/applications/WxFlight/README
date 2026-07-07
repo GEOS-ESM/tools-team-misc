@@ -1,0 +1,3 @@
+wp2traj.py -v -p DC8 test.csv 2024-01-19T8:00:00 2024-01-19T12:00:00 2024-01-19T15:00:00
+
+trj_sampler.py -d 60 -o /discover/nobackup/projects/gmao/asia_aq/pub/flights/2024011900/Seoul_DC8_2024-01-19T12:00:00.nc -v -t csv -I -r sampler.rc test.csv

@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=conus_vort_images
-#SBATCH --output=%x-%j.out
-#SBATCH --error=%x-%j.out
+#SBATCH --output=/discover/nobackup/%u/tools-team-misc/projects/EarthNow/output/%x-%j.out
 #SBATCH --account=s1460
 #SBATCH --constraint=mil
 #SBATCH --nodes=1
@@ -10,6 +9,7 @@
 #SBATCH --time=0:30:00
 #SBATCH --no-requeue
 
-./plot_one.sh conus 20260401 "vorticity_heights_500mb_EarthNow" all
+./plot_one.sh conus grey_topo 20260508_00z "vorticity_heights_500mb_EarthNow" all
+
 
 

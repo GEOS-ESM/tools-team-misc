@@ -1,0 +1,306 @@
+********************************************************************************
+*        Include file for calculation of trajectories (Program FLEXTRA)        *
+*        This file contains a global common block used in FLEXTRA              *
+*                                                                              *
+*        Authors: A. Stohl, G. Wotawa                                          *
+*                                                                              *
+*        1 February 1994                                                       *
+*        Update: December 1998, A. Stohl                                       *
+*                                                                              *
+********************************************************************************
+
+
+C Variables needed for polar stereographic projection
+*****************************************************
+
+      logical xglobal,sglobal,nglobal
+      real switchnorthg,switchsouthg
+
+C     xglobal             T for global fields, F for limited area fields
+C     sglobal             T if domain extends towards south pole
+C     nglobal             T if domain extends towards north pole
+C     switchnorthg,switchsouthg   same as parameters switchnorth,
+C                         switchsouth, but in grid units
+
+      real southpolemap(9),northpolemap(9)
+
+C     southpolemap,northpolemap   define stereographic projections
+C                         at the two poles
+
+
+C Variables needed for nested grids
+***********************************
+
+      integer numbnests
+
+C numbnests    number of nested grids
+
+      character*18 wfnamen(maxnests,numbwfmax)
+      character*18 wfspecn(maxnests,numbwfmax)
+
+C wfnamen      nested wind field names
+C wfspecn      specifications of wind field file, e.g. if on hard 
+C              disc or on tape
+
+
+      integer nxn(maxnests),nyn(maxnests)
+      real dxn(maxnests),dyn(maxnests),xlon0n(maxnests),ylat0n(maxnests)
+
+C nxn,nyn      actual dimensions of nested wind fields in x and y direction
+C dxn,dyn      grid distances in x,y direction for the nested grids
+C xlon0n       geographical longitude of lower left grid point of nested wind fields
+C ylat0n       geographical latitude of lower left grid point of nested wind fields
+
+
+      real uun(0:nxmaxn-1,0:nymaxn-1,nuvzmax,3,maxnests)
+      real vvn(0:nxmaxn-1,0:nymaxn-1,nuvzmax,3,maxnests)
+      real wwn(0:nxmaxn-1,0:nymaxn-1,nwzmax,3,maxnests)
+      real ttn(0:nxmaxn-1,0:nymaxn-1,nuvzmax,3,maxnests)
+      real qqn(0:nxmaxn-1,0:nymaxn-1,nuvzmax,3,maxnests)
+      real pvn(0:nxmaxn-1,0:nymaxn-1,nuvzmax,3,maxnests)
+      real thn(0:nxmaxn-1,0:nymaxn-1,nuvzmax,3,maxnests)
+      real psn(0:nxmaxn-1,0:nymaxn-1,1,3,maxnests)
+      real oron(0:nxmaxn-1,0:nymaxn-1,maxnests)
+
+C uun,vvn,wwn  nested wind data in x,y and z direction
+C psn          nested surface pressure
+C oron [m]     nested orography of the ECMWF model 
+C ttn, qqn     nested temperature and specific humidity
+C pvn, thn     nested potential vorticity and potential temperature
+
+
+      real xresoln(0:maxnests),yresoln(0:maxnests)
+
+C xresoln, yresoln   Factors by which the resolutions in the nests 
+C                    are enhanced compared to mother grid
+
+      real xln(maxnests),yln(maxnests),xrn(maxnests),yrn(maxnests)
+
+C xln,yln,xrn,yrn    Corner points of nested grids in grid coordinates
+C                    of mother grid
+
+
+
+      integer nx,ny,nxfield,nuvz,nwz,nlev_geos
+
+C nx,ny,nuvz,nwz          actual dimensions of wind fields in x,y and z
+C                         direction, respectively
+
+C nxfield                 same as nx for limited area fields,
+C                         but for global fields nx=nxfield+1 
+
+C nuvz is used for u,v components
+C nwz is used for w components (staggered grid)
+C nlev_goes  number of levels GEOS model
+
+      integer inter,interstep,ldim,numbunc,inpolkind,modecet
+
+C inter                   index, if trajectory output with constant time step
+C interstep               time step for trajectory output
+C ldim                    number of steps along the interpolated trajectory
+C numbunc                 number of uncertainty trajectories
+C inpolkind               index for kind of interpolation (spline or linear)
+C modecet                 1 = CET mode switched off, 2 = CET mode switched on
+
+      character*50 runcomment
+
+C runcomment              identification comment for the model run
+
+      real cfl,cflt
+
+C* cfl                    CFL-criterion horizontal and vertical
+C* cflt                   CFL-criterion time
+
+      real distunc
+
+C distunc                 distance (grid units) of uncertainty t. from main one
+
+      integer ldirect
+
+C ldirect                 direction of the trajectories (-1=backward,1=forward)
+
+      integer numpoint
+
+C numpoint                actual number of trajectory starting/ending points
+
+      integer lentra,ibdate,ibtime,iedate,ietime,interv
+
+
+C lentra                  length of trajectory (s)
+C ibdate                  beginning date (YYYYMMDD)
+C ibtime                  beginning time (HHMISS)
+C iedate                  ending date (YYYYMMDD)
+C ietime                  ending time (HHMISS)
+C interv                  interval of trajectory calculation (s)       
+
+      integer len(numpath+2*maxnests)
+
+C len                     length of path names needed for trajectory model
+
+      integer ideltas,nextflight
+
+C ideltas                 length of trajectory loop from beginning to
+C                         ending date (s)
+C nextflight              next time, when initialization of FLIGHT
+C                         trajectories is due (s)
+
+      real epsu,epsv,epsw,relaxtime
+
+C epsu,epsv,epsw          magnitude of the relative random errors that are
+C                         added to the wind components of the ensemble
+C                         uncertainty trajectories at each time step
+C relaxtime               time constant (in units of the wind field interval)
+C                         at which the above errors are relaxed using
+C                         a Langevin equation
+
+
+      integer numbwf,wftime(numbwfmax)
+      character*180 wfname(numbwfmax)
+      character*10 wfspec(numbwfmax)
+
+C numbwf                  actual number of wind fields
+C wftime(numbwfmax) [s]   times relative to beginning time of wind fields
+C wfname(numbwfmax)       file names of wind fields
+C wfspec(numbwfmax)       specifications of wind field file, e.g. if on hard 
+C                         disc or on tape
+
+
+      real akm(nwzmax), bkm(nwzmax)
+      real akz(nuvzmax)  , bkz(nuvzmax)
+
+* akm,bkm: coeffizients which regulate vertical discretization of ecmwf model
+*          (at the border of model layers)
+* akz,bkz: model discretization coeffizients at the centre of the layers
+
+
+      integer memtime(3),memind(3)
+
+C memind     pointer, at which position the wind fields are actually stored
+C            in memory
+C memtime    times of the fields stored in memory
+
+      real uu(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real vv(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real pe(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real delp(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real pm(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real uupol(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real vvpol(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real ww(0:nxmax-1,0:nymax-1,nwzmax,3)
+      real tt(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real qq(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real pv(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real th(0:nxmax-1,0:nymax-1,nuvzmax,3)
+      real ps(0:nxmax-1,0:nymax-1,1,3)
+      real oro(0:nxmax-1,0:nymax-1)
+
+C uu,vv,ww             wind data in x,y and z direction (grid values)
+C uupol,vvpol          horizontal wind transformed onto a polarstereographic grid
+C tt, qq               temperature and specific humidity
+C pv, th               potential vorticity and potential temperature
+C ps                   surface pressure
+C delp                 layer pressure thickness
+C pe                   pressure at layer edges
+C pm                   mid-layer pressure
+C oro [m]              orography of the GEOS model (PHIS/gravity)
+
+      real xpoint(maxtra),ypoint(maxtra),zpoint(maxtra)
+
+C xpoint                  x-coordinates of starting/ending points
+C ypoint                  y-coordinates of starting/ending points
+C zpoint                  z-coordinates of starting/ending points
+
+      real dx,dy,xlon0,ylat0,xthelp,ythelp
+      real uvheight(nuvzmax),wheight(nwzmax),heightmin,heightmax
+
+C dx                      grid distance in x direction
+C dy                      grid distance in y direction
+C uvheight                heights of (u,v) gridpoints
+C wheight                 heights of (w) gridpoints
+C xlon0                   geographical longitude of lower left grid point
+C ylat0                   geographical latitude of lower left grid point
+C heightmin, heightmax    minimum and maximum height of modelling domain
+C xthelp,ythelp           help variables to convert geografical coordinates
+C                         into grid coordinates
+
+      real zdirect
+
+C zdirect                 direction of model levels from bottom to top
+C                         if coordinate of first model level (bottom) is
+C                         less then coordinate of last model level,
+C                         zdirect is set 1. Otherwise, it is set -1
+
+      integer numtra,nttra(maxtra),npoint(maxtra)
+      integer kind(maxtra),kindz(maxtra)
+      real randerroru(maxtra),randerrorv(maxtra),randerrorw(maxtra)
+      integer ittra(maxtra,maxtime),ittraint(maxitime)
+      real xtra(maxtra,maxtime),ytra(maxtra,maxtime),
+     &     ztra(maxtra,maxtime),ptra(maxtra,maxtime),
+     &     htra(maxtra,maxtime),pvtra(maxtra,maxtime),
+     &     thtra(maxtra,maxtime),qqtra(maxtra,maxtime)
+      real xtraint(maxitime),ytraint(maxitime),ztraint(maxitime),
+     +     ptraint(maxitime),htraint(maxitime),pvtraint(maxitime),
+     +     thtraint(maxitime),qqtraint(maxitime)
+
+C numtra                  actual number of trajectories in memory
+C nttra(maxtra)           number of time steps that are already computed
+C npoint(maxtra)          identification of startpoint of trajectory
+C kind(maxtra)            index for kind of trajectories (e.g. isobaric, 3-d,..)
+C randerroru,randerrorv,  Random errors added to the trajectory during
+C randerrorw              last time step
+C kindz(maxtra)           indicates the unit of the z coordinate (1: masl,
+C                         2: magl, 3: hPa)
+C htra,ptra               height in meters and in hPa
+C xtra,ytra,ztra          spatial positions of the trajectories
+C qqtra                   specific humidity along trajectories
+C qqtraint                specific humidity interpolated to constant time step
+C thtra(maxtra,maxtime) [K] potential temperature along trajectory
+C thtraint(maxitime) [K] potential temperature interpolated to constant step
+c pvtra(maxtra,maxtime) [Ks-1hPa-1] potential vorticity along trajectory
+c pvtraint(maxtra,maxtime) [Ks-1hPa-1] potential vorticity interpolated to constant step
+C ittra (maxtra,maxtime) [s] temporal position of the trajectories
+C ittraint(maxitime) [s]  one trajectory interpolated to constant time step
+C xtraint,ytraint,ztraint one trajectory interpolated to constant time step
+
+
+      double precision bdate
+
+C bdate                   beginning date of trajectory loop (julian date)
+
+      character path(numpath+2*maxnests)*180
+
+C path                    path names needed for trajectory model
+
+      character pathnames*180
+
+C pathnames              filename of pathnames file - command line input
+
+      character compoint(maxtra)*45
+
+C compoint                comment - characterization of starting point
+
+      common /global1/
+     +bdate,
+     +nx,ny,nuvz,nwz,numbwf,wftime,inter,interstep,ldim,numbunc,modecet,
+     +inpolkind,ldirect,kind,kindz,lentra,ibdate,ibtime,iedate,ietime,
+     +interv,len,numpoint,ideltas,ittra,ittraint,numtra,nttra,npoint,
+     +memtime,memind,nxfield,nlev_geos,nextflight,
+     +randerroru,randerrorv,randerrorw
+
+      common /global2/
+     +xtra,ytra,ztra,ptra,qqtra,htra,xtraint,ytraint,ztraint,ptraint,
+     +qqtraint,htraint,
+     +cfl,cflt,distunc,akm,bkm,akz,bkz,pvtra,pvtraint,thtra,
+     +thtraint,uu,vv,uupol,vvpol,ww,tt,qq,pv,th,ps,oro,
+     +switchsouthg,switchnorthg,northpolemap,southpolemap,
+     +xpoint,ypoint,zpoint,epsu,epsv,epsw,relaxtime,
+     +dx,dy,uvheight,wheight,heightmin,heightmax,xlon0,ylat0,
+     +xthelp,ythelp,zdirect,xglobal,sglobal,nglobal
+
+      common /global3/
+     +pathnames,path,wfname,wfspec,compoint,runcomment
+
+      common /global4/
+     +numbnests,nxn,nyn,uun,vvn,wwn,ttn,qqn,pvn,thn,psn,oron,
+     +xlon0n,ylat0n,dxn,dyn,xresoln,yresoln,xln,yln,xrn,yrn,
+     +wfnamen,wfspecn

@@ -1,0 +1,10 @@
+WX_PATH: /discover/nobackup/projects/gmao/asia_aq
+WX_FLIGHT_PATH: $WX_PATH/pub/flight_tracks/$WX_MODEL/Y%Y/M%m/D%d/H%H
+#WX_CURTAIN_PATH: /discover/nobackup/dao_ops/jardizzo/ASIA-AQ/curtain/$WX_MODEL/Y%Y/M%m/D%d/H%H
+WX_CURTAIN_PATH: /gpfsm/dnb06/projects/p14/pub/fp/.internal/ASIA-AQ/flight_tracks/$WX_MODEL/%Y%m%d_%H
+
+WX_CURTAIN_FILE: $WX_CURTAIN_PATH/nasa.gmao.flight_track.$aircraft.$stream.$field.0.$airport.%Y-%m-%dT%H:%M:%S.PT000H.png
+
+HANDLERS: 
+  GEOS-FP: curtain_fp
+  GEOS-CF: curtain_cf

@@ -1,0 +1,890 @@
+**********************************************************************
+*                                                                    *
+*                 TRAJECTORY MODEL                                   *
+*                 DEFINITION OF STARTING/ENDING POINTS               *
+*                                                                    *
+*  The first 7 characters of the comment are also used as filenames. *
+*  Therefore, they cannot be blank and they must be different for    *
+*  each starting point.                                              *
+*                                                                    *
+*  Kind of trajectory: 1 = 3 dimensional                             *
+*                      2 = on model layers                           *
+*                      3 = mixing layer                              *
+*                      4 = isobaric                                  *
+*                      5 = isentropic                                *
+*                                                                    *
+**********************************************************************
+*                                                                    *
+*  Unit of z coordinate: 1 = Meters above sea level                  *
+*                        2 = Meters above ground                     *
+*                        3 = Hectopascal                             *
+*                                                                    *
+*  For mixing layer trajectories (kind 3), the z coordinate must be  *
+*  given in m.a.g.l. (option 2)                                      *
+*                                                                    *
+**********************************************************************
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+  500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 1000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0001
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 1500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0002
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 2000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0003
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 2500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0004
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 3000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0005
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 3500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0006
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 4000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0007
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 4500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0008
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 5000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0009
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 5500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0010
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 6000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0011
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 6500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0012
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 7000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0013
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 7500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0014
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 8000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0015
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 8500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0016
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 9000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0017
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+ 9500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0018
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+10000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0019
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+10500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0020
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+11000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0021
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+11500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0022
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  11.1   
+____.____                  f9.4  Longitude [DEG]
+
+  47.5   
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 2         
+ _                         1X,I1, Unit of z coordinate
+
+12000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+1_0023
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+  500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 1000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0001
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 1500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0002
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 2000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0003
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 2500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0004
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 3000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0005
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 3500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0006
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 4000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0007
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 4500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0008
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 5000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0009
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 5500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0010
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 6000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0011
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 6500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0012
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 7000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0013
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 7500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0014
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 8000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0015
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 8500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0016
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 9000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0017
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+ 9500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0018
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+10000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0019
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+10500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0020
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+11000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0021
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+11500.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0022
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -25.20   
+____.____                  f9.4  Longitude [DEG]
+
+  36.97  
+____.____                  f9.4  Latitude [DEG]
+
+ 1
+ _                         1X,I1 Kind of trajectory (see file header)
+
+ 1         
+ _                         1X,I1, Unit of z coordinate
+
+12000.0
+_____.___                  f10.3 z-coordinate (see file header)
+ 
+2_0023
+________________________________________   character*40 comment
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

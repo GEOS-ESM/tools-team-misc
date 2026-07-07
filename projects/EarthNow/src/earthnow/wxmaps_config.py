@@ -4,10 +4,12 @@ Defines standard projections, extents, and map parameters for weather visualizat
 with support for HD, 4K, and 8K resolutions at 16:9 aspect ratio
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Tuple, Optional, List, Dict, Any
 import cartopy.crs as ccrs
 import numpy as np
+
+from earthnow import paths
 
 # Create a STYLE registry to import style names
 STYLES = {}
@@ -67,7 +69,7 @@ class StyleConfig:
 
     # GSHHS options
     use_gshhs: bool = False
-    gshhs_path: str = "/discover/nobackup/projects/gmao/osse2/GSHHG/v2.3.7"
+    gshhs_path: str = str(paths.GSHHS_DIR)
     gshhs_resolution: str = "h"  # f, h, i, l, c
     gshhs_min_area: float = 1.0  # km^2
     gshhs_max_level: int = 2  # 1=land, 2=land+lakes, 3=+islands, 4=+ponds
@@ -77,9 +79,7 @@ class StyleConfig:
 
     # NWS Warnings options
     show_nws_warnings: bool = False
-    nws_shapefile_base: str = (
-        "/discover/nobackup/projects/gmao/osse2/TSE_staging/SHAPE_FILES/ALL"
-    )
+    nws_shapefile_base: str = str(paths.NWS_SHAPEFILE_DIR)
     nws_warning_types: Optional[List[Tuple[str, str]]] = (
         None  # List of (type, status) tuples: [('TO', 'W'), ('SV', 'W')]
     )
@@ -92,7 +92,7 @@ class StyleConfig:
     nws_custom_status: Optional[str] = None  # Single status: 'W', 'A', 'Y', 'S'
     nws_severe_only: bool = False  # Show only tornado and severe thunderstorm warnings
 
-    # Boundary styles
+    boundaries: list[str] = field(default_factory=list)  # Defaults to empty I think
     coastline_color: str = "#333333"
     coastline_width: float = 1.0
     coastline_alpha: float = 1.0
@@ -105,7 +105,7 @@ class StyleConfig:
     state_width: float = 0.4
     state_alpha: float = 0.6
 
-    county_color: str = "#CCCCCC"
+    county_color: str = "#B0B0B0"
     county_width: float = 0.2
     county_alpha: float = 0.4
 
@@ -135,7 +135,7 @@ class StyleConfig:
     title_fontsize: Optional[int] = None  # Auto-scaled if None
 
     # Timestamp
-    show_timestamp: bool = True
+    show_timestamp: bool = False
     timestamp_location: str = "lower left"
     timestamp_fontsize: Optional[int] = None  # Auto-scaled if None
     timestamp_format: str = "detailed"  # 'detailed' or 'simple'
@@ -300,13 +300,37 @@ class StyleConfig:
     def grey_topo() -> "StyleConfig":
         """Testing to create grey topo style"""
         return StyleConfig(
-            # use_base_image=True,
-            # base_image_type="natural_earth_greyblue",
-            background_color="white",
-            text_color="black",
+            use_base_image=True,
+            base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
             use_gshhs=False,
-            ocean_color="#E6E6E6",
+            # ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
+            show_timestamp=True,  # Defaults is False now, add it in your style for testing
+        )
+
+    @staticmethod
+    @register_style("greyblue")
+    def greyblue() -> "StyleConfig":
+        """Simple image-only Natural Earth template"""
+        return StyleConfig(
+            use_base_image=True,
+            base_image_type="natural_earth_greyblue",
+            use_gshhs=False,
+        )
+
+    @staticmethod
+    @register_style("helicity")
+    def helicity() -> "StyleConfig":
+        """Style used for 2-5 KM Max Updraft Helicity w Radar Reflectivity Plots"""
+        return StyleConfig(
+            boundaries=["coastlines", "countries", "states", "counties"],
+            ocean_color="#c8c8c8",
             land_color="#FFFFFF",
+            coastline_width=0.4,
+            country_color="#333333",
+            state_color="#333333",
+            show_nws_warnings=True,
+            nws_severe_only=True,
+            show_timestamp=True,  # Take this out once finished
         )
 
 

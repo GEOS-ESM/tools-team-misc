@@ -8,10 +8,15 @@ fi
 MAPTYPE=$1
 SLURM_JOB_ID=$2
 
+# Set absolute path to work in
+OUTPUT_PATH="/discover/nobackup/$USER/tools-team-misc/projects/EarthNow/output/"
+
 # Access SLURM log file and extract saved image paths to file
-LOG_FILE="${MAPTYPE}_vort_images-${SLURM_JOB_ID}.out"
+LIST_PATH="$OUTPUT_PATH"file_list.txt
+LOG_FILE="$OUTPUT_PATH${MAPTYPE}_vort_images-${SLURM_JOB_ID}.out"
 sync
-grep "Saved: " "$LOG_FILE" | awk '{print $2}' | sort -V | awk '{print "file \x27" $1 "\x27"}' > file_list.txt
+grep "Saved: " "$LOG_FILE" | awk '{print $2}' | sort -V | awk '{print "file \x27" $1 "\x27"}' > "$LIST_PATH"
+
 
 PLOTS_PATH=/discover/nobackup/"$USER"/EarthNow/plots/
 
@@ -19,5 +24,5 @@ OUTPUT_NAME="vorticity_${MAPTYPE}_SLURM-${SLURM_JOB_ID}.mp4"
 OUTPUT=$PLOTS_PATH$OUTPUT_NAME
 
 
-mp4_generator.sh -o "$OUTPUT" file_list.txt
+mp4_generator.sh -o "$OUTPUT" "$LIST_PATH"
 

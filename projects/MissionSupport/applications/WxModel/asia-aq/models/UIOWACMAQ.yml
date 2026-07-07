@@ -1,0 +1,43 @@
+handlers: 'wget:uiowacmaq'
+
+tau_start: 0
+tau_end: 72
+tau_inc: 1
+
+wget:
+
+  url: https://bio.cgrer.uiowa.edu/ASIA-AQ/FLUID/ 
+  remote_dir: '%iy4%im2%id2'
+  local_dir: $WXMODEL_DATA_DIR/UIOWACMAQ/Y%iy4/M%im2/D%id2/H%ih2
+
+  sockets: 4
+
+  tau_start: 0
+  tau_end: 72
+  tau_inc: 1
+
+  remote_files: &FILENAMES
+
+    - uiowa_asiaaq_fcst_%iy4%im2%id2%ih2_%h3.nc
+
+uiowacmaq:
+
+  tasks: 4
+
+  tau_start: 0
+  tau_end: 72
+  tau_inc: 1
+
+  input_dir: $WXMODEL_DATA_DIR/UIOWACMAQ/Y%iy4/M%im2/D%id2/H%ih2
+  output_dir: $WXMODEL_DATA_DIR/UIOWACMAQ/Y%iy4/M%im2/D%id2/H%ih2
+    
+  grads_dir: $WXMODEL_OPENDAP_DIR/UIOWACMAQ
+  grads_file: UIOWACMAQ.%iy4%im2%id2_%ih2.ddf
+  grads_latest: UIOWACMAQ.latest.ddf
+  dummy_file: $WXMODEL_DATA_DIR/dummy.ddf
+  files: *FILENAMES
+
+  grads_records:
+      - DSET $output_dir/uiowa_asiaaq_fcst_%iy4%im2%id2%ih2_%f3.nc
+      - OPTIONS template
+      - TDEF time 73 linear %ih2:00z%id2%imc%iy4 1hr

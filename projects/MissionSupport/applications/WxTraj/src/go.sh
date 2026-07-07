@@ -1,0 +1,1 @@
+python ./flextra_run_ops.py 2023-01-01T00:00:00 start_points.csv --inputs ./ --outputs output_joe --alts 1000 --direction backward --days 3 --ctlFile /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/assim/inst3_3d_asm_Nv

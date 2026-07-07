@@ -38,6 +38,7 @@ for region in regions:
 
         driver = cfg_products[product]["driver"]
         options.update(cfg_products[product])
+        options = {k: v for k, v in options.items() if k != "driver"}
 
         for data_reader in data_readers:
 

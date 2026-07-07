@@ -1,6 +1,6 @@
 import os
 import re
-import ruamel.yaml as yaml
+import yaml
 from string import Template
 from datetime import timedelta
 

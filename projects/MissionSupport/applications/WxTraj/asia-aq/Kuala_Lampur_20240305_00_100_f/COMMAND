@@ -1,0 +1,126 @@
+********************************************************************************
+*                                                                              *
+*    Input file for the trajectory model FLEXTRA: Please select your options   *
+*                                                                              *
+********************************************************************************
+
+1. __________________________________________________ 3X, A50
+   Test run #1
+   LABEL FOR THE MODEL RUN
+   
+2. __                3X, I2  
+    1
+   DIRECTION         1 FORWARD, -1 BACKWARD TRAJECTORIES
+   
+3. _______           3X, I7
+   0720000
+   HHHMISS           LENGTH OF AN INDIVIDUAL TRAJECTORY
+
+4. ________ ______   3X, I8, 1X, I6
+   20240305 000000
+   YYYYMMDD HHMISS   BEGINNING DATE
+
+5. ________ ______   3X, I8, 1X, I6
+   20240305 000000
+   YYYYMMDD HHMISS   ENDING DATE
+
+6. _______           3X, I7
+   0030000
+   HHHMISS           TIME INTERVAL BETWEEN STARTING TIMES OF TRAJECTORIES
+
+7. _  _____          3X, I1, 2X, I5
+   1  10800 
+   i  SSSSS          i>0: INTERPOLATED OUTPUT OF TRAJECTORY EVERY SSSSS SECONDS
+
+8. _____  ___.___  _.___  _.___  _.___  _.___ 3X, I5, 2X, F7.3 4(2X,F5.3)
+   00000  000.500  2.000  0.080  0.080  0.200 
+   NUMBER            NUMBER, DISTANCE (GRID UNITS), TIME CONSTANT (WIND FIELD INTERVAL UNITS) AND INTERPOLATION ERRORS (IN U, V AND W) OF UNCERTAINTY TRAJECT.
+
+9. _                 3X, I1
+   1 
+   INTERPOLATION     1 = IDEAL INTERPOLATION   >1 = LINEAR INTERPOLATION
+
+10. ---.--           4X, F6.4
+      5.0
+    CFL              TIMESTEP CRITERION HORIZONTAL AND VERTICAL
+
+11. ---.--           4X, F6.4
+      5.0
+    CFLT             TIMESTEP CRITERION TIME GAP BETWEEN INPUT WIND FIELDS
+
+12. -                4X, I1  
+    1              
+    MODE             1 NORMAL MODE, 2 CET MODE, 3 FLIGHT MODE
+===================================================================
+1. Comment to identify the current model run
+
+2. Direction of trajectories (1 means forward trajectories, -1 backward)
+
+3. Temporal lengths of the trajectories in the format HHHMISS, where HHH is 
+   HOUR, MI is MINUTE and SS is SECOND
+
+4. Beginning date and time of trajectory calculation. Must be given in format
+   YYYYMMDD HHMISS, where YYYY is YEAR, MM is MONTH, DD is DAY, HH is HOUR,
+   MI is MINUTE and SS is SECOND. All times are in UTC.
+
+5. Ending date and time of trajectory calculation. Same format as 4.
+
+6. Time interval between two trajectory calculations. Same format as 3.
+
+7. Options for the trajectory output:     
+   0 = original data in irregular time intervals
+   1 = constant time intervals, interpolated output every SSSSS seconds
+   2 = 0 plus 1
+
+8. Six parameters have to be inputted. The first is the number of
+   uncertainty trajectories. They are starting in a distance from
+   the starting point of the reference trajectory as given by the
+   second parameter (in grid units).
+   Additionally, random errors may be added at each time step of the
+   trajectory calculation. Using a Langevin equation, they are relaxed 
+   with a time constant (in units of the wind field interval, third
+   parameter) specified by the user. These random errors are
+   thought to reflect typical wind errors caused, for instance, by
+   interpolation. The magnitude of these errors (in relative units,
+   relative to the wind velocity) must be specified by the user for
+   the three wind components u, v and w (last three parameters).
+
+9. Kind of interpolation
+   1  - horizontal interpolation bicubic
+        vertical interpolation polynomial
+        temporal interpolation linear
+   >1 - horizontal interpolation bilinear         
+        vertical interpolation linear
+        temporal interpolation linear
+ 
+10.cfl criterion horizontal/vertical
+   factor by which time step must be shorter than that determined
+   from the CFL criterion, i.e.
+
+                delta_t1=delta x/u/cfl
+                delta_t2=delta y/v/cfl
+                delta_t3=delta z/w/cfl
+
+                delta_t(space) = min(delta_t1,delta_t2,delta_t3)
+
+11. cfl criterion time
+    factor by wich time is shorter than time interval of the wind
+    fields
+
+                delta_t(time) = delta_T(input wind)/cflt
+
+     The time step used for trajectory calculation is the minimum of
+     delta_t(space) and delta_t(time)
+
+     cfl and cflt must not be less than 1!
+
+12.  1 NORMAL mode -> read file STARTPOINTS and calculate a time
+     series of trajectories starting all from the same starting
+     points
+     2 CET mode -> read file STARTCET and calculate trajectories
+     starting uniformly spaced from a user-defined domain
+     (for a single starting time)
+     3 FLIGHT mode -> read file STARTFLIGHT and calculate
+     trajectories starting neither uniformly spaced nor with
+     constant time intervals (as needed, for instance, to start
+     trajectories along an aircraft leg)

@@ -1,0 +1,13 @@
+BCEXT,OCEXT,SSEXT,SUEXT,DUEXT: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast/inst3_3d_ext_Np/inst3_3d_ext_Np.%Y%m%d_%H
+
+CLDLOW,CLDMID,CLDHGH,PRECTOT,PRECCON,PRECSNO: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast/inst3_2d_met_Nx/inst3_2d_met_Nx.%Y%m%d_%H
+
+U2M,V2M,T2M,SLP: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast/tavg1_2d_slv_Nx/tavg1_2d_slv_Nx.%Y%m%d_%H
+
+SSEXTTAU,DUEXTTAU,BCEXTTAU,OCEXTTAU,SUEXTTAU,NIEXTTAU, DUSMASS25,SSSMASS25,OCSMASS,BCSMASS,NISMASS25,SO4SMASS,COSC: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast/inst1_2d_hwl_Nx/inst1_2d_hwl_Nx.%Y%m%d_%H
+
+BC,OC,SS,SO4,DU,NI: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast/inst3_3d_aer_Np/inst3_3d_aer_Np.%Y%m%d_%H
+
+CO,CO2,AIRDENS: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast/inst3_3d_chm_Np/inst3_3d_chm_Np.%Y%m%d_%H
+
+U,V,RH: /discover/nobackup/projects/gmao/yotc/pub/fp/opendap/fcast/inst3_3d_asm_Np/inst3_3d_asm_Np.%Y%m%d_%H

@@ -244,3 +244,5 @@ __marimo__/
 # Gitlab CFAPI
 projects/CFAPI/.git
 projects/CFAPI/.gitignore
+
+*.ipynb

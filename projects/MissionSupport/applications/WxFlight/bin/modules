@@ -1,0 +1,8 @@
+  setenv ESMADIR /discover/nobackup/rgovinda/git_motel/GAAS-SLES12/GAAS
+#  setenv ESMADIR /home/adasilva/workspace/GAAS
+  setenv ARCH `uname -s`
+#  setenv PYTHONPATH $ESMADIR/$ARCH/lib/Python
+  setenv PYTHONPATH $ESMADIR/Linux/lib/Python:/home/dao_ops/gmao_packages/Workflow/Shared:/home/dao_ops/gmao_packages/WxFlight/bin:/home/dao_ops/gmao_packages/Workflow/Shared:/home/dao_ops/gmao_packages/WxFlight/lib
+#  setenv PYTHONPATH /discover/nobackup/acollow/Python
+  set path = ( . /home/dao_ops/gmao_packages/WxFlight/bin $ESMADIR/$ARCH/bin $ESMADIR/src/GMAO_Shared/Chem_Base/ $path )
+  source  $ESMADIR/src/g5_modules

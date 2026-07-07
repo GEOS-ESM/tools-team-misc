@@ -1,0 +1,30 @@
+aircraft: [DC8, snapshot]
+flight_times: [PT8H, PT12H, PT15H]
+flight_plans: [default]
+
+schedule:
+
+  20240101-20240201:
+    aircraft: [DC8, snapshot]
+    flight_times: [PT8H, PT12H, PT15H]
+    flight_plans: [default]
+
+  20240202-20240206:
+    aircraft: [DC8]
+    flight_times: [PT7H30M, PT12H, PT15H]
+    flight_plans: [Manila]
+
+  20240207-20240213:
+    aircraft: [DC8]
+    flight_times: [P1DT9H, P2DT9H, P3DT9H, P4DT9H]
+    flight_plans: [Manila]
+
+  20240214-20240309:
+    aircraft: [DC8]
+    flight_times: [P1DT9H, P2DT9H, P3DT9H, P4DT9H]
+    flight_plans: [Seoul]
+
+  20240310-:
+    aircraft: [DC8]
+    flight_times: [P1DT8H, P2DT8H, P3DT8H, P4DT8H]
+    flight_plans: [bangkok]

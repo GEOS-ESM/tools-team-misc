@@ -13,6 +13,7 @@ import cartopy.crs as ccrs  # ADD THIS LINE
 import numpy as np
 
 from earthnow.wxmaps_config import WxMapsConfig, StyleConfig, STYLES
+from earthnow import paths
 from earthnow.wxmaps_plotting import WxMapPlotter
 from earthnow.wxmaps_utils import (
     get_output_filepath,
@@ -21,6 +22,33 @@ from earthnow.wxmaps_utils import (
 
 from earthnow.data_readers import DATA_READERS
 from earthnow.products import PRODUCTS
+
+import logging
+
+from pathlib import Path
+
+script_name = Path(__file__).stem
+logger = logging.getLogger(script_name)  # Set logger name to the script name
+logger.addHandler(logging.NullHandler())  # Add this line to ignore if no logger passed
+
+
+# Create logger and colored handler function
+def setup_root_logger(logger_level):
+    import logging
+    from colorlog import ColoredFormatter
+
+    # root logger
+    root_logger = logging.getLogger()
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        ColoredFormatter("\n%(log_color)s %(levelname)s: %(name)s: %(message)s\n")
+    )
+    root_logger.addHandler(handler)
+    root_logger.setLevel(logger_level)
+
+    return
+
 
 # -----------------------------------------------------------------------------
 # ARGPARSE
@@ -37,6 +65,9 @@ def parse_args():
     # -------------------------------------------------------------------------
     # Core required args
     # -------------------------------------------------------------------------
+    # FIX: THIS ENTIRE ARG IS AN ISSUE - the data reader should be determined by the dates
+    # Also, just specifying the data reader won't override the other defaults (exp-path, collection, etc.)
+    # I'm assuming he just added this so he could plot GEOS-AI separately?
     parser.add_argument(
         "--data-reader",
         default="geos_cycled_replays",
@@ -90,7 +121,7 @@ def parse_args():
     # -------------------------------------------------------------------------
     parser.add_argument(
         "--exp-path",
-        default="/discover/nobackup/projects/gmao/osse2/HWT",
+        default=paths.DEFAULT_HWT_EXP_PATH,
         help="Experiment path (for cycled replays)",
     )
     parser.add_argument(
@@ -108,13 +139,11 @@ def parse_args():
     # Forward Processing specific
     parser.add_argument(
         "--fp-base-path",
-        default="/discover/nobackup/projects/gmao/gmao_ops/pub",
+        default=paths.DEFAULT_GEOS_FP_BASE,
         help="Base path for Forward Processing data",
     )
 
-    parser.add_argument(
-        "--base-path", default="/discover/nobackup/projects/gmao/g6dev/pub/WxMaps"
-    )
+    parser.add_argument("--base-path", default=paths._G6DEV_PUB / "WxMaps")
 
     parser.add_argument(
         "--resolution", choices=["hd", "fhd", "2k", "4k", "8k"], default="4k"
@@ -125,6 +154,7 @@ def parse_args():
     # -------------------------------------------------------------------------
     # Map features
     # -------------------------------------------------------------------------
+    # Left these args still so you can specify if you need
     parser.add_argument(
         "--boundaries",
         nargs="+",
@@ -160,7 +190,18 @@ def parse_args():
     parser.add_argument("--show-nws-warnings", action="store_true")
     parser.add_argument(
         "--nws-shapefile-base",
-        default="/discover/nobackup/projects/gmao/osse2/TSE_staging/SHAPE_FILES/ALL",
+        default=paths.NWS_SHAPEFILE_DIR,
+    )
+    parser.add_argument(
+        "--logger",
+        choices=[
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+        ],
+        type=str.upper,
+        help="Enable logging with specified level.",
     )
 
     # -------------------------------------------------------------------------
@@ -178,18 +219,17 @@ def create_data_reader(args):
 
     Handles different initialization signatures for different readers.
     """
-    ReaderClass = DATA_READERS[args.data_reader]
+    ReaderClass = DATA_READERS[
+        args.data_reader
+    ]  # FIX: He returns the reader twice? Here and in the if statement
+    logger.info(f"Initial Reader: {ReaderClass=}")
 
-    if args.data_reader == "geos_forward_processing":
-        # Forward Processing reader uses different parameters
-        reader = ReaderClass(
-            base_path=args.fp_base_path,
-            exp_id=args.exp_id,
-            collection=(
-                args.collection if args.collection != "inst1_2d_asm_Nx" else None
-            ),
-        )
-    elif args.data_reader == "geos_cycled_replays":
+    # FIX: # I think this is if you put all the option fields: data-reader, exp_id, and collection - but if you only specify the data reader and nothing else it will still use defaults. So it will never have a args.data_reader be fp since its set via defaults...
+    # Ok for geos replay: this is the default inputs, but isn't this just duplicating what is already in the reader?
+    # OK WAIT ----- this second "call" specifies the map type from args I guess
+    # Is there a default map type? Like is the intial reader call even necessary
+
+    if args.data_reader == "geos_cycled_replays":
         # Cycled Replays reader
         reader = ReaderClass(
             exp_path=args.exp_path,
@@ -198,13 +238,24 @@ def create_data_reader(args):
             collection=args.collection,
             map_type=args.map_type,
         )
+    elif args.data_reader == "geos_forward_processing":
+        # Forward Processing reader uses different parameters
+        reader = ReaderClass(
+            base_path=args.fp_base_path,
+            exp_id=args.exp_id,
+            collection=(
+                args.collection if args.collection != "inst1_2d_asm_Nx" else None
+            ),
+        )
     elif args.data_reader == "gencast_geos_fp":
         # GenCast reader
         reader = ReaderClass(
             exp_path=args.exp_path, exp_res=args.exp_res, exp_id=args.exp_id
         )
+
     else:
         # Generic fallback - try all parameters and let reader handle it
+        # If no reader specified, try defaults #FIX: But the defaults is the replay?????
         try:
             reader = ReaderClass(
                 exp_path=args.exp_path,
@@ -214,10 +265,19 @@ def create_data_reader(args):
                 map_type=args.map_type,
             )
         except TypeError:
-            # If that fails, try minimal parameters
+            # If that fails, try minimal parameters # FIX: So i guess the reader doesn't need the maptype but would it still return data?
             reader = ReaderClass(exp_path=args.exp_path, exp_id=args.exp_id)
 
     return reader
+
+
+def return_valid_directory(reader, args):
+    if reader.resolve_file(args.fdate, args.pdate) is not None:
+        return "Data reader directory found"
+    else:
+        raise FileNotFoundError(
+            f"Data reader could not find directory for fdate {args.fdate} and pdate {args.pdate}"
+        )
 
 
 # -----------------------------------------------------------------------------
@@ -225,6 +285,7 @@ def create_data_reader(args):
 # -----------------------------------------------------------------------------
 
 
+# Note that these override the style arguments
 def build_style(args):
     style = STYLES[args.style]()
 
@@ -232,6 +293,9 @@ def build_style(args):
         style.ocean_color = args.ocean_color
     if args.land_color:
         style.land_color = args.land_color
+
+    if args.boundaries:
+        style.boundaries = args.boundaries
 
     if args.boundaries_color:
         style.coastline_color = args.boundaries_color
@@ -252,6 +316,12 @@ def build_style(args):
 
 def plot_single_pdate(pdate, args, style, map_config):
     import copy
+    import multiprocessing_logging
+
+    # Reinitalize root logger for mp handler, idk why this works it just does
+    if args.logger:
+        setup_root_logger(args.logger)
+        multiprocessing_logging.install_mp_handler()
 
     local_args = copy.copy(args)
     local_args.pdate = pdate
@@ -262,12 +332,15 @@ def plot_single_pdate(pdate, args, style, map_config):
     plotter = WxMapPlotter(map_config, resolution=local_args.resolution, style=style)
 
     fig, ax = plotter.create_basemap(
-        boundaries=local_args.boundaries or [],
         feature_resolution=local_args.feature_resolution,
     )
 
     # Create reader for this worker
     reader = create_data_reader(local_args)
+    logger.info(f"Reader returned: {reader=}")  # This returns GEOS replay reader always
+
+    # Test reader returns a valid directory
+    logger.info(return_valid_directory(reader, local_args))
 
     # Call product function
     local_args.contour_label_size = map_config.contour_label_size
@@ -315,6 +388,9 @@ def plot_single_pdate(pdate, args, style, map_config):
 
 def main():
     args = parse_args()
+
+    if args.logger:
+        setup_root_logger(args.logger)
 
     # -------------------------------------------------------------------------
     # Map config
@@ -421,6 +497,7 @@ def main():
         # If pdate not provided, plot ALL available times
         pdates = reader.find_available_times(args.fdate)
         pdates = [dt.strftime("%Y%m%d_%H%Mz") for dt in pdates]
+        logger.info(f"Available pdates for fdate {args.fdate}: {pdates}")
     else:
         pdates = [args.pdate]
 

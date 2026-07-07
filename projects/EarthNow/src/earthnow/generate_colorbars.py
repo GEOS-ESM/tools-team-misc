@@ -4,8 +4,9 @@ Generate colorbar PNGs for all WxMaps products
 """
 
 import sys
+from earthnow import paths
 
-sys.path.insert(0, "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps")
+sys.path.insert(0, str(paths._G6DEV_PUB / "WxMaps"))
 
 print("Generating WxMaps colorbars...")
 print("=" * 60)
@@ -99,4 +100,4 @@ gen_vslp850()
 
 print("\n" + "=" * 60)
 print("All colorbars generated successfully!")
-print("Location: /discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/")
+print(f"Location: {paths.COLORBAR_OUT_DIR}/")
