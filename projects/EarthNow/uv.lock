@@ -408,6 +408,7 @@ dependencies = [
     { name = "pytz" },
     { name = "scipy" },
     { name = "shapely" },
+    { name = "wxvis" },
 ]
 
 [package.dev-dependencies]
@@ -437,6 +438,7 @@ requires-dist = [
     { name = "pytz" },
     { name = "scipy", specifier = ">=1.10" },
     { name = "shapely" },
+    { name = "wxvis", git = "https://github.com/GEOS-ESM/tools-team-misc.git?subdirectory=projects%2FWxVis&branch=main" },
 ]
 
 [package.metadata.requires-dev]
@@ -2067,6 +2069,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/35/a2/8e3becb46433538a3
 wheels = [
     { url = "https://files.pythonhosted.org/packages/68/5a/199c59e0a824a3db2b89c5d2dade7ab5f9624dbf6448dc291b46d5ec94d3/wcwidth-0.6.0-py3-none-any.whl", hash = "sha256:1a3a1e510b553315f8e146c54764f4fb6264ffad731b3d78088cdb1478ffbdad", size = 94189, upload-time = "2026-02-06T19:19:39.646Z" },
 ]
+
+[[package]]
+name = "wxvis"
+version = "0.1.0"
+source = { git = "https://github.com/GEOS-ESM/tools-team-misc.git?subdirectory=projects%2FWxVis&branch=main#a4ccf8b80454cd03c7c967b34b58d8c59760d780" }
 
 [[package]]
 name = "xarray"
