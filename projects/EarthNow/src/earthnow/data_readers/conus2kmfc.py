@@ -8,6 +8,12 @@ CONUS2KMFC_VARS = dict(
     VORT500="VORT500.inst1_2d_asm_Nx",
     H500="H500.inst1_2d_asm_Nx",
     T2M="T2M.inst1_2d_asm_Nx",
+    DBZ_MAX="DBZ_MAX.inst1_2d_asm_Nx",
+    SNOW="SNOW.inst1_2d_asm_Nx",
+    RAIN="RAIN.inst1_2d_asm_Nx",
+    ICE="ICE.inst1_2d_asm_Nx",
+    H1000="H1000.inst1_2d_asm_Nx",
+    H500="H500.inst1_2d_asm_Nx",
 )
 
 CONUS2KMFC = SimpleNamespace(
