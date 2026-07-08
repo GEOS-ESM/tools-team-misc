@@ -38,7 +38,7 @@ Sandwich RGB - Blended LW IR and Veggie VIS
 `ploteic_radar`
 Radar Reflectivity [Rain/Snow/Ice]
 - Assignee: Emily
-- Status:
+- Status: In progress
 - Function call:
 
 `ploteic_precip`
