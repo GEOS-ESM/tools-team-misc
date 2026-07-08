@@ -11,13 +11,13 @@ CONUS2KMFC_LCC_COORDS = (
 CONUS2KMFC_LCC_VARS = dict(
     VORT500="VORT500.hwt_15mn_slv_LCC",
     H500="H500.hwt_15mn_slv_LCC",
-    TMP_2M="TMP_2M.hwt_15mn_slv_LCC",
+    T2M="TMP_2M.hwt_15mn_slv_LCC",
     HGT_SFC="HGT_SFC.hwt_15mn_slv_LCC",  # surface geopotential height
-    REFC="REFC.hwt_15mn_slv_LCC",  # maximum composite radar reflectivity
+    REFL_MAX="REFC.hwt_15mn_slv_LCC",  # maximum composite radar reflectivity
     SNOW="SNOW.hwt_15mn_slv_LCC",
     RAIN="RAIN.hwt_15mn_slv_LCC",
     ICE="ICE.hwt_15mn_slv_LCC",
-    HGT="HGT.hwt_15mn_prs_LCC",  # layer edge height (NOT geopotential height)
+    EDGE_HGT="HGT.hwt_15mn_prs_LCC",  # layer edge height (NOT geopotential height)
 )
 
 CONUS2KMFC_LCC = SimpleNamespace(
