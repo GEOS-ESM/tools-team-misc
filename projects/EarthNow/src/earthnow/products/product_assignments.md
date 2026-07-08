@@ -10,12 +10,12 @@ GeoColor: True View of Earth
 
 `ploteic_sandwich`
 Sandwich RGB - Blended LW IR and Veggie VIS
-- Assignee:
+- Assignee: Bennett
 - Status:
 
 `ploteic_band16`
 13.3 micron - CO2 Longwave Band IR
-- Assignee:
+- Assignee: Bennett
 - Status:
 
 `ploteic_band14`
