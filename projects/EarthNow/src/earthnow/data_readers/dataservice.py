@@ -6,6 +6,44 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Variable mapping in format 'variable_alias: {'collection' : 'variable name'}
+VARIABLE_MAPPING = {
+    "T2M": {
+        "hwt_15mn_slv_lcc": "TMP_2M",
+        "hwt_30mn_slv_LCC": "TMP_2M",
+        "inst1_2d_asm_Nx": "TMP",
+    },
+    "REFL_MAX": {
+        "hwt_15mn_slv_LCC": "REFC",
+        "hwt_30mn_slv_LCC": "REFC",
+        "inst1_2d_asm_Nx": "DBZ_MAX",
+    },
+    "VORT500": {
+        "hwt_15mn_slv_LCC": "VORT500",
+        "hwt_30mn_slv_LCC": "VORT500",
+        "inst1_2d_asm_Nx": "VORT500",
+    },
+    "HGT_SFC": {
+        "hwt_15mn_slv_LCC": "HGT_SFC",
+        "hwt_30mn_slv_LCC": "HGT_SFC",
+    },
+    "SNOW": {
+        "hwt_15mn_slv_LCC": "SNOW",
+        "hwt_30mn_slv_LCC": "SNOW",
+        "inst1_2d_asm_Nx": "SNOW",
+    },
+    "RAIN": {
+        "hwt_15mn_slv_LCC": "RAIN",
+        "hwt_30mn_slv_LCC": "RAIN",
+        "inst1_2d_asm_Nx": "RAIN",
+    },
+    "ICE": {
+        "hwt_15mn_slv_LCC": "ICE",
+        "hwt_30mn_slv_LCC": "ICE",
+        "inst1_2d_asm_Nx": "ICE",
+    },
+}
+
 
 class SimpleNetCDFDataService(object):
 
