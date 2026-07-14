@@ -1,13 +1,19 @@
 from types import SimpleNamespace
 from .dataservice import DataService
 from .registry import register
+from .variables import return_fullname
 
 CONUS2KMRP_URI = "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/holding/$collection/%Y%m/Feature-c2160_L137.$collection.%Y%m%d_%H%Mz.nc4"
 
-CONUS2KMRP_VARS = dict(
-    VORT500="VORT500.inst1_2d_asm_Nx",
-    H500="H500.inst1_2d_asm_Nx",
-    T2M="T2M.inst1_2d_asm_Nx",
+CONUS2KMRP_VARS = return_fullname(
+    {
+        "VORT500": "inst1_2d_asm_Nx",
+        "H500": "inst1_2d_asm_Nx",
+        "T2M": "inst1_2d_asm_Nx",
+        "DBZ_MAX": "inst1_2d_asm_Nx",
+        "UH25": "inst1_2d_asm_Nx",
+        "CAPE": "inst1_2d_asm_Nx",
+    }
 )
 
 CONUS2KMRP = SimpleNamespace(
