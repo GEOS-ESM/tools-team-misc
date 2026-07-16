@@ -24,6 +24,7 @@ dependencies = [
   "geopandas",
   "python_dotenv",
   "wxvis",
+  "pyyaml",
 ]
 
 
