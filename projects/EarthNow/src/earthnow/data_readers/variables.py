@@ -7,6 +7,17 @@ from dataclasses import dataclass, field
 VARIABLES_YAML = Path(__file__).parent / "variables.yaml"
 
 
+# Loader class to prevent duplicate overrides in yaml_load
+class UniqueKeyLoader(yaml.SafeLoader):
+    def construct_mapping(self, node, deep=False):
+        # loader.flatten_mapping(node)
+        mapping = {}
+        for key_node, value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            if key in mapping:
+                raise ValueError(f"Duplicate key '{key}' found in YAML file!")
+            value = self.construct_object(value_node, deep=deep)
+            mapping[key] = value
 
         return mapping
 
@@ -92,7 +103,7 @@ class VariableRegistry:
 def build_registry(yaml_path: Path) -> VariableRegistry:
     """Loads variable definitions from yaml_path and registers them."""
     with open(yaml_path) as f:
-        products = yaml.safe_load(f)
+        products = yaml.load(f, Loader=UniqueKeyLoader)
 
     registry = VariableRegistry()
     for alias, data in products.items():
