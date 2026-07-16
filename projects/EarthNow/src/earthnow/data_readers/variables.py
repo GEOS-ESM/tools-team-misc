@@ -7,36 +7,74 @@ from dataclasses import dataclass, field
 VARIABLES_YAML = Path(__file__).parent / "variables.yaml"
 
 
-class VariableRegistry(dict):
-    """Dict of alias -> ValidVariable, with lookups."""
 
-    def register(self, variable: "ValidVariable") -> None:
-        if variable.alias in self:
-            raise ValueError(f"Error: The alias '{variable.alias}' is already registered")
-        self[variable.alias] = variable
+        return mapping
+
+
+# Class to store each variable alias, description, and collection variable names
+@dataclass()
+class ValidVariable:
+    alias: str
+    description: str
+    collections: dict[str, str] = field(default_factory=dict)
+
+    def return_fullname(self, collection_name: str) -> Optional[str]:
+        """Returns the formatted string for a specific collection name if it exists."""
+        value = self.collections.get(collection_name)
+        if value:
+            return f"{value}.{collection_name}"
+        return None
+
+
+# Class to register variable aliases into registry
+class VariableRegistry:
+    """Registry of alias -> ValidVariable, with lookups."""
+
+    def __init__(self):
+        self._variables: dict[str, ValidVariable] = {}
+
+    def __getitem__(self, alias: str) -> ValidVariable:
+        return self._variables[alias]
+
+    def __contains__(self, alias: str) -> bool:
+        return alias in self._variables
+
+    def register(self, variable: ValidVariable) -> None:
+        if variable.alias in self._variables:
+            raise ValueError(
+                f"Error: The alias '{variable.alias}' is already registered"
+            )
+        self._variables[variable.alias] = variable
 
     @property
     def aliases(self) -> list[str]:
-        return list(self.keys())
+        return list(self._variables.keys())
+
+    @property
+    def alias_descriptions(self) -> dict[str, str]:
+        """Returns a dictionary mapping alias -> description."""
+        return {alias: var.description for alias, var in self._variables.items()}
 
     @property
     def collections(self) -> list[str]:
-        names = {name for var in self.values() for name in var.collection.collection}
+        """Returns a list of collections of the variable aliases"""
+        names = {name for var in self._variables.values() for name in var.collections}
         return sorted(names)
 
     def collection_aliases(self, collection_name: str) -> list[str]:
         """All aliases that define a variable name for the given collection."""
         return [
             alias
-            for alias, var in self.items()
-            if collection_name in var.collection.collection
+            for alias, var in self._variables.items()
+            if collection_name in var.collections
         ]
 
     def resolve(self, alias: str, collection_name: str) -> str:
         """Returns "<varname>.<collection_name>" for alias, raising if either is invalid."""
-        if alias not in self:
+        if alias not in self._variables:
             raise KeyError(f"'{alias}' is not a registered alias")
-        fullname = self[alias].collection.return_fullname(collection_name)
+
+        fullname = self._variables[alias].return_fullname(collection_name)
         if fullname is None:
             raise ValueError(
                 f"'{alias}' has no variable registered for collection '{collection_name}'"
@@ -51,29 +89,6 @@ class VariableRegistry(dict):
         }
 
 
-# Define a data class for the collections
-@dataclass(frozen=True)
-class CollectionVariable:
-    # Maps collection name -> variable name within that collection.
-    # Not all vars have all collections, and new collections require no code changes.
-    collection: dict[str, str] = field(default_factory=dict)
-
-    def return_fullname(self, collection_name: str) -> Optional[str]:
-        """Returns the formatted string for a specific collection name if it exists."""
-        value = self.collection.get(collection_name)
-        if value:
-            return f"{value}.{collection_name}"
-        return None
-
-
-# Define a data class for each variable with a nested collection class
-@dataclass()
-class ValidVariable:
-    alias: str
-    description: str
-    collection: CollectionVariable = field(default_factory=CollectionVariable)
-
-
 def build_registry(yaml_path: Path) -> VariableRegistry:
     """Loads variable definitions from yaml_path and registers them."""
     with open(yaml_path) as f:
@@ -81,9 +96,12 @@ def build_registry(yaml_path: Path) -> VariableRegistry:
 
     registry = VariableRegistry()
     for alias, data in products.items():
-        collection = CollectionVariable(collection=data["collection"])
         registry.register(
-            ValidVariable(alias=alias, description=data["description"], collection=collection)
+            ValidVariable(
+                alias=alias,
+                description=data["description"],
+                collections=data.get("collection", {}),
+            )
         )
     return registry
 
