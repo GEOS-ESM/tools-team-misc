@@ -63,7 +63,7 @@ SNOW:
 T2M:
   description: "2 Meter Temperature"
   collection:
-    inst1_2d_asm_Nx: TMP
+    inst1_2d_asm_Nx: T2M
     hwt_15mn_slv_LCC: TMP_2M
     hwt_30mn_slv_LCC: TMP_2M
 
