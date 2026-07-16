@@ -43,8 +43,12 @@ class VariableRegistry(dict):
             )
         return fullname
 
-
-VARIABLE_REGISTRY = VariableRegistry()
+    def resolve_many(self, alias_to_collection: dict[str, str]) -> dict[str, str]:
+        """Batch form of resolve(): {alias: collection_name} -> {alias: fullname}."""
+        return {
+            alias: self.resolve(alias, collection_name)
+            for alias, collection_name in alias_to_collection.items()
+        }
 
 
 # Define a data class for the collections
@@ -70,18 +74,18 @@ class ValidVariable:
     collection: CollectionVariable = field(default_factory=CollectionVariable)
 
 
-def return_fullname(input_dict: dict):
-    return {
-        key: VARIABLE_REGISTRY.resolve(key, value) for key, value in input_dict.items()
-    }
+def build_registry(yaml_path: Path) -> VariableRegistry:
+    """Loads variable definitions from yaml_path and registers them."""
+    with open(yaml_path) as f:
+        products = yaml.safe_load(f)
+
+    registry = VariableRegistry()
+    for alias, data in products.items():
+        collection = CollectionVariable(collection=data["collection"])
+        registry.register(
+            ValidVariable(alias=alias, description=data["description"], collection=collection)
+        )
+    return registry
 
 
-# Load variable definitions and register them
-with open(VARIABLES_YAML) as f:
-    PRODUCTS_DICTIONARY = yaml.safe_load(f)
-
-for alias, data in PRODUCTS_DICTIONARY.items():
-    coll_var = CollectionVariable(collection=data["collection"])
-    VARIABLE_REGISTRY.register(
-        ValidVariable(alias=alias, description=data["description"], collection=coll_var)
-    )
+VARIABLE_REGISTRY = build_registry(VARIABLES_YAML)

@@ -1,11 +1,11 @@
 from types import SimpleNamespace
 from .dataservice import DataService
 from .registry import register
-from .variables import return_fullname
+from .variables import VARIABLE_REGISTRY
 
 CONUS2KMFC_URI = "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/forecasts/CYCLED_REPLAY_P10800_C21600_T21600_%%Y%%m%%d_%%Hz/GEOS.$collection.%Y%m%d_%H%Mz.nc4"
 
-CONUS2KMFC_VARS = return_fullname(
+CONUS2KMFC_VARS = VARIABLE_REGISTRY.resolve_many(
     {
         "VORT500": "inst1_2d_asm_Nx",
         "H500": "inst1_2d_asm_Nx",
