@@ -1,0 +1,222 @@
+# --- reusables ---------------------------------------------------------------
+_common:
+  met_vars_v1: &met_vars_v1 [CLDTT, PHIS, T2M_F, TPREC, U10M, V10M, ZPBL, TPREC_mm]
+  pm_slv_v1: &pm_slv_v1 ['PM25ni_RH35_GCC', 'PM25ss_RH35_GCC', 'PM25du_RH35_GCC', 'PM25oc_RH35_GCC', 'PM25bc_RH35_GCC', 'PM25su_RH35_GCC', 'PM25soa_RH35_GCC']
+  one_billion: &ppb 1.0e9
+  one: &one 1.0
+
+# --- main config -------------------------------------------------------------
+
+aqc: &aqc
+  default: NO2
+  basic_fields: [CO, NO2, O3, SO2]
+  # PM25:
+  #   title: PM2.5
+  #   fields: [PM25_RH35_GCC]
+  PM25_RH35: 
+    title: PM2.5
+    fields: [PM25_RH35_GCC]
+
+aqc_slv: *aqc
+
+chm_slv:
+  <<: *aqc
+  basic_fields: [CO, NO2, O3, SO2, HCHO, NOy, ISOP, ACET,
+                  ALD2, ALK4, C2H6, C3H8, EOH, H2O2, HNO3,
+                  HNO4, MACR, MVK, N2O5, NH3, NH4, NIT, "NO", 
+                  NOy, PRPE, RCHO, TOLU, XYLE]
+  PM25_sum: 
+    title: PM2.5
+    fields: *pm_slv_v1
+  PM25_RH35:
+    title: PM2.5
+    fields: [PM25_RH35_GCC]
+
+chm_p23: &chm_p23
+  <<: *aqc 
+  basic_fields: [CO, NO2, O3, SO2, HCHO, NOy]
+
+chm_v72: 
+  <<: *chm_p23
+  basic_fields: [CO, HCHO, NO2, BrO, O3, SO2]
+
+met_slv: &met_slv
+  default: MET
+  basic_fields: [T, T_F, T_C, U, V, Q, RH, CLDTT, PHIS, ZPBL,
+                  TS, PS, SLP, TPREC, TPREC_mm, #TROPPB
+                  Q2M, T2M, U2M, V2M, T2M_F, T2M_C, 
+                  Q10M, T10M, U10M, V10M, T10M_F, T10M_C]
+  MET: 
+    title: Met
+    fields: *met_vars_v1
+
+met_p23: &met_p23
+  <<: *met_slv
+  basic_fields: [EPV, OMEGA, H, PS, Q, RH, SLP, T, ETH, U, V]
+  # basic_fields: [T, U, V, ZPBL, T_F, T_C]
+  MET: 
+    title: Met 
+    fields: ['H']
+
+met_v72: 
+  <<: *met_p23
+  basic_fields: [PS, Q, T, THETA, U, V, PHIS, ZL, QCTOT, DELP]
+  MET:
+    title: Met
+    fields: [T, U, V, ZL]
+
+fields: 
+  CO: &ppbv
+    units: ppbv
+    scaling: *ppb
+  NO2: *ppbv
+  O3: *ppbv
+  SO2: *ppbv
+  HCHO: *ppbv
+  NOy: *ppbv
+  ACET: *ppbv
+  ALD2: *ppbv
+  ALK4: *ppbv
+  BCPI: *ppbv
+  BCPO: *ppbv
+  BENZ: *ppbv
+  BrO: *ppbv
+  C2H6: *ppbv
+  C3H8: *ppbv
+  CH4: *ppbv
+  DST1: *ppbv
+  DST2: *ppbv
+  DST3: *ppbv
+  DST4: *ppbv
+  EOH: *ppbv
+  H2O2: *ppbv
+  HNO3: *ppbv
+  HNO4: *ppbv
+  IO: *ppbv
+  MACR: *ppbv
+  MEK: *ppbv
+  N2O5: *ppbv
+  NH3: *ppbv
+  NH4: *ppbv
+  NIT: *ppbv
+  "NO":  *ppbv
+  OCPI: *ppbv
+  OCPO: *ppbv
+  PAN: *ppbv
+  PRPE: *ppbv
+  RCHO: *ppbv
+  SALA: *ppbv
+  SALC: *ppbv
+  SOAP: *ppbv
+  SOAS: *ppbv
+  TOLU: *ppbv
+  XYLE: *ppbv
+
+  PM25_RH35: &aero
+    units: ug/m3
+    scaling: *one
+  PM25bc_RH35: *aero
+  PM25du_RH35: *aero
+  PM25nh4_RH35: *aero
+  PM25nit_RH35: *aero
+  PM25oc_RH35: *aero
+  PM25soa_RH35: *aero
+  PM25ss_RH35: *aero
+  PM25su_RH35: *aero
+  PM25_RH35_GCC: *aero
+  PM25bc_RH35_GCC: *aero
+  PM25du_RH35_GCC: *aero
+  PM25ni_RH35_GCC: *aero
+  PM25oc_RH35_GCC: *aero
+  PM25soa_RH35_GCC: *aero
+  PM25ss_RH35_GCC: *aero
+  PM25su_RH35_GCC: *aero
+  U10M: &wspd
+    units: m s-1
+    scaling: *one
+  V10M: *wspd
+  U: *wspd
+  V: *wspd
+  U2M: *wspd
+  V2M: *wspd
+  PBL: &hgt
+    units: m
+    scaling: *one
+  ZPBL: *hgt
+  H: *hgt
+  ZL: *hgt
+  Q: &s_humid
+    units: kg kg-1
+    scaling: *one
+  QCTOT: *s_humid 
+  Q2M: *s_humid
+  Q10M: *s_humid
+  RH: 
+    units: Percentage
+    scaling: *one
+  PS: &Pa
+    units: Pa
+    scaling: *one
+  SLP: *Pa
+  PL: *Pa
+  TROPPB: *Pa
+  TROPPT: *Pa
+  TROPPV: *Pa
+  DELP: *Pa
+  PPBL: *Pa
+  CLDTT:
+    units: Percentage
+    scaling: *one
+  PHIS:
+    units: m+2 s-2
+    scaling: *one
+  TPREC:
+    units: kg m-2 s-1 
+    scaling: *one
+  TPREC_mm:
+    units: mm
+    scaling: 3.6e3
+    var: TPREC
+  T: &T_K
+    units: Kelvin
+    scaling: *one
+  T2M: *T_K
+  T10M: *T_K
+  TS: *T_K
+  T_C: &T_C
+    units: Degrees Celcius
+    scaling: 'KtoC'
+    var: T
+  T2M_C:
+    <<: *T_C
+    var: T2M
+  T10M_C:
+    <<: *T_C
+    var: T2M
+  TS_C:
+    <<: *T_C
+    var: TS
+  T_F: &T_F
+    units: Degrees Fahrenheit
+    scaling: 'KtoF'
+    var: T
+  T2M_F:
+    <<: *T_F
+    var: T2M
+  T10M_F:
+    <<: *T_F
+    var: T2M
+  TS_F:
+    <<: *T_F
+    var: TS
+  EPV: 
+    units: K m+2 kg-1 s-1
+    scaling: *one
+  OMEGA:
+    units: Pa s-1
+    scaling: *one
+  THETA:
+    <<: *T_K
+    var: TH
+  ETH: *T_K
+

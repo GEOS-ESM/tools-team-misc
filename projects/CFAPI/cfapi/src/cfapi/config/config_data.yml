@@ -1,3 +1,47 @@
+v2:
+  dataset:
+    latest: '/css/gmao/geos-cf/NRTv2/pub/opendap/fcst'
+    fcast: 'fcst/Y%Y/M%m/D%d'
+    assim: 'ana/Y%Y/M%m/D%d'
+  data_ana: &data_ana
+    oxi:     'oxi_inst_1hr_glo_L1440x721_v72'
+    str:     'str_inst_1hr_glo_L1440x721_p28'
+    chm_v72: 'chm_inst_1hr_glo_L1440x721_v72'
+    met_v72: 'met_inst_1hr_glo_L1440x721_v72'
+    oxi_v72: 'oxi_inst_1hr_glo_L1440x721_v72'
+    str_p28: 'str_inst_1hr_glo_L1440x721_p28'
+  data:
+    <<: *data_ana
+    aqc:     'aqc_tavg_1hr_glo_L1440x721_slv'
+    ems:     'ems_tavg_1hr_glo_L1440x721_slv'
+    ghg:     'ghg_inst_3hr_glo_L1440x721_v72'
+    htf:     'htf_inst_15mn_glo_L1440x721_slv'
+    sat:     'sat_inst_1hr_glo_L1440x721_v72'
+    xgc:     'xgc_tavg_1hr_glo_L1440x721_slv'
+    aqc_slv: 'aqc_tavg_1hr_glo_L1440x721_slv'
+    ems_slv: 'ems_tavg_1hr_glo_L1440x721_slv'
+    ghg_v72: 'ghg_inst_3hr_glo_L1440x721_v72'
+    htf_slv: 'htf_inst_15mn_glo_L1440x721_slv'
+    sat_v72: 'sat_inst_1hr_glo_L1440x721_v72'
+    xgc_slv: 'xgc_tavg_1hr_glo_L1440x721_slv'
+    chm_p23: 'chm_inst_1hr_glo_L1440x721_p23'
+    chm_slv: 'chm_tavg_1hr_glo_L1440x721_slv'
+    met_slv: 'met_tavg_1hr_glo_L1440x721_slv'
+    met_p23: 'met_inst_1hr_glo_L1440x721_p23'
+
+  products:
+    chm: [CO, NO2, O3, PM25, SO2, HCHO]
+    met: [MET]
+    aqc: [CO, NO2, O3, PM25, SO2]
+  date_limits:
+    format: '%Y%m%d'
+    fcast: ['20250804','']
+    assim: ['20250804','']
+  format: &format
+    json: 'application/json'
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    txt: 'text/plain'
+
 v1:
   dataset:
     latest: '/discover/nobackup/projects/gmao/geos_cf/pub/GEOS-CF_NRT/opendap/fcast'
@@ -17,31 +61,8 @@ v1:
     met: [MET]
     aqc: [CO, NO2, O3, PM25, SO2]
   date_limits:
-    fcast: ['20190101','']
-    assim: ['20180101','']
-  format: &format
-    json: 'application/json'
-    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    txt: 'text/plain'
-v2:
-  dataset:
-    latest: '/css/gmao/geos-cf/NRTv2/pub/opendap/fcst'
-    fcast: 'fcst/Y%Y/M%m/D%d'
-    assim: 'ana/Y%Y/M%m/D%d'
-  data:
-    chm_slv: 'chm_tavg_1hr_glo_L1440x721_slv'
-    met_slv: 'met_tavg_1hr_glo_L1440x721_slv'
-    chm_p23: 'chm_inst_1hr_glo_L1440x721_p23'
-    met_p23: 'met_inst_1hr_glo_L1440x721_p23'
-    chm_v72: 'chm_inst_1hr_glo_L1440x721_v72'
-    met_v72: 'met_inst_1hr_glo_L1440x721_v72'
-    aqc_slv: 'aqc_tavg_1hr_glo_L1440x721_slv'
-    aqc: 'aqc_tavg_1hr_glo_L1440x721_slv'
-  products:
-    chm: [CO, NO2, O3, PM25, SO2, HCHO]
-    met: [MET]
-    aqc: [CO, NO2, O3, PM25, SO2]
-  date_limits:
-    fcast: ['20250804','']
-    assim: ['20250804','']
+    format: '%Y%m%d'
+    fcast: ['20190101','20260101']
+    assim: ['20180101','20260101']
   format: *format
+

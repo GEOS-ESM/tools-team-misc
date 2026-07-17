@@ -9,7 +9,7 @@ import logging
 from . import validator as v
 
 SCRIPT = Path(__file__).name
-logger = logging.getLogger("cfapi.cfapi_interface")
+logger = logging.getLogger("cfapi")
 
 
 class CustomFormatter(
