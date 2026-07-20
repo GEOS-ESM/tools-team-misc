@@ -34,34 +34,39 @@ H500:
     hwt_30mn_slv_LCC: H500
 
 HGT_SFC:
-  description: ""
+  description: "Surface geopotential height (m+2 s-2)"
   collection:
     hwt_15mn_slv_LCC: HGT_SFC
     hwt_30mn_slv_LCC: HGT_SFC
 
+HGT:
+  description: "Layer edge heights (m)"
+  collection:
+    hwt_15mn_prs_LCC: HGT
+
 ICE:
-  description: ""
+  description: "Icefall (kg m-2 s-1)"
   collection:
     inst1_2d_asm_Nx: ICE
     hwt_15mn_slv_LCC: ICE
     hwt_30mn_slv_LCC: ICE
 
 RAIN:
-  description: ""
+  description: "Rainfall (kg m-2 s-1)"
   collection:
     inst1_2d_asm_Nx: RAIN
     hwt_15mn_slv_LCC: RAIN
     hwt_30mn_slv_LCC: RAIN
 
 SNOW:
-  description: ""
+  description: "Snowfall (kg m-2 s-1)"
   collection:
     inst1_2d_asm_Nx: SNOW
     hwt_15mn_slv_LCC: SNOW
     hwt_30mn_slv_LCC: SNOW
 
 T2M:
-  description: "2 Meter Temperature"
+  description: "2 Meter Air Temperature (K)"
   collection:
     inst1_2d_asm_Nx: T2M
     hwt_15mn_slv_LCC: TMP_2M
