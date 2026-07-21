@@ -17,6 +17,10 @@ CONUS2KMRP_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "DBZ_MAX": "hwt_30mn_slv_LCC",
         "UH25": "hwt_30mn_slv_LCC",
         "CAPE": "hwt_30mn_slv_LCC",
+        "SNOW": "hwt_30mn_slv_LCC",
+        "RAIN": "hwt_30mn_slv_LCC",
+        "SNOWACCUM": "hwt_01hr_acc_LCC",
+        "PRECACCUM": "hwt_01hr_acc_LCC",
     }
 )
 

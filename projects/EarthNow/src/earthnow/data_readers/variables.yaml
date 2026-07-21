@@ -58,12 +58,24 @@ RAIN:
     hwt_15mn_slv_LCC: RAIN
     hwt_30mn_slv_LCC: RAIN
 
+PRECACCUM:
+  description: "Precipitation total (mm)" # rain only? seems correct
+  collection:
+    hwt_01hr_acc_LCC: APCP
+    tavg1_2d_flx_Nx: PRECACCUM  
+
 SNOW:
   description: "Snowfall (kg m-2 s-1)"
   collection:
     inst1_2d_asm_Nx: SNOW
     hwt_15mn_slv_LCC: SNOW
     hwt_30mn_slv_LCC: SNOW
+
+SNOWACCUM:
+  description: "Snowfall total (mm)"
+  collection:
+    hwt_01hr_acc_LCC: SNOWACCUM
+    tavg1_2d_flx_Nx: SNOWACCUM
 
 T2M:
   description: "2 Meter Air Temperature (K)"

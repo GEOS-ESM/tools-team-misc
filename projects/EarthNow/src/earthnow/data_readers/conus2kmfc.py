@@ -13,6 +13,10 @@ CONUS2KMFC_VARS = VARIABLE_REGISTRY.resolve_many(
         "DBZ_MAX": "inst1_2d_asm_Nx",
         "UH25": "inst1_2d_asm_Nx",
         "CAPE": "inst1_2d_asm_Nx",
+        "SNOW": "inst1_2d_asm_Nx",
+        "RAIN": "inst1_2d_asm_Nx",
+        "SNOWACCUM": "tavg1_2d_flx_Nx",
+        "PRECACCUM": "tavg1_2d_flx_Nx",
     }
 )
 
