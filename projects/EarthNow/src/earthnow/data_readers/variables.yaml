@@ -97,3 +97,17 @@ VORT500:
     inst1_2d_asm_Nx: VORT500
     hwt_15mn_slv_LCC: VORT500
     hwt_30mn_slv_LCC: VORT500
+
+U10M:
+  description: "10-meter Eastward wind (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: U10M
+    hwt_15mn_slv_LCC: UGRD_10M
+    hwt_30mn_slv_LCC: UGRD_10M
+
+V10M:
+  description: "10-meter Northward wind (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: V10M
+    hwt_15mn_slv_LCC: VGRD_10M
+    hwt_30mn_slv_LCC: VGRD_10M
