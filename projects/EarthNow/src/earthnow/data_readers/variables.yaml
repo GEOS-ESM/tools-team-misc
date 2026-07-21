@@ -111,3 +111,24 @@ V10M:
     inst1_2d_asm_Nx: V10M
     hwt_15mn_slv_LCC: VGRD_10M
     hwt_30mn_slv_LCC: VGRD_10M
+
+U250:
+  description: "Eastward wind at 250 hPa (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: U250
+    hwt_15mn_slv_LCC: U250
+    hwt_30mn_slv_LCC: U250
+
+V250:
+  description: "Northward wind at 250 hPa (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: V250
+    hwt_15mn_slv_LCC: V250
+    hwt_30mn_slv_LCC: V250
+
+SLP:
+  description: "Sea level pressure (Pa)"
+  collection:
+    inst1_2d_asm_Nx: SLP
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL

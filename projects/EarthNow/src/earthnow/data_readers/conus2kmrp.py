@@ -15,8 +15,9 @@ CONUS2KMRP_VARS = VARIABLE_REGISTRY.resolve_many(
         "CAPE": "inst1_2d_asm_Nx",
         "RAIN": "inst1_2d_asm_Nx",
         "SNOW": "inst1_2d_asm_Nx",
-        "U10M": "inst1_2d_asm_Nx",
-        "V10M": "inst1_2d_asm_Nx",
+        "U250": "inst1_2d_asm_Nx",
+        "V250": "inst1_2d_asm_Nx",
+        "SLP": "inst1_2d_asm_Nx",
         "SNOWACCUM": "tavg1_2d_flx_Nx",
         "PRECACCUM": "tavg1_2d_flx_Nx",
     }

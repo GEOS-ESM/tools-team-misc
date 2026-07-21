@@ -119,7 +119,7 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # Read SLP
     # ------------------------------------------------------------
     slp, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["SLP"]
+        args.fdate, args.pdate, variables=["SLP", "PRMSL"]
     )
     slp = slp.astype(np.float32) / 100.0
 

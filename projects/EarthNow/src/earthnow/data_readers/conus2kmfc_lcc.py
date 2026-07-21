@@ -21,6 +21,9 @@ CONUS2KMFC_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "SNOW": "hwt_15mn_slv_LCC",
         "U10M": "hwt_15mn_slv_LCC",
         "V10M": "hwt_15mn_slv_LCC",
+        "U250": "hwt_15mn_slv_LCC",
+        "V250": "hwt_15mn_slv_LCC",
+        "SLP": "hwt_15mn_slv_LCC",
         "SNOWACCUM": "hwt_01hr_acc_LCC",
         "PRECACCUM": "hwt_01hr_acc_LCC",
     }
