@@ -88,23 +88,19 @@ def plot_cape(fig, ax, plotter, reader, args):
     # Plot field
     # ------------------------------------------------------------
     plot = ax.contourf(lons, lats, data, cmap=cmap, norm=norm, levels=CAPE_LEVELS)
-    # fig.colorbar(plot)  # Confirm plot colorbar matches
 
-    # generate_colorbar()
+    # generate_colorbar(plot) # Uncomment to generate colorbar w every frame
 
 
-def generate_colorbar():
-    """Generate colorbar"""
+def generate_colorbar(plot):
     from earthnow.wxmaps_utils import save_colorbar_single
 
     colorbar_output = (
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
     save_colorbar_single(
-        CAPE_COLORS,
-        CAPE_LEVELS,
-        refl_output,
+        plot,
+        colorbar_output,
         label="Surface-Based CAPE [J/kg]",
-        extend="max",
         ticks=CAPE_LEVELS[::4],
     )
