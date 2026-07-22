@@ -1,0 +1,726 @@
+# CFAPI Root Schema v2
+# Reflects the actual implementation as of May 2026.
+# Covers input parameters, allowed values, defaults, aliases, constraints,
+# dataset/product availability, and the response envelope structure.
+
+# ---------------------------------------------------------------------------
+# INPUT PARAMETERS
+# ---------------------------------------------------------------------------
+
+input_parameters:
+
+  version:
+    type: string
+    required: false
+    default: "v2"
+    canonical_values: ["v1", "v2"]
+    aliases:
+      "1": "v1"
+      "2": "v2"
+    description: >
+      Data version. v1 references the legacy NRT dataset; v2 references the
+      current NRTv2 dataset with an expanded species list.
+
+  collection:
+    type: string
+    required: false
+    default: "fcast"
+    canonical_values: ["fcast", "assim"]
+    aliases:
+      fcst:        "fcast"
+      forecast:    "fcast"
+      ana:         "assim"
+      assimilation: "assim"
+    description: >
+      Model collection. "fcast" is the 5-day deterministic forecast;
+      "assim" is the analysis/replay (assimilation) run.
+
+  dataset:
+    type: string
+    required: false
+    default: "aqc"
+    canonical_values: ["aqc", "chm", "met"]
+    aliases:
+      airq:        "aqc"
+      airquality:  "aqc"
+      chem:        "chm"
+      chemistry:   "chm"
+      meteo:       "met"
+      meteorology: "met"
+    description: >
+      Thematic dataset family.
+        aqc – air quality chemistry (surface only)
+        chm – full chemistry (surface, pressure, and model vertical levels)
+        met – meteorology (surface, pressure, and model vertical levels)
+
+  level:
+    type: string
+    required: false
+    default: "slv"
+    canonical_values: ["slv", "p23", "v72"]
+    aliases:
+      x1: "slv"
+      v1: "slv"
+    description: >
+      Vertical level type.
+        slv – single surface level
+        p23 – 23-level pressure grid
+        v72 – 72 native model levels
+
+  product:
+    type: string | list[string]
+    required: false
+    default: dataset-dependent  # see dataset_defaults below
+    description: >
+      Variable(s) to return. Accepts a single string (product) or a list
+      (products). When omitted the dataset default is used. Products must
+      belong to the chosen dataset/level combination (see availability below).
+      Aliases are resolved before validation.
+
+  lat:
+    type: float
+    required: false
+    default: 38.9
+    range: [-90.0, 90.0]
+    description: >
+      Latitude of the point of interest. The nearest available grid cell
+      is returned; the snapped value is reported in the response schema.
+
+  lon:
+    type: float
+    required: false
+    default: -77.0
+    range: [-180.0, 180.0]
+    notes: >
+      Longitudes in [180, 360) are automatically converted to [-180, 180).
+    description: >
+      Longitude of the point of interest. Same snapping behaviour as lat.
+
+  start:
+    type: string | null
+    aliases: [start_date]
+    required: false
+    default: null  # resolved to "latest"
+    format: "YYYYMMDD  |  latest"
+    description: >
+      First date of the requested time series. "latest" (or null) returns
+      the most recent available initialization or analysis day.
+
+  end:
+    type: string | null
+    aliases: [end_date]
+    required: false
+    default: null  # open-ended when start is a fixed date
+    format: "YYYYMMDD"
+    description: >
+      Last date of the requested time series (inclusive). Must be >= start
+      when both are supplied.
+
+  days:
+    type: integer
+    aliases: [num_days]
+    required: false
+    default: 1
+    range: [1, 31]
+    description: >
+      Number of consecutive days to retrieve when start/end are not
+      specified as a date range.
+
+  # --- optional runtime/settings parameters ---
+
+  use_cache:
+    type: boolean
+    required: false
+    default: true
+    description: Read from on-disk JSON cache when available.
+
+  refresh:
+    type: boolean
+    required: false
+    default: false
+    description: Force re-read from NetCDF even if a cache entry exists.
+
+  cache_root:
+    type: string | path | null
+    required: false
+    default: null  # resolved internally
+    description: Override the default cache directory root.
+
+  fill_value:
+    type: float
+    required: false
+    default: 1.0e15
+    description: Sentinel used for missing / masked data in the response.
+
+  netcdf_engine:
+    type: string
+    required: false
+    default: "netcdf4"
+    description: xarray engine for reading NetCDF files.
+
+  data_limit_override:
+    type: boolean
+    required: false
+    default: false
+    description: >
+      Bypass the 30-day data cap for assimilation requests (max 92 days
+      is always enforced regardless of this flag).
+
+# ---------------------------------------------------------------------------
+# PARAMETER ALIASES (summary)
+# ---------------------------------------------------------------------------
+
+parameter_aliases:
+  start_date: start
+  end_date:   end
+  num_days:   days
+
+# ---------------------------------------------------------------------------
+# DATASET DEFAULT PRODUCTS
+# ---------------------------------------------------------------------------
+
+dataset_defaults:
+  aqc_slv: "NO2"
+  chm_slv: "NO2"
+  chm_p23: "NO2"
+  chm_v72: "NO2"
+  met_slv: "MET"
+  met_p23: "MET"
+  met_v72: "MET"
+
+# ---------------------------------------------------------------------------
+# PRODUCT ALIASES
+# ---------------------------------------------------------------------------
+
+product_aliases:
+  PM25:
+    - pm25
+    - pm2.5
+    - pm_25
+  HCHO:
+    - hcho
+    - formaldehyde
+    - h2co
+    - form
+  PM25_RH35:
+    - pm25_rh35_gcc
+    - pm_25_rh35
+    - pm_25_rh35_gcc
+  T:
+    - t
+    - temp
+    - temperature
+  MET:
+    - met
+
+# ---------------------------------------------------------------------------
+# DATASET / LEVEL COMBINATIONS AND AVAILABLE PRODUCTS
+# ---------------------------------------------------------------------------
+# Products are listed under the datakey (dataset_level) they belong to.
+# "basic_fields" are directly addressable by variable name.
+# Named product blocks aggregate multiple variables under one product key.
+
+dataset_products:
+
+  aqc_slv:
+    description: "Air Quality Chemistry – surface level"
+    supported_collections: ["fcast", "assim"]
+    default: "NO2"
+    basic_fields:
+      - CO       # Carbon Monoxide (ppbv)
+      - NO2      # Nitrogen Dioxide (ppbv)
+      - O3       # Ozone (ppbv)
+      - SO2      # Sulfur Dioxide (ppbv)
+    named_products:
+      PM25_RH35:
+        title: "PM2.5"
+        fields_v1: ["PM25_RH35_GCC"]
+        fields_v2: ["PM25_RH35"]
+
+  chm_slv:
+    description: "Full Chemistry – surface level"
+    supported_collections: ["fcast", "assim"]
+    default: "NO2"
+    basic_fields:
+      # Trace gases
+      - CO       # Carbon Monoxide (ppbv)
+      - NO2      # Nitrogen Dioxide (ppbv)
+      - NO       # Nitric Oxide (ppbv)
+      - NOy      # Total Reactive Nitrogen (ppbv)
+      - O3       # Ozone (ppbv)
+      - SO2      # Sulfur Dioxide (ppbv)
+      - HCHO     # Formaldehyde (ppbv)
+      - HNO3     # Nitric Acid (ppbv)
+      - HNO4     # Peroxynitric Acid (ppbv)
+      - N2O5     # Dinitrogen Pentoxide (ppbv)
+      - NH3      # Ammonia (ppbv)
+      - NH4      # Ammonium (ppbv)
+      - NIT      # Inorganic Nitrate (ppbv)
+      - PAN      # Peroxyacetyl Nitrate (ppbv)  # v2 only
+      - H2O2     # Hydrogen Peroxide (ppbv)
+      - ISOP     # Isoprene (ppbv)
+      - ACET     # Acetone (ppbv)
+      - ALD2     # Acetaldehyde (ppbv)
+      - ALK4     # Lumped Alkenes C4 (ppbv)
+      - C2H6     # Ethane (ppbv)
+      - C3H8     # Propane (ppbv)
+      - EOH      # Ethanol (ppbv)
+      - MACR     # Methacrolein (ppbv)
+      - MEK      # Methyl Ethyl Ketone (ppbv)   # v2 only
+      - MVK      # Methyl Vinyl Ketone (ppbv)
+      - PRPE     # Lumped Propene (ppbv)
+      - RCHO     # Lumped Aldehydes (ppbv)
+      - TOLU     # Toluene (ppbv)
+      - XYLE     # Xylene (ppbv)
+      - BENZ     # Benzene (ppbv)               # v2 only
+      - CH4      # Methane (ppbv)               # v1 only (basic)
+      # Aerosols (v2 basic_fields)
+      - BCPI     # Black Carbon Hydrophilic (ppbv)
+      - BCPO     # Black Carbon Hydrophobic (ppbv)
+      - OCPI     # Organic Carbon Hydrophilic (ppbv)
+      - OCPO     # Organic Carbon Hydrophobic (ppbv)
+      - SALA     # Accumulation Sea Salt (ppbv)
+      - SALC     # Coarse Sea Salt (ppbv)
+      - SOAP     # Secondary Organic Aerosol Precursor (ppbv)
+      - SOAS     # Secondary Organic Aerosol Species (ppbv)
+      - DST1     # Dust Bin 1 (ppbv)            # v2 only
+      - DST2     # Dust Bin 2 (ppbv)            # v2 only
+      - DST3     # Dust Bin 3 (ppbv)            # v2 only
+      - DST4     # Dust Bin 4 (ppbv)            # v2 only
+      # PM fractions (ug/m3, v2 basic_fields)
+      - PM10_RH35
+      - PM25nit_RH35
+      - PM25nh4_RH35
+      - PM25ss_RH35
+      - PM25du_RH35
+      - PM25oc_RH35
+      - PM25bc_RH35
+      - PM25su_RH35
+      - PM25soa_RH35
+      # Bromine (v1 only)
+      - BrO
+      # Iodine (v1 only)
+      - IO
+    named_products:
+      PM25_RH35:
+        title: "PM2.5 (RH35)"
+        fields_v1: ["PM25_RH35_GCC"]
+        fields_v2: ["PM25_RH35"]
+      PM25_sum:
+        title: "PM2.5 (component sum)"
+        fields_v1: ["PM25ni_RH35_GCC", "PM25ss_RH35_GCC", "PM25du_RH35_GCC",
+                    "PM25oc_RH35_GCC", "PM25bc_RH35_GCC", "PM25su_RH35_GCC",
+                    "PM25soa_RH35_GCC"]
+        fields_v2: ["PM25nit_RH35", "PM25nh4_RH35", "PM25ss_RH35",
+                    "PM25du_RH35",  "PM25oc_RH35",  "PM25bc_RH35",
+                    "PM25su_RH35",  "PM25soa_RH35"]
+      HCHO:
+        title: "Formaldehyde"
+        fields_v2: ["HCHO"]  # explicit block in v2; otherwise available as basic_field
+
+  chm_p23:
+    description: "Full Chemistry – 23 pressure levels"
+    supported_collections: ["fcast", "assim"]
+    default: "NO2"
+    basic_fields:
+      - CO
+      - NO2
+      - O3
+      - SO2
+      - HCHO
+      - NOy
+
+  chm_v72:
+    description: "Full Chemistry – 72 native model levels"
+    supported_collections: ["fcast", "assim"]
+    default: "NO2"
+    basic_fields:
+      - CO
+      - HCHO
+      - NO2
+      - BrO
+      - O3
+      - SO2
+
+  met_slv:
+    description: "Meteorology – surface level"
+    supported_collections: ["fcast", "assim"]
+    default: "MET"
+    basic_fields:
+      # Temperature
+      - T         # 2-m Temperature (K)        [v2 at 2m, v1 may differ]
+      - T2M       # 2-m Temperature (K)
+      - T10M      # 10-m Temperature (K)
+      - TS        # Skin Temperature (K)
+      - T_C       # 2-m Temperature (°C)
+      - T2M_C     # 2-m Temperature (°C)
+      - T10M_C    # 10-m Temperature (°C)
+      - TS_C      # Skin Temperature (°C)
+      - T_F       # 2-m Temperature (°F)
+      - T2M_F     # 2-m Temperature (°F)
+      - T10M_F    # 10-m Temperature (°F)
+      - TS_F      # Skin Temperature (°F)
+      # Wind
+      - U         # Zonal Wind (m s-1)
+      - V         # Meridional Wind (m s-1)
+      - U2M       # 2-m Zonal Wind (m s-1)
+      - V2M       # 2-m Meridional Wind (m s-1)
+      - U10M      # 10-m Zonal Wind (m s-1)
+      - V10M      # 10-m Meridional Wind (m s-1)
+      # Humidity
+      - Q         # Specific Humidity (kg kg-1)
+      - Q2M       # 2-m Specific Humidity (kg kg-1)
+      - Q10M      # 10-m Specific Humidity (kg kg-1)
+      - RH        # Relative Humidity (%)
+      # Pressure / Height
+      - PS        # Surface Pressure (Pa)
+      - SLP       # Sea Level Pressure (Pa)
+      - ZPBL      # Planetary Boundary Layer Height (m)
+      - ZL        # Layer height (m)             # v2 only
+      - PHIS      # Surface Geopotential (m² s-²)
+      # Cloud / Radiation
+      - CLDTT     # Cloud Top Temperature (%)
+      # Precipitation
+      - TPREC     # Total Precipitation (kg m-2 s-1)
+      - TPREC_mm  # Total Precipitation (mm; TPREC × 3600)
+      # Tropopause (v2 only)
+      - TROPPB    # Tropopause Pressure – Blended (Pa)
+    named_products:
+      MET:
+        title: "Met (standard bundle)"
+        fields_v1: ["CLDTT", "PHIS", "T2M_F", "TPREC", "U10M", "V10M",
+                    "ZPBL", "TPREC_mm"]
+        fields_v2: ["CLDTT", "PHIS", "T_F", "T", "T_C", "TPREC", "U", "V",
+                    "ZPBL", "TPREC_mm"]
+
+  met_p23:
+    description: "Meteorology – 23 pressure levels"
+    supported_collections: ["fcast", "assim"]
+    default: "MET"
+    basic_fields:
+      - T         # Temperature (K)
+      - U         # Zonal Wind (m s-1)
+      - V         # Meridional Wind (m s-1)
+      - Q         # Specific Humidity (kg kg-1)
+      - RH        # Relative Humidity (%)
+      - H         # Geopotential Height (m)
+      - PL        # Layer Pressure (Pa)
+      - DELP      # Pressure Thickness (Pa)
+      - OMEGA     # Vertical Velocity (Pa s-1)  # if present
+      - EPV       # Ertel Potential Vorticity (K m² kg-1 s-1)
+      - TH        # Potential Temperature (K)
+    named_products:
+      MET:
+        title: "Met (standard bundle)"
+        fields_v2: ["T", "U", "V", "Q", "RH", "H"]
+
+  met_v72:
+    description: "Meteorology – 72 native model levels"
+    supported_collections: ["fcast", "assim"]
+    default: "MET"
+    basic_fields:
+      - T         # Temperature (K)
+      - U         # Zonal Wind (m s-1)
+      - V         # Meridional Wind (m s-1)
+      - Q         # Specific Humidity (kg kg-1)
+      - QCTOT     # Total Condensate (kg kg-1)
+      - PL        # Layer Pressure (Pa)
+      - DELP      # Pressure Thickness (Pa)
+      - AIRDENS_DRYP  # Dry Air Density (kg m-3)  # v2 only
+    named_products:
+      MET:
+        title: "Met (standard bundle)"
+        fields_v2: ["T", "U", "V", "Q", "PL", "DELP"]
+
+# ---------------------------------------------------------------------------
+# FIELD UNITS AND SCALING
+# ---------------------------------------------------------------------------
+# Scaling is applied to the raw NetCDF value before it is returned.
+# Special scaling strings: KtoC = T - 273.15, KtoF = (T - 273.15) * 9/5 + 32
+
+field_metadata:
+
+  # Trace gases
+  CO:        {units: "ppbv",         scaling: 1.0e9}
+  NO2:       {units: "ppbv",         scaling: 1.0e9}
+  NO:        {units: "ppbv",         scaling: 1.0e9}
+  NOy:       {units: "ppbv",         scaling: 1.0e9}
+  O3:        {units: "ppbv",         scaling: 1.0e9}
+  SO2:       {units: "ppbv",         scaling: 1.0e9}
+  HCHO:      {units: "ppbv",         scaling: 1.0e9}
+  HNO3:      {units: "ppbv",         scaling: 1.0e9}
+  HNO4:      {units: "ppbv",         scaling: 1.0e9}
+  N2O5:      {units: "ppbv",         scaling: 1.0e9}
+  NH3:       {units: "ppbv",         scaling: 1.0e9}
+  NH4:       {units: "ppbv",         scaling: 1.0e9}
+  NIT:       {units: "ppbv",         scaling: 1.0e9}
+  PAN:       {units: "ppbv",         scaling: 1.0e9}
+  H2O2:      {units: "ppbv",         scaling: 1.0e9}
+  ISOP:      {units: "ppbv",         scaling: 1.0e9}
+  ACET:      {units: "ppbv",         scaling: 1.0e9}
+  ALD2:      {units: "ppbv",         scaling: 1.0e9}
+  ALK4:      {units: "ppbv",         scaling: 1.0e9}
+  C2H6:      {units: "ppbv",         scaling: 1.0e9}
+  C3H8:      {units: "ppbv",         scaling: 1.0e9}
+  CH4:       {units: "ppbv",         scaling: 1.0e9}
+  EOH:       {units: "ppbv",         scaling: 1.0e9}
+  MACR:      {units: "ppbv",         scaling: 1.0e9}
+  MEK:       {units: "ppbv",         scaling: 1.0e9}
+  MVK:       {units: "ppbv",         scaling: 1.0e9}
+  PRPE:      {units: "ppbv",         scaling: 1.0e9}
+  RCHO:      {units: "ppbv",         scaling: 1.0e9}
+  TOLU:      {units: "ppbv",         scaling: 1.0e9}
+  XYLE:      {units: "ppbv",         scaling: 1.0e9}
+  BENZ:      {units: "ppbv",         scaling: 1.0e9}
+  BrO:       {units: "ppbv",         scaling: 1.0e9}
+  IO:        {units: "ppbv",         scaling: 1.0e9}
+  BCPI:      {units: "ppbv",         scaling: 1.0e9}
+  BCPO:      {units: "ppbv",         scaling: 1.0e9}
+  OCPI:      {units: "ppbv",         scaling: 1.0e9}
+  OCPO:      {units: "ppbv",         scaling: 1.0e9}
+  SALA:      {units: "ppbv",         scaling: 1.0e9}
+  SALC:      {units: "ppbv",         scaling: 1.0e9}
+  SOAP:      {units: "ppbv",         scaling: 1.0e9}
+  SOAS:      {units: "ppbv",         scaling: 1.0e9}
+  DST1:      {units: "ppbv",         scaling: 1.0e9}
+  DST2:      {units: "ppbv",         scaling: 1.0e9}
+  DST3:      {units: "ppbv",         scaling: 1.0e9}
+  DST4:      {units: "ppbv",         scaling: 1.0e9}
+
+  # Aerosol mass concentrations
+  PM25_RH35:     {units: "ug/m3",   scaling: 1.0}
+  PM10_RH35:     {units: "ug/m3",   scaling: 1.0}
+  PM25nit_RH35:  {units: "ug/m3",   scaling: 1.0}
+  PM25nh4_RH35:  {units: "ug/m3",   scaling: 1.0}
+  PM25ss_RH35:   {units: "ug/m3",   scaling: 1.0}
+  PM25du_RH35:   {units: "ug/m3",   scaling: 1.0}
+  PM25oc_RH35:   {units: "ug/m3",   scaling: 1.0}
+  PM25bc_RH35:   {units: "ug/m3",   scaling: 1.0}
+  PM25su_RH35:   {units: "ug/m3",   scaling: 1.0}
+  PM25soa_RH35:  {units: "ug/m3",   scaling: 1.0}
+
+  # Wind
+  U:       {units: "m s-1",         scaling: 1.0}
+  V:       {units: "m s-1",         scaling: 1.0}
+  U2M:     {units: "m s-1",         scaling: 1.0}
+  V2M:     {units: "m s-1",         scaling: 1.0}
+  U10M:    {units: "m s-1",         scaling: 1.0}
+  V10M:    {units: "m s-1",         scaling: 1.0}
+
+  # Temperature (Kelvin)
+  T:       {units: "Kelvin",         scaling: 1.0}
+  T2M:     {units: "Kelvin",         scaling: 1.0}
+  T10M:    {units: "Kelvin",         scaling: 1.0}
+  TS:      {units: "Kelvin",         scaling: 1.0}
+
+  # Temperature (Celsius) – NetCDF var is the corresponding K field
+  T_C:     {units: "Degrees Celsius",    scaling: "KtoC",  var: "T"}
+  T2M_C:   {units: "Degrees Celsius",    scaling: "KtoC",  var: "T2M"}
+  T10M_C:  {units: "Degrees Celsius",    scaling: "KtoC",  var: "T10M"}
+  TS_C:    {units: "Degrees Celsius",    scaling: "KtoC",  var: "TS"}
+
+  # Temperature (Fahrenheit)
+  T_F:     {units: "Degrees Fahrenheit", scaling: "KtoF",  var: "T"}
+  T2M_F:   {units: "Degrees Fahrenheit", scaling: "KtoF",  var: "T2M"}
+  T10M_F:  {units: "Degrees Fahrenheit", scaling: "KtoF",  var: "T10M"}
+  TS_F:    {units: "Degrees Fahrenheit", scaling: "KtoF",  var: "TS"}
+
+  # Humidity
+  Q:       {units: "kg kg-1",        scaling: 1.0}
+  Q2M:     {units: "kg kg-1",        scaling: 1.0}
+  Q10M:    {units: "kg kg-1",        scaling: 1.0}
+  QCTOT:   {units: "kg kg-1",        scaling: 1.0}
+  RH:      {units: "Percentage",     scaling: 1.0}
+
+  # Pressure
+  PS:      {units: "Pa",             scaling: 1.0}
+  SLP:     {units: "Pa",             scaling: 1.0}
+  PL:      {units: "Pa",             scaling: 1.0}
+  DELP:    {units: "Pa",             scaling: 1.0}
+  TROPPB:  {units: "Pa",             scaling: 1.0}
+  TROPPT:  {units: "Pa",             scaling: 1.0}
+  PPBL:    {units: "Pa",             scaling: 1.0}
+  TROPPV:  {units: "Pa",             scaling: 1.0}
+
+  # Height / Geopotential
+  ZPBL:    {units: "m",              scaling: 1.0}
+  ZL:      {units: "m",              scaling: 1.0}
+  H:       {units: "m",              scaling: 1.0}
+  PBL:     {units: "m",              scaling: 1.0}
+  PHIS:    {units: "m+2 s-2",        scaling: 1.0}
+
+  # Cloud
+  CLDTT:   {units: "Percentage",     scaling: 1.0}
+
+  # Precipitation
+  TPREC:    {units: "kg m-2 s-1",    scaling: 1.0}
+  TPREC_mm: {units: "mm",            scaling: 3.6e3, var: "TPREC"}
+
+  # Dynamics
+  OMEGA:   {units: "Pa s-1",         scaling: 1.0}
+  EPV:     {units: "K m+2 kg-1 s-1", scaling: 1.0}
+  TH:      {units: "Kelvin",         scaling: 1.0}
+
+  # Density (v2 only)
+  AIRDENS_DRYP: {units: "kg m-3",    scaling: 1.0}
+
+# ---------------------------------------------------------------------------
+# VALIDATION CONSTRAINTS
+# ---------------------------------------------------------------------------
+
+constraints:
+
+  dataset_level_compatibility:
+    aqc: ["slv"]             # aqc only at surface
+    chm: ["slv", "p23", "v72"]
+    met: ["slv", "p23", "v72"]
+
+  date_limits:
+    format: "YYYYMMDD"
+    fcast:
+      max_days: 1            # forecast: single initialisation date only
+    assim:
+      soft_limit_days: 30    # warning / override required beyond this
+      hard_limit_days: 92    # always enforced; BadRequest raised above this
+
+  lat:
+    min: -90.0
+    max:  90.0
+
+  lon:
+    min: -180.0
+    max:  180.0
+    notes: "Inputs in [180, 360) are silently remapped to [-180, 180)."
+
+  days:
+    min: 1
+    max: 31
+
+# ---------------------------------------------------------------------------
+# RESPONSE ENVELOPE
+# ---------------------------------------------------------------------------
+
+response_schema:
+  type: object
+  properties:
+
+    schema:
+      type: object
+      description: Metadata and provenance for the returned data.
+      properties:
+        version:
+          type: string
+          example: "v2"
+        collection:
+          type: string
+          enum: ["fcast", "assim"]
+        dataset:
+          type: string
+          description: Full NetCDF stream name, e.g. "chm_tavg_1hr_glo_L1440x721_slv"
+        product:
+          type: array
+          items: {type: string}
+          description: Resolved list of product keys returned.
+        lev:
+          type: string
+          description: Human-readable level descriptor, e.g. "Surface Level" or "p23".
+        levs:
+          type: array
+          items: {type: number}
+          description: Actual pressure/model level values from the NetCDF file (empty for slv).
+        lat:
+          type: number
+          description: Requested latitude.
+        lon:
+          type: number
+          description: Requested longitude.
+        near_lat:
+          type: number
+          description: Nearest available grid latitude.
+        near_lon:
+          type: number
+          description: Nearest available grid longitude.
+        type:
+          type: string
+          const: "object"
+        missing_value:
+          type: number
+          default: 1.0e15
+        description:
+          type: string
+          description: >
+            Human-readable summary, e.g.
+            "5-day forecast of …" or "Replay of …"
+        forecast_initialization_time:
+          type: string
+          format: ISO-8601
+          description: Present only when collection is "fcast".
+        time_range:
+          type: string
+          description: >
+            "YYYY-MM-DDThh:mm:ss to YYYY-MM-DDThh:mm:ss"
+            Present only when collection is "assim".
+        longname:
+          type: object
+          additionalProperties: {type: string}
+          description: Mapping of variable key to NetCDF long_name attribute.
+        units:
+          type: object
+          additionalProperties: {type: string}
+          description: Mapping of variable key to physical units string.
+        response_time:
+          type: string
+          description: Wall-clock seconds elapsed to build the response.
+
+    values:
+      type: object
+      description: >
+        Time-series data keyed by product name.
+        Surface level (slv): {product: [v0, v1, …]} – one float per time step.
+        Multi-level (p23 / v72): {product: {level: [v0, v1, …]}} – one float
+        per time step per level.
+      additionalProperties:
+        oneOf:
+          - type: array
+            items: {type: number}
+            description: Surface-level values (slv).
+          - type: object
+            additionalProperties:
+              type: array
+              items: {type: number}
+            description: Multi-level values (p23 / v72); keys are level labels.
+
+    time:
+      type: array
+      items:
+        type: string
+        format: ISO-8601
+      description: >
+        Ordered list of time stamps corresponding to index positions in
+        the values arrays, e.g. ["2025-01-31T00:00:00", "2025-01-31T01:00:00", …]
+
+# ---------------------------------------------------------------------------
+# FILE NAMING CONVENTIONS (stream names)
+# ---------------------------------------------------------------------------
+
+stream_names:
+  v2:
+    aqc_slv:  "aqc_tavg_1hr_glo_L1440x721_slv"
+    chm_slv:  "chm_tavg_1hr_glo_L1440x721_slv"
+    chm_p23:  "chm_inst_1hr_glo_L1440x721_p23"
+    chm_v72:  "chm_inst_1hr_glo_L1440x721_v72"
+    met_slv:  "met_tavg_1hr_glo_L1440x721_slv"
+    met_p23:  "met_inst_1hr_glo_L1440x721_p23"
+    met_v72:  "met_inst_1hr_glo_L1440x721_v72"
+  v1:
+    chm_slv:  "chm_tavg_1hr_g1440x721_v1"
+    met_slv:  "met_tavg_1hr_g1440x721_x1"
+    aqc_slv:  "aqc_tavg_1hr_g1440x721_slv"
+    # additional v1 keys follow the same pattern
+
+# ---------------------------------------------------------------------------
+# CACHE STRUCTURE
+# ---------------------------------------------------------------------------
+
+cache_key_path_template: >
+  {cache_root}/file_cache/{version}/{collection}/{datakey}/{file_time}/{products}/data_{lat}_{lon}[_{days}days].json

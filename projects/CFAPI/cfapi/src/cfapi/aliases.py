@@ -5,7 +5,7 @@ from typing import Dict, Iterable, Tuple, List, Any, Optional
 import argparse
 import logging
 
-logger = logging.getLogger("cfapi.aliases")
+logger = logging.getLogger("cfapi")
 
 
 def _norm(s: str) -> str:
