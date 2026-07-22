@@ -52,7 +52,7 @@ exclude = [
 ]
 
 [tool.uv.sources]
-wxvis = {git = "https://github.com/GEOS-ESM/tools-team-misc.git", branch = "main", subdirectory = "projects/WxVis" }
+wxvis = { git = "https://github.com/GEOS-ESM/tools-team-misc.git", branch = "main", subdirectory = "projects/WxVis" }
 
 [tool.taskipy.tasks]
 mytest = "./bin/scratch/plot_one_single_wrapper.sh"

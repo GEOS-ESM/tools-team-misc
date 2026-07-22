@@ -10,44 +10,18 @@ from earthnow.products.registry import register
 import logging
 
 logger = logging.getLogger(__name__)
+from wxvis import colors
+from matplotlib import colormaps
 
+cmap = colormaps["CAPE"]
+
+variable = "cape"
 
 # ------------------------------------------------------------------
 # CAPE colormap + levels
 # ------------------------------------------------------------------
-CAPE_RGB = (
-    np.array(
-        [
-            [200, 200, 200],
-            [160, 160, 160],
-            [125, 125, 125],
-            [91, 91, 91],
-            [116, 170, 255],
-            [83, 125, 226],
-            [52, 84, 197],
-            [23, 43, 158],
-            [117, 255, 117],
-            [79, 197, 79],
-            [45, 142, 45],
-            [16, 91, 16],
-            [255, 255, 91],
-            [221, 170, 60],
-            [188, 91, 31],
-            [156, 24, 0],
-            [255, 142, 255],
-            [212, 106, 212],
-            [170, 70, 170],
-            [129, 39, 129],
-            [90, 10, 90],
-            [50, 10, 60],
-        ]
-    )
-    / 255.0
-)
-CAPE_ALPHA = np.ones(CAPE_RGB.shape[0])
 # NOTE: Alpha values from IDL: alevs= [99,100] - I don't really know what this means I just clipped below 100?
 
-CAPE_COLORS = np.column_stack((CAPE_RGB, CAPE_ALPHA))
 
 CAPE_LEVELS = np.array(
     [
@@ -108,7 +82,6 @@ def plot_cape(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
-    cmap = ListedColormap(CAPE_COLORS)
     norm = BoundaryNorm(CAPE_LEVELS, ncolors=cmap.N, clip=False)
 
     # ------------------------------------------------------------
@@ -124,9 +97,9 @@ def generate_colorbar():
     """Generate colorbar"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    # Reflectivity colorbar
-    refl_output = "/discover/nobackup/hzafar/EarthNow/plots/cape_colorbar.png"
-
+    colorbar_output = (
+        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
+    )
     save_colorbar_single(
         CAPE_COLORS,
         CAPE_LEVELS,
