@@ -1,0 +1,82 @@
+# Registry of valid variables and their per-collection names.
+#
+# TEMPLATE TO ADD A VARIABLE:
+# ALIAS:
+#   description: "DESCRIPTION"  # Long name description
+#   collection:
+#     inst1_2d_asm_Nx: VARIABLE_NAME
+#     hwt_15mn_slv_LCC: VARIABLE_NAME
+#     hwt_30mn_slv_LCC: VARIABLE_NAME
+#
+# The top-level key is the alias (must match that used across collections).
+# A variable does not need an entry for every collection, and new collection
+# names can be added freely -- no code changes required.
+
+CAPE:
+  description: "Convective Available Potential Energy (J/kg)"
+  collection:
+    inst1_2d_asm_Nx: CAPE
+    hwt_15mn_slv_LCC: CAPE
+    hwt_30mn_slv_LCC: CAPE
+
+DBZ_MAX:
+  description: "Maximum Composite Radar Reflectivity"
+  collection:
+    inst1_2d_asm_Nx: DBZ_MAX
+    hwt_15mn_slv_LCC: REFC
+    hwt_30mn_slv_LCC: REFC
+
+H500:
+  description: "Height at 500 hPa (m)"
+  collection:
+    inst1_2d_asm_Nx: H500
+    hwt_15mn_slv_LCC: H500
+    hwt_30mn_slv_LCC: H500
+
+HGT_SFC:
+  description: ""
+  collection:
+    hwt_15mn_slv_LCC: HGT_SFC
+    hwt_30mn_slv_LCC: HGT_SFC
+
+ICE:
+  description: ""
+  collection:
+    inst1_2d_asm_Nx: ICE
+    hwt_15mn_slv_LCC: ICE
+    hwt_30mn_slv_LCC: ICE
+
+RAIN:
+  description: ""
+  collection:
+    inst1_2d_asm_Nx: RAIN
+    hwt_15mn_slv_LCC: RAIN
+    hwt_30mn_slv_LCC: RAIN
+
+SNOW:
+  description: ""
+  collection:
+    inst1_2d_asm_Nx: SNOW
+    hwt_15mn_slv_LCC: SNOW
+    hwt_30mn_slv_LCC: SNOW
+
+T2M:
+  description: "2 Meter Temperature"
+  collection:
+    inst1_2d_asm_Nx: T2M
+    hwt_15mn_slv_LCC: TMP_2M
+    hwt_30mn_slv_LCC: TMP_2M
+
+UH25:
+  description: "Updraft Helicity 2-5 KM (m2 s-2)"
+  collection:
+    inst1_2d_asm_Nx: UH25
+    hwt_15mn_slv_LCC: UPHL_2-KM
+    hwt_30mn_slv_LCC: UPHL_2-KM
+
+VORT500:
+  description: "500 mb Relative Vorticity"
+  collection:
+    inst1_2d_asm_Nx: VORT500
+    hwt_15mn_slv_LCC: VORT500
+    hwt_30mn_slv_LCC: VORT500
