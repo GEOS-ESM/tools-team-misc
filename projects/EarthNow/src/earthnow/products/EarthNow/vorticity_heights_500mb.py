@@ -7,14 +7,23 @@ import numpy as np
 from matplotlib.colors import BoundaryNorm, ListedColormap
 
 from earthnow.products.registry import register
-from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
 
-vCOLORS = load_color_table(paths.colortable("idl_colortable_5_reversed.txt"))
+from wxvis import colors
+from matplotlib import colormaps
+
+cmap = colormaps["IDL-005-STD_GAMMA-II"].reversed()
+variable = "vorticity"
+
+# set alphas near zero for transparency
+cmap_colors = cmap(np.arange(cmap.N))
+cmap_colors[:3, -1] = 0
+cmap = ListedColormap(cmap_colors)
+
 
 vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
 
@@ -69,22 +78,15 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
-    # TODO: Incorporate generalized colormap module
-    cmap = ListedColormap(vCOLORS)
-    cmap_colors = cmap(np.arange(cmap.N))
 
-    # Bills alphas for vort: alevs= [0,2.5], Match this
-    cmap_colors[:3, -1] = 0
-    cmap = ListedColormap(cmap_colors)
-
-    norm = BoundaryNorm(vLEVELS, ncolors=cmap.N, clip=True)
+    norm = BoundaryNorm(vLEVELS, ncolors=cmap.N)
 
     # ------------------------------------------------------------
     # Plot vorticity field (cyclonic)
     # ------------------------------------------------------------
     # Conus
     if np.all(lats > 0):
-        ax.pcolormesh(
+        plot = ax.pcolormesh(
             lons,
             lats,
             vort,
@@ -106,7 +108,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
             else:
                 lats_mask = lats[~mask]
                 vort_mask = vort[~mask] * -1
-            ax.pcolormesh(
+            plot = ax.pcolormesh(
                 lons,
                 lats_mask,
                 vort_mask,
@@ -157,25 +159,20 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
         inline_spacing=5,
     )
 
-    # Generate a new colorbar tests
-    # ticks = np.arange(0,65,5)
-    # generate_colorbar(
-    #     cmap_colors, # If we apply transparency to a colormap, we want it to be reflected in the colobar we create... so perhaps we need to regenerate this more often/inside the function?
-    #     vLEVELS,
-    #     ticks,
-    # )
+    # generate_colorbar(plot) # Uncomment this to generate colorbar
 
 
-def generate_colorbar(colors, levels, ticks):
-    """Generate colorbar for 500mb vorticity/heights"""
+def generate_colorbar(plot):
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    output = paths.colorbar_output("vorticity_heights_500mb.png")
+    colorbar_output = (
+        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
+    )
+    ticks = np.arange(0, 65, 5)
+
     save_colorbar_single(
-        colors,
-        levels,
-        output,
+        plot,
+        colorbar_output,
         label="500mb Cyclonic Relative Vorticity (×10⁻⁵ s⁻¹) and Height (m)",
-        extend="neither",
         ticks=ticks,
     )
