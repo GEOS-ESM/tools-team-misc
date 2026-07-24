@@ -8,61 +8,19 @@ import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm, LinearSegmentedColormap
 from earthnow.products.registry import register
+from wxvis import colors
+from matplotlib import colormaps
 
 import logging
 
 logger = logging.getLogger(__name__)
 
+cmap = colormaps["DBZ_MAX"]
+uphl_cmap = colormaps["UPHL"]
 
-# ------------------------------------------------------------------
-# Updraft Helicity colormap + levels
-# ------------------------------------------------------------------
-# IDL values for colormapping
-r = [128, 200, 54, 123, 59, 153]
-g = [128, 231, 224, 62, 54, 0]
-b = [128, 255, 224, 210, 135, 153]
-
-UPHL_colors_list = np.column_stack((r, g, b)) / 255
-
-UPHL_COLORS = np.array(
-    [
-        (128 / 255, 128 / 255, 128 / 255),  # Dark grey
-        (200 / 255, 231 / 255, 255 / 255),  # Light Blue
-        (54 / 255, 224 / 255, 224 / 255),  # Bright Cyan
-        (123 / 255, 62 / 255, 210 / 255),  # Vibrant Purple
-        (59 / 255, 54 / 255, 135 / 255),  #  Dark Indigo
-        (153 / 255, 0 / 255, 153 / 255),  # Deep Magenta
-    ]
-)
 
 # Level generation for Updraft Helicity
 UPHL_LEVELS = np.arange(50, 800, 50)  # 50–750 m²/s²
-
-# ------------------------------------------------------------------
-# Reflectivity colormap + levels (wxmaps-style)
-# ------------------------------------------------------------------
-
-REFL_COLORS = (
-    np.array(
-        [
-            [108, 237, 239],
-            [50, 129, 246],
-            [0, 33, 245],
-            [117, 250, 76],
-            [86, 187, 55],
-            [55, 125, 34],
-            [255, 253, 84],
-            [246, 192, 66],
-            [239, 134, 51],
-            [234, 57, 36],
-            [175, 35, 24],
-            [117, 20, 12],
-            [230, 61, 244],
-            [134, 106, 198],
-        ]
-    )
-    / 255.0
-)
 
 REFL_LEVELS = np.arange(5.0, 80.0, 5.0)  # 5–75 dBZ
 
@@ -130,15 +88,12 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
-    cmap = ListedColormap(REFL_COLORS)
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
 
-    uphl_cmap = LinearSegmentedColormap.from_list(
-        "custom_smooth", UPHL_colors_list, N=len(UPHL_LEVELS)
-    )
     uphl_norm = BoundaryNorm(UPHL_LEVELS, ncolors=uphl_cmap.N, clip=True)
     # logger.info((uphl_cmap.N))
     # logger.info(UPHL_LEVELS)
+
     # ------------------------------------------------------------
     # Plot fields
     # ------------------------------------------------------------
@@ -169,23 +124,6 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
         zorder=5,
     )
     logger.info(f"vmin: {UPHL_LEVELS.min()} vmax: {UPHL_LEVELS.max()}")
-    # fig.colorbar(uphl_plot)  # Confirm plot colorbar matches
-
-    import matplotlib.pyplot as plt
-    import matplotlib.cm as cm
-
-    fig_cbar, ax_cbar = plt.subplots(figsize=(10, 2))
-
-    sm = cm.ScalarMappable(cmap=uphl_cmap, norm=uphl_norm)
-    plt.colorbar(
-        sm,
-        cax=ax_cbar,
-        orientation="horizontal",
-    )
-    uphl_output = (
-        "/discover/nobackup/hzafar/EarthNow/plots/updraft_helicity_colorbar.png"
-    )
-    fig_cbar.savefig(uphl_output)
 
     # ------------------------------------------------------------
     # Report image resolution
@@ -205,23 +143,23 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
         f"  Pixel ratio (image/data): {(img_height_px * img_width_px) / (data_shape[0] * data_shape[1]):.2f}x"
     )
 
-    generate_colorbar()
+    # generate_colorbar("dbz_max", radar_plot, "Simulated Radar (dBZ)", REFL_LEVELS)
+    # generate_colorbar(
+    #     "uphl", uphl_plot, "Maximum Updraft Helicity (m2 s-2)", UPHL_LEVELS[1::2]
+    # )
 
 
-# We should just get rid of this, I want to look into replacing this with Joe's config next
-def generate_colorbar():
-    """Generate colorbar for max reflectivity"""
+def generate_colorbar(variable, plot, label, ticks):
+    """Generate colorbar for each var"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    # Reflectivity colorbar
-    refl_output = (
-        "/discover/nobackup/hzafar/EarthNow/plots/max_reflectivity_colorbar.png"
+    colorbar_output = (
+        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
+
     save_colorbar_single(
-        REFL_COLORS,
-        REFL_LEVELS,
-        refl_output,
-        label="Composite Reflectivity (dBZ)",
-        extend="neither",
-        ticks=REFL_LEVELS,
+        plot,
+        colorbar_output,
+        label=label,
+        ticks=ticks,
     )
