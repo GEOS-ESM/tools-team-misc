@@ -10,7 +10,7 @@ VARIABLES_YAML = Path(__file__).parent / "variables.yaml"
 # Loader class to prevent duplicate overrides in yaml_load
 class UniqueKeyLoader(yaml.SafeLoader):
     def construct_mapping(self, node, deep=False):
-        # loader.flatten_mapping(node)
+        self.flatten_mapping(node)  # support YAML merge keys (<<)
         mapping = {}
         for key_node, value_node in node.value:
             key = self.construct_object(key_node, deep=deep)
@@ -102,9 +102,12 @@ class VariableRegistry:
 
 def build_registry(yaml_path: Path) -> VariableRegistry:
     """Loads variable definitions from yaml_path and registers them."""
-    with open(yaml_path) as f:
-        products = yaml.load(f, Loader=UniqueKeyLoader)
-
+    with yaml_path.open("r", encoding="utf-8") as f:
+        products = yaml.load(f, Loader=UniqueKeyLoader) or {}
+    if not isinstance(products, dict):
+        raise ValueError(
+            f"Expected a mapping at top level of {yaml_path}, got {type(products).__name__}"
+        )
     registry = VariableRegistry()
     for alias, data in products.items():
         registry.register(
