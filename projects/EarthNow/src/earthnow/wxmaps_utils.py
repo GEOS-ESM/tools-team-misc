@@ -431,32 +431,28 @@ def save_colorbar_grid(
 
 
 def save_colorbar_single(
-    colors,
-    levels,
+    plot,
     output_path,
     label="",
     width=6600,
     height=600,
-    extend="neither",
     ticks=None,
+    format=None,
 ):
     """
     Generate a single horizontal colorbar PNG.
 
     Parameters
     ----------
-    colors : array-like
-        Color array (N, 3) normalized to 0-1
-    levels : array-like
-        Contour levels
+    plot: matplotlib.pyplot obj
     output_path : str
         Full path to save PNG
     label : str
         Label for the colorbar
     width, height : int
         Image dimensions in pixels
-    extend : str
-        'neither', 'both', 'min', 'max'
+    format: str
+        Tick value formatting
     """
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap, BoundaryNorm
@@ -471,16 +467,10 @@ def save_colorbar_single(
     ax = fig.add_axes([0.15, 0.35, 0.70, 0.25])  # [left, bottom, width, height]
 
     # Create colormap
-    cmap = ListedColormap(colors)
-    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
-
-    # Create colorbar
-    cb = plt.colorbar(
-        plt.cm.ScalarMappable(norm=norm, cmap=cmap),
-        cax=ax,
-        orientation="horizontal",
-        extend=extend,
-    )
+    if format:
+        cb = fig.colorbar(plot, cax=ax, orientation="horizontal", format=format)
+    else:
+        cb = fig.colorbar(plot, cax=ax, orientation="horizontal")
 
     # Set label with large font
     cb.set_label(label, fontsize=48, fontweight="bold", labelpad=15)
