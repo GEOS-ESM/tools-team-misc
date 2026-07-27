@@ -35,6 +35,12 @@ products:
     style: light
     driver: "plotall.py"
     base-path: $BASE_PATH
+  Aerosols:
+    product: aerosol_EarthNow
+    style: greyblue
+    driver: "plotall.py"
+    base-path: $BASE_PATH
+
 
 data_readers:
   geos_cycled_replay:
