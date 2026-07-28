@@ -328,6 +328,31 @@ def load_color_table(filepath):
     return colors / 255.0
 
 
+def colorbar_alpha_fade(
+    cmap,
+    pct_float: float,
+    ncolors=256,
+):
+    """
+    Apply an alpha fade to an existing colormap
+    Parameters
+    -------------
+    cmap: matplotlib.colors.Colormap
+    """
+    if not (0 <= pct_float <= 1):
+        raise ValueError("Percent must be between 0 and 1")
+    color_matrix = cmap(np.linspace(0, 1, ncolors))
+    alphas = np.ones(ncolors)
+    n_fade = int(256 * pct_float)
+    alphas[:n_fade] = np.linspace(0, 1, n_fade)
+    color_matrix[:, -1] = alphas
+
+    from matplotlib.colors import ListedColormap
+
+    cmap = ListedColormap(color_matrix)
+    return cmap
+
+
 # I think we should delete this function, since we can more simply generate colorbar rows using the build_colorbar below
 def save_colorbar_grid(
     colorbar_specs, output_path, title="", width=6600, height=600, grid_shape=(2, 2)

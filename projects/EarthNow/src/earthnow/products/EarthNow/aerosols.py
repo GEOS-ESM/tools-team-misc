@@ -9,6 +9,8 @@ from earthnow.products.registry import register
 
 import logging
 
+from earthnow.wxmaps_utils import colorbar_alpha_fade
+
 logger = logging.getLogger(__name__)
 
 from wxvis import colors
@@ -69,16 +71,7 @@ def plot_aerosols(fig, ax, plotter, reader, args):
         # Colormap + normalization
         # ------------------------------------------------------------
         cmap = colormaps[values["cmap"]]
-
-        # Assign alpha transparency
-        num_colors = 256
-        color_matrix = cmap(np.linspace(0, 1, num_colors))
-        alphas = np.ones(num_colors)
-        n_fade = int(256 * 0.2)
-        alphas[:n_fade] = np.linspace(0, 1, n_fade)
-        color_matrix[:, -1] = alphas
-
-        cmap = ListedColormap(color_matrix)
+        cmap = colorbar_alpha_fade(cmap, 0.30)
 
         # ------------------------------------------------------------
         # Plot fields
