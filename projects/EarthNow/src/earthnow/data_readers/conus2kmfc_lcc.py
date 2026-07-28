@@ -17,6 +17,10 @@ CONUS2KMFC_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "DBZ_MAX": "hwt_30mn_slv_LCC",
         "UH25": "hwt_30mn_slv_LCC",
         "CAPE": "hwt_30mn_slv_LCC",
+        "NIEXTTAU": "hwt_30mn_slv_LCC",
+        "SUEXTTAU": "hwt_30mn_slv_LCC",
+        "DUEXTTAU": "hwt_30mn_slv_LCC",
+        "SSEXTTAU": "hwt_30mn_slv_LCC",
     }
 )
 

@@ -26,6 +26,13 @@ DBZ_MAX:
     hwt_15mn_slv_LCC: REFC
     hwt_30mn_slv_LCC: REFC
 
+DUEXTTAU:
+  description: "Dust Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: DUEXTTAU
+    hwt_15mn_slv_LCC: DUEXTTAU
+    hwt_30mn_slv_LCC: DUEXTTAU
+
 H500:
   description: "Height at 500 hPa (m)"
   collection:
@@ -46,6 +53,13 @@ ICE:
     hwt_15mn_slv_LCC: ICE
     hwt_30mn_slv_LCC: ICE
 
+NIEXTTAU:
+  description: "Nitrate Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: NIEXTTAU
+    hwt_15mn_slv_LCC: NIEXTTAU
+    hwt_30mn_slv_LCC: NIEXTTAU
+
 RAIN:
   description: ""
   collection:
@@ -59,6 +73,20 @@ SNOW:
     inst1_2d_asm_Nx: SNOW
     hwt_15mn_slv_LCC: SNOW
     hwt_30mn_slv_LCC: SNOW
+
+SSEXTTAU:
+  description: "Sea Salt Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: SSEXTTAU
+    hwt_15mn_slv_LCC: SSEXTTAU
+    hwt_30mn_slv_LCC: SSEXTTAU
+
+SUEXTTAU:
+  description: "Sulfate Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: SUEXTTAU
+    hwt_15mn_slv_LCC: SUEXTTAU
+    hwt_30mn_slv_LCC: SUEXTTAU
 
 T2M:
   description: "2 Meter Temperature"
