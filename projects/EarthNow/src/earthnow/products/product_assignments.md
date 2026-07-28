@@ -70,8 +70,8 @@ Convective Available Potential Energy
 ## Composition
 `ploteic_aerosols`
 Aerosol Optical Thickness [SS, DU, SU, NI]
-- Assignee: Sandra / Hannah
-- Status:
+- Assignee: Hannah
+- Status: Done
 
 `ploteic_carbon`
 Carbon Aerosol Optical Thickness
