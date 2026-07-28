@@ -41,7 +41,7 @@ aerosols = {
 }
 
 n_vars = len(aerosols.keys())
-create_colorbar = True
+create_colorbar = False
 
 
 # ------------------------------------------------------------------
