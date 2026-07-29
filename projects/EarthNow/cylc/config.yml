@@ -10,29 +10,39 @@ plot_current:
   nproc: $NPROC
 
 products:
-  RainSnow:
-    product: rain_snow_accumulation_total_EarthNow
-    style: light
-    driver: "plotall.py"
-    base-path: $BASE_PATH
+  # RainSnow: # I don't think this product is complete, comment out for now
+  #   product: rain_snow_accumulation_total_EarthNow
+  #   style: light
+  #   driver: "plotall.py"
+  #   base-path: $BASE_PATH
   T2m:
     product: temperature_2m_EarthNow
-    style: light
+    style: light # Create "Blank" style?
     driver: "plotall.py"
     base-path: $BASE_PATH
   Vort500:
     product: vorticity_heights_500mb_EarthNow
-    style: light
+    style: greytopo
     driver: "plotall.py"
     base-path: $BASE_PATH
   Wind10m:
     product: winds_10m_EarthNow
-    style: light
+    style: light # Create "Blank" style?
     driver: "plotall.py"
     base-path: $BASE_PATH
   Wind250:
     product: winds_heights_250mb_EarthNow
-    style: light
+    style: greyblue
+    driver: "plotall.py"
+    base-path: $BASE_PATH
+  HelicityMaxReflectivity:
+    product: max_reflectivity_EarthNow
+    style: helicity
+    driver: "plotall.py"
+    base-path: $BASE_PATH
+  Cape:
+    product: cape_EarthNow
+    style: greyblue
     driver: "plotall.py"
     base-path: $BASE_PATH
   Aerosols:

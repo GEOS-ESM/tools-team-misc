@@ -167,6 +167,8 @@ class GEOSDataReader:
         error_msg = (
             f"No suitable GEOS file found for {pdate} "
             f"(vars={variables}, collections={self._candidate_collections(var_type=var_type)})"
+            f"\n** Your plot may be an empty map!"
+            f"\n** Double check that var_type is being passed appropriately in product script."
         )
 
         if raise_on_missing:

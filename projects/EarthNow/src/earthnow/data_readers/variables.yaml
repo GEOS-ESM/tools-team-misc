@@ -41,13 +41,18 @@ H500:
     hwt_30mn_slv_LCC: H500
 
 HGT_SFC:
-  description: ""
+  description: "Surface geopotential height (m+2 s-2)"
   collection:
     hwt_15mn_slv_LCC: HGT_SFC
     hwt_30mn_slv_LCC: HGT_SFC
 
+HGT:
+  description: "Layer edge heights (m)"
+  collection:
+    hwt_15mn_prs_LCC: HGT
+
 ICE:
-  description: ""
+  description: "Icefall (kg m-2 s-1)"
   collection:
     inst1_2d_asm_Nx: ICE
     hwt_15mn_slv_LCC: ICE
@@ -61,18 +66,30 @@ NIEXTTAU:
     hwt_30mn_slv_LCC: NIEXTTAU
 
 RAIN:
-  description: ""
+  description: "Rainfall (kg m-2 s-1)"
   collection:
     inst1_2d_asm_Nx: RAIN
     hwt_15mn_slv_LCC: RAIN
     hwt_30mn_slv_LCC: RAIN
 
+PRECACCUM:
+  description: "Precipitation total (mm)" # rain only? seems correct
+  collection:
+    hwt_01hr_acc_LCC: APCP
+    tavg1_2d_flx_Nx: PRECACCUM
+
 SNOW:
-  description: ""
+  description: "Snowfall (kg m-2 s-1)"
   collection:
     inst1_2d_asm_Nx: SNOW
     hwt_15mn_slv_LCC: SNOW
     hwt_30mn_slv_LCC: SNOW
+
+SNOWACCUM:
+  description: "Snowfall total (mm)"
+  collection:
+    hwt_01hr_acc_LCC: SNOWACCUM
+    tavg1_2d_flx_Nx: SNOWACCUM
 
 SSEXTTAU:
   description: "Sea Salt Aerosol Optical Depth"
@@ -89,7 +106,7 @@ SUEXTTAU:
     hwt_30mn_slv_LCC: SUEXTTAU
 
 T2M:
-  description: "2 Meter Temperature"
+  description: "2 Meter Air Temperature (K)"
   collection:
     inst1_2d_asm_Nx: T2M
     hwt_15mn_slv_LCC: TMP_2M
@@ -108,3 +125,38 @@ VORT500:
     inst1_2d_asm_Nx: VORT500
     hwt_15mn_slv_LCC: VORT500
     hwt_30mn_slv_LCC: VORT500
+
+U10M:
+  description: "10-meter Eastward wind (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: U10M
+    hwt_15mn_slv_LCC: UGRD_10M
+    hwt_30mn_slv_LCC: UGRD_10M
+
+V10M:
+  description: "10-meter Northward wind (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: V10M
+    hwt_15mn_slv_LCC: VGRD_10M
+    hwt_30mn_slv_LCC: VGRD_10M
+
+U250:
+  description: "Eastward wind at 250 hPa (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: U250
+    hwt_15mn_slv_LCC: U250
+    hwt_30mn_slv_LCC: U250
+
+V250:
+  description: "Northward wind at 250 hPa (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: V250
+    hwt_15mn_slv_LCC: V250
+    hwt_30mn_slv_LCC: V250
+
+SLP:
+  description: "Sea level pressure (Pa)"
+  collection:
+    inst1_2d_asm_Nx: SLP
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL

@@ -51,7 +51,7 @@ while [[ "$#" -gt 0 ]]; do
       shift 2
       ;;
     -l|--logger-opt)
-      LOGGER="$3"
+      LOGGER="$2"
       shift 2
       ;;
     -b|--boundaries)
