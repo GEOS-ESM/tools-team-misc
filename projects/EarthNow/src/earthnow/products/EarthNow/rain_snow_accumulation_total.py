@@ -96,9 +96,13 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ============
     # Read from reader (reader decides the collection)
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["SNOWACCUM"], var_type="accum"
+        args.fdate, args.pdate, variables=["SNOWACCUM"]  # , var_type="accum"
     )
+
+    # NOTE: old data readers required var_type keyword, new ones do not.
+
     if data is None:
+
         return False  # Signal to skip this plot
 
     data = data.astype(np.float32) / 25.4
@@ -131,8 +135,11 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ============
     # Read from reader (reader decides the collection)
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["APCP", "PRECACCUM"], var_type="accum"
+        args.fdate, args.pdate, variables=["APCP", "PRECACCUM"]  # , var_type="accum"
     )
+
+    # NOTE: old data readers required var_type keyword, new ones do not.
+
     if data is None:
         return False  # Signal to skip this plot
     data = data.astype(np.float32) / 25.4
