@@ -52,7 +52,7 @@ Near Surface Winds
 
 `ploteic_tanom`
 2-meter Temperature Anomaly (1-day running mean)
-- Assignee:
+- Assignee: Skip this product for now
 
 `ploteic_cape`
 Convective Available Potential Energy
@@ -74,7 +74,7 @@ Aerosol Optical Thickness [SS, DU, SU, NI]
 `ploteic_carbon`
 Carbon Aerosol Optical Thickness
 - Assignee: Hannah
-- Status:
+- Status: Done
 
 
 ## Global Dynamics
