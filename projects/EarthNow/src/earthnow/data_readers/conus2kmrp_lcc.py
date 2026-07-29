@@ -30,6 +30,9 @@ CONUS2KMRP_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "SUEXTTAU": "hwt_30mn_slv_LCC",
         "DUEXTTAU": "hwt_30mn_slv_LCC",
         "SSEXTTAU": "hwt_30mn_slv_LCC",
+        "OCEXTTAU": "hwt_30mn_slv_LCC",
+        "BREXTTAU": "hwt_30mn_slv_LCC",
+        "BCEXTTAU": "hwt_30mn_slv_LCC",
     }
 )
 
