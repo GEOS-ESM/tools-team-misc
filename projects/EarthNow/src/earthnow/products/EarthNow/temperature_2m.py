@@ -119,13 +119,19 @@ def plot_temperature_2m(fig, ax, plotter, reader, args):
         N=256,
     )
 
+    # Interp to 256 levels maintaining spacing change in original
+    old_x = np.linspace(0, 1, len(LEVELS))
+    new_x = np.linspace(0, 1, 256)
+    fine_levels = np.interp(new_x, old_x, LEVELS)
+
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    ax.pcolormesh(
+    ax.contourf(
         lons,
         lats,
         data,
+        levels=fine_levels,
         cmap=cmap,
         norm=norm,
         transform=ccrs.PlateCarree(),
