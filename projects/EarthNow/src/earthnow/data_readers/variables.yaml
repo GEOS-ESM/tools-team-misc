@@ -26,6 +26,13 @@ DBZ_MAX:
     hwt_15mn_slv_LCC: REFC
     hwt_30mn_slv_LCC: REFC
 
+DUEXTTAU:
+  description: "Dust Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: DUEXTTAU
+    hwt_15mn_slv_LCC: DUEXTTAU
+    hwt_30mn_slv_LCC: DUEXTTAU
+
 H500:
   description: "Height at 500 hPa (m)"
   collection:
@@ -51,6 +58,13 @@ ICE:
     hwt_15mn_slv_LCC: ICE
     hwt_30mn_slv_LCC: ICE
 
+NIEXTTAU:
+  description: "Nitrate Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: NIEXTTAU
+    hwt_15mn_slv_LCC: NIEXTTAU
+    hwt_30mn_slv_LCC: NIEXTTAU
+
 RAIN:
   description: "Rainfall (kg m-2 s-1)"
   collection:
@@ -62,7 +76,7 @@ PRECACCUM:
   description: "Precipitation total (mm)" # rain only? seems correct
   collection:
     hwt_01hr_acc_LCC: APCP
-    tavg1_2d_flx_Nx: PRECACCUM  
+    tavg1_2d_flx_Nx: PRECACCUM
 
 SNOW:
   description: "Snowfall (kg m-2 s-1)"
@@ -76,6 +90,20 @@ SNOWACCUM:
   collection:
     hwt_01hr_acc_LCC: SNOWACCUM
     tavg1_2d_flx_Nx: SNOWACCUM
+
+SSEXTTAU:
+  description: "Sea Salt Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: SSEXTTAU
+    hwt_15mn_slv_LCC: SSEXTTAU
+    hwt_30mn_slv_LCC: SSEXTTAU
+
+SUEXTTAU:
+  description: "Sulfate Aerosol Optical Depth"
+  collection:
+    inst1_2d_asm_Nx: SUEXTTAU
+    hwt_15mn_slv_LCC: SUEXTTAU
+    hwt_30mn_slv_LCC: SUEXTTAU
 
 T2M:
   description: "2 Meter Air Temperature (K)"

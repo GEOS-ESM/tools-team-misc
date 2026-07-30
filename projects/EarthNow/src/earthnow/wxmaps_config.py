@@ -304,7 +304,6 @@ class StyleConfig:
             base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
             use_gshhs=False,
             # ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
-            show_timestamp=True,  # Defaults is False now, add it in your style for testing
         )
 
     @staticmethod
@@ -330,7 +329,6 @@ class StyleConfig:
             state_color="#333333",
             show_nws_warnings=True,
             nws_severe_only=True,
-            show_timestamp=True,  # Take this out once finished
         )
 
 

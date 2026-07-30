@@ -22,6 +22,10 @@ CONUS2KMFC_VARS = VARIABLE_REGISTRY.resolve_many(
         "SLP": "inst1_2d_asm_Nx",
         "SNOWACCUM": "tavg1_2d_flx_Nx",
         "PRECACCUM": "tavg1_2d_flx_Nx",
+        "NIEXTTAU": "inst1_2d_asm_Nx",
+        "SUEXTTAU": "inst1_2d_asm_Nx",
+        "DUEXTTAU": "inst1_2d_asm_Nx",
+        "SSEXTTAU": "inst1_2d_asm_Nx",
     }
 )
 

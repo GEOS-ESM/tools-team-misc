@@ -65,7 +65,8 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
     # )
 
     # ------------------------------------------------------------
-    # Report data resolution
+    # Report data resolution --
+    # NOTE: I don't know what this is for? No other product has this
     # ------------------------------------------------------------
     data_shape = data.shape
     print(

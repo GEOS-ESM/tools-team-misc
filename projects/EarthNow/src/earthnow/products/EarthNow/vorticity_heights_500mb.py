@@ -4,28 +4,16 @@ Vorticity and Heights at 500mb Product
 
 import cartopy.crs as ccrs
 import numpy as np
-from matplotlib.colors import BoundaryNorm, ListedColormap
+from matplotlib.colors import BoundaryNorm
 
 from earthnow.products.registry import register
-from earthnow import paths
-
-# ------------------------------------------------------------------
-# Reflectivity colormap + levels (wxmaps-style)
-# ------------------------------------------------------------------
-
 from wxvis import colors
 from matplotlib import colormaps
+from earthnow.wxmaps_utils import colorbar_alpha_fade
 
-cmap = colormaps["IDL-005-STD_GAMMA-II"].reversed()
 variable = "vorticity"
-
-# set alphas near zero for transparency
-cmap_colors = cmap(np.arange(cmap.N))
-cmap_colors[:3, -1] = 0
-cmap = ListedColormap(cmap_colors)
-
-
 vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # Main product function
@@ -78,6 +66,8 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
+    cmap = colormaps["IDL-005-STD_GAMMA-II"].reversed()
+    cmap = colorbar_alpha_fade(cmap, 0.1)
 
     norm = BoundaryNorm(vLEVELS, ncolors=cmap.N)
 
@@ -131,12 +121,6 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
 
     hgts_smoothed = boxcar_smooth_2D(hgts, window_size=window_size)
 
-    # Subsample the data for plotting (only for quick speed applications)
-    # stride = 6
-    # lons_sub = lons[::stride]
-    # lats_sub = lats[::stride]
-    # hgts_sub = hgts_smoothed[::stride, ::stride]
-
     hlevs = np.arange(4500, 6300, 30)  # 4800m to 6240m every 30m
 
     cs = ax.contour(
@@ -159,7 +143,8 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
         inline_spacing=5,
     )
 
-    # generate_colorbar(plot) # Uncomment this to generate colorbar
+    if create_colorbar == True:
+        generate_colorbar(plot)
 
 
 def generate_colorbar(plot):

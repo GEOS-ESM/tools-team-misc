@@ -328,6 +328,32 @@ def load_color_table(filepath):
     return colors / 255.0
 
 
+def colorbar_alpha_fade(
+    cmap,
+    pct_float: float,
+    ncolors=256,
+):
+    """
+    Apply an alpha fade to an existing colormap
+    Parameters
+    -------------
+    cmap: matplotlib.colors.Colormap
+    """
+    if not (0 <= pct_float <= 1):
+        raise ValueError("Percent must be between 0 and 1")
+    color_matrix = cmap(np.linspace(0, 1, ncolors))
+    alphas = np.ones(ncolors)
+    n_fade = int(256 * pct_float)
+    alphas[:n_fade] = np.linspace(0, 1, n_fade)
+    color_matrix[:, -1] = alphas
+
+    from matplotlib.colors import ListedColormap
+
+    cmap = ListedColormap(color_matrix)
+    return cmap
+
+
+# I think we should delete this function, since we can more simply generate colorbar rows using the build_colorbar below
 def save_colorbar_grid(
     colorbar_specs, output_path, title="", width=6600, height=600, grid_shape=(2, 2)
 ):
@@ -430,13 +456,54 @@ def save_colorbar_grid(
     print(f"Saved colorbar to: {output_path}")
 
 
+def build_colorbar(
+    fig,
+    ax,
+    mappable,
+    ticks,
+    label="",
+    format=None,
+):
+    """
+    Build a single horizontal colorbar PNG given an existing fig, ax
+
+    Parameters
+    ----------
+    fig:
+    axis:
+    plot: matplotlib.pyplot obj
+    ticks : np.array
+        Colorbar tickmarks
+    label : str
+        Label for the colorbar
+    format: str
+        Tick value formatting
+    """
+
+    if format:
+        cb = fig.colorbar(mappable, cax=ax, orientation="horizontal", format=format)
+    else:
+        cb = fig.colorbar(mappable, cax=ax, orientation="horizontal")
+
+    # Set label with large font
+    cb.set_label(label, fontsize=60, loc="left", labelpad=15)
+    cb.ax.xaxis.set_label_position("top")
+    cb.ax.tick_params(labelsize=42, width=4, length=12)
+    cb.ax.minorticks_off()
+
+    tick_positions = ticks
+    cb.set_ticks(tick_positions)
+
+    return fig
+
+
 def save_colorbar_single(
     plot,
     output_path,
+    ticks,
     label="",
     width=6600,
     height=600,
-    ticks=None,
     format=None,
 ):
     """
@@ -447,6 +514,8 @@ def save_colorbar_single(
     plot: matplotlib.pyplot obj
     output_path : str
         Full path to save PNG
+    ticks : np.array
+        Colorbar tickmarks
     label : str
         Label for the colorbar
     width, height : int
@@ -455,7 +524,6 @@ def save_colorbar_single(
         Tick value formatting
     """
     import matplotlib.pyplot as plt
-    from matplotlib.colors import ListedColormap, BoundaryNorm
     import os
 
     dpi = 100
@@ -466,26 +534,7 @@ def save_colorbar_single(
     # Single axes with margins
     ax = fig.add_axes([0.15, 0.35, 0.70, 0.25])  # [left, bottom, width, height]
 
-    # Create colormap
-    if format:
-        cb = fig.colorbar(plot, cax=ax, orientation="horizontal", format=format)
-    else:
-        cb = fig.colorbar(plot, cax=ax, orientation="horizontal")
-
-    # Set label with large font
-    cb.set_label(label, fontsize=48, fontweight="bold", labelpad=15)
-    cb.ax.tick_params(labelsize=42, width=4, length=12)
-    # Set colorbar outline width
-    cb.outline.set_linewidth(3)
-
-    # Set tick positions
-    if ticks is not None:
-        tick_positions = ticks
-    elif len(levels) > 20:
-        tick_positions = levels[:: len(levels) // 10]  # ~10 ticks
-    else:
-        tick_positions = levels[::2]
-    cb.set_ticks(tick_positions)
+    build_colorbar(fig, ax, plot, ticks, label)
 
     # Save
     os.makedirs(os.path.dirname(output_path), exist_ok=True)

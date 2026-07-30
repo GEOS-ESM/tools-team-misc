@@ -10,3 +10,4 @@ from . import winds_heights_250mb
 from . import rain_snow_accumulation_total
 from . import max_reflectivity
 from . import cape
+from . import aerosols
