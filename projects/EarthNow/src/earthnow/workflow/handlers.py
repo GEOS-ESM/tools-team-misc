@@ -5,7 +5,7 @@ import shutil
 import tempfile 
 import subprocess
 
-from myutils import str_replace
+from earthnow.workflow.utils import str_replace
 
 def make_image(request):
 

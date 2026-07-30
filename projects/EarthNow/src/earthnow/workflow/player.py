@@ -1,5 +1,5 @@
 import copy
-from myutils import parse_duration
+from earthnow.workflow.utils import parse_duration
 
 
 class Player(object):

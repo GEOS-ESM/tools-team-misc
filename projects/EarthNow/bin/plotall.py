@@ -143,6 +143,10 @@ def parse_args():
         help="Base path for Forward Processing data",
     )
 
+    parser.add_argument(
+         "--output", default="",
+    )
+
     parser.add_argument("--base-path", default=paths._G6DEV_PUB / "WxMaps")
 
     parser.add_argument(
@@ -365,14 +369,17 @@ def plot_single_pdate(pdate, args, style, map_config):
             local_args.fdate, local_args.pdate, timezone=local_args.timezone
         )
 
-    output = get_output_filepath(
-        local_args.base_path,
-        local_args.exp_res,
-        local_args.exp_id,
-        local_args.product,
-        local_args.map_type,
-        local_args.fdate,
-        local_args.pdate,
+    output = local_args.output
+    
+    if not output:
+        output = get_output_filepath(
+            local_args.base_path,
+            local_args.exp_res,
+            local_args.exp_id,
+            local_args.product,
+            local_args.map_type,
+            local_args.fdate,
+            local_args.pdate,
     )
 
     plotter.save(output, optimize=True)
