@@ -12,7 +12,12 @@ environment variables to adapt to a different HPC cluster or local install:
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        return False
 
 CONFIG_DIR = Path(__file__).resolve().parent
 load_dotenv(CONFIG_DIR / ".env")
