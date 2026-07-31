@@ -114,19 +114,32 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # Colormap + normalization
     # ------------------------------------------------------------
     cmap = plt.get_cmap("PuBu")
-    norm = BoundaryNorm(snowLEVELS, ncolors=cmap.N, clip=True)
+    # norm = BoundaryNorm(snowLEVELS, ncolors=cmap.N, clip=True)
+    # BoundaryNorm essentially puts data into buckets
+    # Which can make a pcolormesh plot color levels
+    # similar to a contour plot
+    # But we don't need BoundaryNorm for a contour plot bc contourf
+    # makes buckets for us using levels.
+
+    # Interp to 256 levels maintaining spacing differences in original
+    old_x = np.linspace(0, 1, len(snowLEVELS))
+    new_x = np.linspace(0, 1, 256)
+    fine_levels = np.interp(new_x, old_x, snowLEVELS)
 
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    ax.pcolormesh(
+    ax.contourf(
         lons,
         lats,
         data,
+        norm="linear",
+        vmin=min(snowLEVELS),
+        vmax=max(snowLEVELS),
+        levels=fine_levels,
         cmap=cmap,
-        norm=norm,
         transform=ccrs.PlateCarree(),
-        shading="nearest",
+        # shading="nearest",
         zorder=4,
     )
 
@@ -151,18 +164,32 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # Colormap + normalization
     # ------------------------------------------------------------
     cmap = plt.get_cmap("YlGn")
-    norm = BoundaryNorm(rainLEVELS, ncolors=cmap.N, clip=True)
+    # norm = BoundaryNorm(rainLEVELS, ncolors=cmap.N, clip=True)
+    # BoundaryNorm essentially puts data into buckets
+    # Which can make a pcolormesh plot color levels
+    # similar to a contour plot
+    # But we don't need BoundaryNorm for a contour plot bc contourf
+    # makes buckets for us using levels.
+    # norm = Normalize(vmin=min(rainLEVELS), vmax=max(rainLEVELS))
+
+    # Interp to 256 levels maintaining spacing differences in original
+    old_x = np.linspace(0, 1, len(rainLEVELS))
+    new_x = np.linspace(0, 1, 256)
+    fine_levels = np.interp(new_x, old_x, rainLEVELS)
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    ax.pcolormesh(
+    ax.contourf(
         lons,
         lats,
         data,
+        levels=fine_levels,
+        norm="linear",
+        vmin=min(rainLEVELS),
+        vmax=max(rainLEVELS),
         cmap=cmap,
-        norm=norm,
         transform=ccrs.PlateCarree(),
-        shading="nearest",
+        # shading="nearest",
         zorder=4,
     )
 
