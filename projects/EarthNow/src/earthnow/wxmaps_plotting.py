@@ -27,7 +27,12 @@ from earthnow.wxmaps_config import (
     ResolutionConfig,
     StyleConfig,
 )
-from earthnow.paths import COUNTRY_BORDERS, STATE_BORDERS_5M, COUNTY_BORDERS_5M
+from earthnow.paths import (
+    COUNTRY_BORDERS,
+    STATE_BORDERS_5M,
+    COUNTY_BORDERS_5M,
+    ROADS_10M,
+)
 
 import logging
 
@@ -168,7 +173,6 @@ class WxMapPlotter:
         # Skip coastlines if using GSHHS (already included)
         # ===================================================================
         if "coastlines" in boundaries:
-            print("  Adding Cartopy coastline+lake borders")
             self.ax.coastlines(
                 resolution=feature_resolution,
                 linewidth=self.style.coastline_width,
@@ -185,6 +189,7 @@ class WxMapPlotter:
                 alpha=self.style.coastline_alpha,
                 zorder=6,
             )
+            print("  Added Cartopy coastline+lake borders")
 
         # Using US gov compliant shape files
         if "countries" in boundaries:
@@ -202,12 +207,11 @@ class WxMapPlotter:
                     zorder=5,
                 )
 
-                print("  Adding US State dept country borders")
                 self.ax.add_feature(countries_feature)
+                print("  Added US State dept country borders")
 
             # Fall back to cartopy if fails
             except Exception:
-                print("  Adding Cartopy country borders")
                 self.ax.add_feature(
                     cfeature.BORDERS.with_scale(feature_resolution),
                     linewidth=self.style.country_width,
@@ -216,15 +220,13 @@ class WxMapPlotter:
                     facecolor="none",
                     zorder=5,
                 )
+                print("  Added Cartopy country borders")
 
         if "states" in boundaries:
             try:
                 from cartopy.io.shapereader import Reader
                 from cartopy.feature import ShapelyFeature
 
-                states_path = (
-                    shapefiles_path + "US_census_files/cb_2018_us_state_5m.shp"
-                )
                 states_feature = ShapelyFeature(
                     Reader(STATE_BORDERS_5M).geometries(),
                     crs=ccrs.PlateCarree(),
@@ -235,8 +237,8 @@ class WxMapPlotter:
                     zorder=5,
                 )
 
-                print("  Adding US Census state borders")
                 self.ax.add_feature(states_feature)
+                print("  Added US Census state borders")
 
             # Fall back to Cartopy if failing
             except Exception:
@@ -251,12 +253,11 @@ class WxMapPlotter:
                 )
 
         if "counties" in boundaries:
-            # Counties require additional Natural Earth data
+            # Use US census counties
             try:
                 from cartopy.io.shapereader import Reader
                 from cartopy.feature import ShapelyFeature
 
-                print("  Adding US Census counties")
                 counties_feature = ShapelyFeature(
                     Reader(COUNTY_BORDERS_5M).geometries(),
                     crs=ccrs.PlateCarree(),
@@ -267,9 +268,11 @@ class WxMapPlotter:
                     zorder=5,
                 )
                 self.ax.add_feature(counties_feature)
+                print("  Adding US Census counties")
 
-            except Exception:
-                print("Warning: Could not load county boundaries")
+            except Exception as e:
+                print("WARNING: Could not load county boundaries")
+                print(f"Error: {e}")
 
         if "rivers" in boundaries:
             print("  Adding Cartopy rivers")
@@ -646,74 +649,78 @@ class WxMapPlotter:
         except Exception as e:
             print(f"Warning: GSHHS coastline outlines failed: {e}")
 
-    def draw_coastlines(self, feature_resolution: str = "50m"):
-        self.ax.coastlines(
-            resolution=feature_resolution,
-            color=self.style.coastline_color,
-            linewidth=self.style.coastline_width,
-            alpha=self.style.coastline_alpha,
-            zorder=6,
-        )
+    # ------------------------------ Note ----------------------------------
+    # I commented out these functions as they are disjointed from the boundaries under create_basemap. If we want to be able to call them individual, we can bring them back but we should move the create_basemap setting with boundaries out to here and then refer to those functions in create_basemap() so we don't have duplicate/conflicting methods
+    # -------------------------------------------------------------------
+    #
+    # def draw_coastlines(self, feature_resolution: str = "50m"):
+    #     self.ax.coastlines(
+    #         resolution=feature_resolution,
+    #         color=self.style.coastline_color,
+    #         linewidth=self.style.coastline_width,
+    #         alpha=self.style.coastline_alpha,
+    #         zorder=6,
+    #     )
+    #
+    # def draw_countries(self, feature_resolution: str = "50m"):
+    #     """Draw country boundaries"""
+    #     self.ax.add_feature(
+    #         cfeature.BORDERS.with_scale(feature_resolution),
+    #         linewidth=self.style.country_width,
+    #         edgecolor=self.style.country_color,
+    #         alpha=self.style.country_alpha,
+    #         facecolor="none",
+    #         zorder=5,
+    #     )
+    #
+    # def draw_states(self, feature_resolution: str = "50m"):
+    #     """Draw state boundaries"""
+    #     self.ax.add_feature(
+    #         cfeature.STATES.with_scale(feature_resolution),
+    #         linewidth=self.style.state_width,
+    #         edgecolor=self.style.state_color,
+    #         alpha=self.style.state_alpha,
+    #         facecolor="none",
+    #         zorder=5,
+    #     )
+    #
+    # def draw_counties(self, feature_resolution: str = "50m"):
+    #     """Draw county boundaries (requires external Natural Earth data)"""
+    #     print("Warning: County boundaries are not yet implemented")
 
-    def draw_countries(self, feature_resolution: str = "50m"):
-        """Draw country boundaries"""
-        self.ax.add_feature(
-            cfeature.BORDERS.with_scale(feature_resolution),
-            linewidth=self.style.country_width,
-            edgecolor=self.style.country_color,
-            alpha=self.style.country_alpha,
-            facecolor="none",
-            zorder=5,
-        )
-
-    def draw_states(self, feature_resolution: str = "50m"):
-        """Draw state boundaries"""
-        self.ax.add_feature(
-            cfeature.STATES.with_scale(feature_resolution),
-            linewidth=self.style.state_width,
-            edgecolor=self.style.state_color,
-            alpha=self.style.state_alpha,
-            facecolor="none",
-            zorder=5,
-        )
-
-    def draw_counties(self, feature_resolution: str = "50m"):
-        """Draw county boundaries (requires external Natural Earth data)"""
-        print("Warning: County boundaries are not yet implemented")
-
-    def draw_rivers(self, feature_resolution: str = "50m"):
-        """Draw rivers"""
-        self.ax.add_feature(
-            cfeature.RIVERS.with_scale(feature_resolution),
-            linewidth=self.style.river_width,
-            edgecolor=self.style.river_color,
-            alpha=self.style.river_alpha,
-            zorder=4,
-        )
-
-    def add_boundaries(self, boundaries):
-        """
-        Draw requested map boundaries in a deterministic order.
-        """
-        if not boundaries:
-            return
-
-        requested = set(boundaries)
-
-        for b in BOUNDARY_ORDER:
-            if b not in requested:
-                continue
-
-            if b == "coastlines":
-                self.draw_coastlines()
-            elif b == "rivers":
-                self.draw_rivers()
-            elif b == "countries":
-                self.draw_countries()
-            elif b == "states":
-                self.draw_states()
-            elif b == "counties":
-                self.draw_counties()
+    # def draw_rivers(self, feature_resolution: str = "50m"):
+    #     """Draw rivers"""
+    #     self.ax.add_feature(
+    #         cfeature.RIVERS.with_scale(feature_resolution),
+    #         linewidth=self.style.river_width,
+    #         edgecolor=self.style.river_color,
+    #         alpha=self.style.river_alpha,
+    #         zorder=4,
+    #     )
+    #
+    # def add_boundaries(self, boundaries):
+    #     """
+    #     Draw requested map boundaries in a deterministic order.
+    #     """
+    #     if not boundaries:
+    #         return
+    #
+    #     requested = set(boundaries)
+    #
+    #     for b in BOUNDARY_ORDER:
+    #         if b not in requested:
+    #             continue
+    #
+    #         if b == "coastlines":
+    #             self.draw_coastlines()
+    #         elif b == "rivers":
+    #             self.draw_rivers()
+    #         elif b == "countries":
+    #             self.draw_countries()
+    #         elif b == "states":
+    #             self.draw_states()
+    #         elif b == "counties":
+    #             self.draw_counties()
 
     def add_cities(
         self, city_list: Optional[List[dict]] = None, min_population: int = 1000000
@@ -861,7 +868,7 @@ class WxMapPlotter:
                         ),
                     )
 
-    def add_roads(self, road_scale: str = "50m", major_only: bool = False):
+    def add_roads(self, road_scale: str = "50m", major_only: bool = True):
         """
         Add road features
 
@@ -874,58 +881,34 @@ class WxMapPlotter:
             If False, show all roads
         """
         try:
-            if major_only:
-                # Load roads shapefile and filter for major roads
-                from cartopy.io.shapereader import Reader, natural_earth
-                import shapely.geometry as sgeom
+            import geopandas as gpd
 
-                # Get the roads shapefile
-                roads_path = natural_earth(
-                    resolution=road_scale, category="cultural", name="roads"
-                )
+            # Import roads shapefile and filter to US only
+            roads_shp = gpd.read_file(ROADS_10M)
+            roads_shp = roads_shp[roads_shp["sov_a3"] == "USA"]
 
-                # Read and filter roads
-                roads_reader = Reader(roads_path)
-                major_roads = []
-
-                for road in roads_reader.records():
-                    # Filter by road type - keep only major highways
-                    # Natural Earth road types: 'Major Highway', 'Secondary Highway', 'Road'
-                    road_type = road.attributes.get("type", "")
-                    if "Major" in road_type or "Highway" in road_type:
-                        major_roads.append(road.geometry)
-
-                # Add filtered roads to map
-                for geom in major_roads:
-                    self.ax.add_geometries(
-                        [geom],
-                        ccrs.PlateCarree(),
-                        edgecolor=self.style.road_color,
-                        facecolor="none",
-                        linewidth=self.style.road_width,
-                        alpha=self.style.road_alpha,
-                        zorder=4,
-                    )
-
-                print(f"Added {len(major_roads)} major roads")
+            if self.style.major_only:
+                # Filter to Major Highways and Beltways
+                roads_shp = roads_shp[
+                    (roads_shp["type"] == "Major Highway")
+                    | (roads_shp["type"] == "Beltway")
+                ]
+                print(f"Adding {len(roads_shp)} US major roads")
             else:
-                # Add all roads using feature
-                roads = cfeature.NaturalEarthFeature(
-                    category="cultural",
-                    name="roads",
-                    scale=road_scale,
-                    edgecolor=self.style.road_color,
-                    facecolor="none",
-                )
-                self.ax.add_feature(
-                    roads,
-                    linewidth=self.style.road_width,
-                    alpha=self.style.road_alpha,
-                    zorder=4,
-                )
+                print("Added All US Roads from Natural Earth")
+
+            self.ax.add_geometries(
+                roads_shp.geometry,
+                crs=ccrs.PlateCarree(),
+                linewidth=self.style.road_width,
+                edgecolor=self.style.road_color,
+                facecolor="none",
+                alpha=self.style.road_alpha,
+                zorder=4,
+            )
+
         except Exception as e:
-            print(f"Warning: Could not load roads feature: {e}")
-            print(f"  This may require downloading Natural Earth road data")
+            print(f"Warning: Could not load roads feature from {ROADS_10M}: {e}")
 
     def add_nws_warnings(self, valid_time: datetime):
         """
@@ -936,10 +919,6 @@ class WxMapPlotter:
         valid_time : datetime
             Valid time for warnings
         """
-        # turn off nws warnings for "global"
-        if not self.style.show_nws_warnings or self.config.name == "global":
-            return
-
         try:
             from earthnow.wxmaps_nws_warnings import NWSWarnings, get_nws_shapefile_path
 

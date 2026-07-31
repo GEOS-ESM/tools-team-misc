@@ -106,6 +106,11 @@ COUNTY_BORDERS_5M = env_path(
     SHAPEFILES_PATH / "US_census_files" / "cb_2018_us_county_5m.shp",
 )
 
+ROADS_10M = env_path(
+    "ROADS_10M",
+    SHAPEFILES_PATH / "Natural_Earth" / "ne_10m_roads.shp",
+)
+
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
