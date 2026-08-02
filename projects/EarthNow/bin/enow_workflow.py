@@ -12,10 +12,41 @@ from earthnow.workflow.player import Player
 from earthnow.workflow.utils import read_yaml
 from earthnow.workflow.handlers import make_image, make_movie, purge
 
-def execute(args):
 
-    args_plot = args['plot']
+def execute(**args):
+    """
+    Executes the earthnow workflow.
 
+    This method executes the EarthNow workflow based on the supplied keyword
+    option arguments.
+
+    Parameters
+    ----------
+    time_dt : datetime object
+        Reference date/time.
+    config : str
+        Configuration filename.
+    task : str
+        Name of configuration task to execute.
+    nproc : int
+        Number of processors to use.
+    plot : bool
+        If true, generate images and movies.
+    image : bool
+        If true, generate images.
+    movie : bool
+        If true, geneate movies.
+    purge : bool
+        If true, delete expired image and movie files.
+
+    Returns
+    -------
+    None
+        No return value
+
+    """
+
+    args_plot = args["plot"]
     time_dt = args["time_dt"]
     task = args["task"]
 
@@ -23,34 +54,51 @@ def execute(args):
     # ==================
 
     config = read_yaml(args["config"])
-    ntasks = config.get('nproc', 1)
-    if args['nproc']:
-        ntasks = args['nproc']
+    ntasks = config.get("nproc", 1)
+    if args["nproc"]:
+        ntasks = args["nproc"]
 
-    # Plot requested data
-    # ===================
+    # Generate images
+    # ===============
 
-    if args_plot or args['image']:
+    if args_plot or args["image"]:
 
         iterator = Player(config, task, time_dt, **args)
         pool = Pool(ntasks)
         pool.map(make_image, iterator)
 
-    if args_plot or args['movie']:
+    # Generate movies
+    # ===============
+
+    if args_plot or args["movie"]:
 
         iterator = Player(config, task, time_dt, tloop=False, seamless=True, **args)
         pool = Pool(ntasks)
         pool.map(make_movie, iterator)
 
-    if args['purge']:
+    # Removed expired image and movie files
+    # =====================================
 
-        clean = dict(config['clean'])
+    if args["purge"]:
+
+        clean = dict(config["clean"])
         options = {**clean, **args}
         iterator = Player(config, task, time_dt, tloop=False, seamless=True, **options)
         pool = Pool(1)
         pool.map(purge, iterator)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
+    """
+    EarthNow workflow command-line interface.
+
+    Retrieves command-line arguments and execute the workflow.
+
+    Usage
+    -----
+    Type "enow_workflow" -h for a list of command-line options.
+
+    """
 
     freeze_support()
 
@@ -61,46 +109,57 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
-            "datetime",
-            metavar="datetime",
-            type=str,
-            help="Date or datetime ISO string (e.g. ccyy-mm-ddThh:mm:ss)",
-        )
+        "datetime",
+        metavar="datetime",
+        type=str,
+        help="Date or datetime ISO string (e.g. ccyy-mm-ddThh:mm:ss)",
+    )
 
     parser.add_argument(
-            "config", metavar="config", type=str, help="configuration file (.yml)"
-        )
+        "config", metavar="config", type=str, help="configuration file (.yml)"
+    )
     parser.add_argument(
-            "--stime", metavar="start_time", default=None, help="Start time as ISO duration offset", type=str
-        )
+        "--stime",
+        metavar="start_time",
+        default=None,
+        help="Start time as ISO duration offset",
+        type=str,
+    )
     parser.add_argument(
-            "--etime", metavar="end_time", default=None, help="Ending time as ISO duration offset", type=str
-        )
+        "--etime",
+        metavar="end_time",
+        default=None,
+        help="Ending time as ISO duration offset",
+        type=str,
+    )
     parser.add_argument(
-            "--task", metavar="task_name", required=True, help="Config task", type=str
-        )
+        "--task", metavar="task_name", required=True, help="Config task", type=str
+    )
     parser.add_argument(
-            "--nproc", metavar="nproc", default=None, help="Number of processors", type=int
-        )
+        "--nproc", metavar="nproc", default=None, help="Number of processors", type=int
+    )
     parser.add_argument(
-            "--products", metavar="products", nargs="*", help="Products to generate", type=str
-        )
+        "--products",
+        metavar="products",
+        nargs="*",
+        help="Products to generate",
+        type=str,
+    )
     parser.add_argument(
-            "--regions", metavar="regions", nargs="*", help="Regions to generate", type=str
-        )
+        "--regions", metavar="regions", nargs="*", help="Regions to generate", type=str
+    )
     parser.add_argument(
-            "--streams", metavar="streams", nargs="*", help="Streams to generate", type=str
-        )
-    parser.add_argument('--plot', action='store_true',
-                    help='Generate all images and movies')
-    parser.add_argument('--publish', action='store_true',
-                    help='Publish visuals')
-    parser.add_argument('--movie', action='store_true',
-                    help='Generate movie files')
-    parser.add_argument('--image', action='store_true',
-                    help='Generate images')
-    parser.add_argument('--purge', action='store_true',
-                    help='Purge expired image files')
+        "--streams", metavar="streams", nargs="*", help="Streams to generate", type=str
+    )
+    parser.add_argument(
+        "--plot", action="store_true", help="Generate all images and movies"
+    )
+    parser.add_argument("--publish", action="store_true", help="Publish visuals")
+    parser.add_argument("--movie", action="store_true", help="Generate movie files")
+    parser.add_argument("--image", action="store_true", help="Generate images")
+    parser.add_argument(
+        "--purge", action="store_true", help="Purge expired image files"
+    )
 
     args = parser.parse_args()
 
@@ -111,10 +170,10 @@ if __name__ == '__main__':
 
     args_dict = vars(args)
     args_dict.update({"date": idate, "time": itime, "time_dt": time_dt})
-    specified = [v for v in args_dict.values() if isinstance(v,bool) and v]
+    specified = [v for v in args_dict.values() if isinstance(v, bool) and v]
     if not specified:
-        args_dict['plot'] = True
+        args_dict["plot"] = True
 
-    execute(args_dict)
+    execute(**args_dict)
 
     sys.exit(0)
