@@ -8,9 +8,9 @@ import datetime as dt
 
 from multiprocessing import Pool, freeze_support
 
-from player import Player
-from myutils import read_yaml
-from handlers import make_image, make_movie, purge
+from earthnow.workflow.player import Player
+from earthnow.workflow.utils import read_yaml
+from earthnow.workflow.handlers import make_image, make_movie, purge
 
 def execute(args):
 
