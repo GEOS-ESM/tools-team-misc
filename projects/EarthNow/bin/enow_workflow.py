@@ -8,9 +8,9 @@ import datetime as dt
 
 from multiprocessing import Pool, freeze_support
 
-from earthnow.workflow.player import Player
-from earthnow.workflow.utils import read_yaml
-from earthnow.workflow.handlers import make_image, make_movie, purge
+from player import Player
+from myutils import read_yaml
+from handlers import make_image, make_movie, purge
 
 def execute(args):
 
@@ -111,6 +111,9 @@ if __name__ == '__main__':
 
     args_dict = vars(args)
     args_dict.update({"date": idate, "time": itime, "time_dt": time_dt})
+    specified = [v for v in args_dict.values() if isinstance(v,bool) and v]
+    if not specified:
+        args_dict['plot'] = True
 
     execute(args_dict)
 
