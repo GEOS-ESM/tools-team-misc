@@ -105,7 +105,7 @@ class StyleConfig:
     state_width: float = 0.4
     state_alpha: float = 0.6
 
-    county_color: str = "#B0B0B0"
+    county_color: str = "#A4A4A4"
     county_width: float = 0.2
     county_alpha: float = 0.4
 
@@ -113,9 +113,11 @@ class StyleConfig:
     river_width: float = 0.2
     river_alpha: float = 0.6
 
-    road_color: str = "#FF8C00"
+    show_roads: bool = False
+    major_only: bool = True
+    road_color: str = "#A4A4A4"
     road_width: float = 0.3
-    road_alpha: float = 0.7
+    road_alpha: float = 0.9
 
     # Frame
     show_frame: bool = False
@@ -327,6 +329,7 @@ class StyleConfig:
             coastline_width=0.4,
             country_color="#333333",
             state_color="#333333",
+            show_roads=True,
             show_nws_warnings=True,
             nws_severe_only=True,
         )

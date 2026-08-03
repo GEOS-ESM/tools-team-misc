@@ -116,8 +116,8 @@ UH25:
   description: "Updraft Helicity 2-5 KM (m2 s-2)"
   collection:
     inst1_2d_asm_Nx: UH25
-    hwt_15mn_slv_LCC: UPHL_2-KM
-    hwt_30mn_slv_LCC: UPHL_2-KM
+    hwt_15mn_slv_LCC: UPHL_2-5KM
+    hwt_30mn_slv_LCC: UPHL_2-5KM
 
 VORT500:
   description: "500 mb Relative Vorticity"

@@ -316,12 +316,9 @@ def build_style(args):
 
 def plot_single_pdate(pdate, args, style, map_config):
     import copy
-    import multiprocessing_logging
 
-    # Reinitalize root logger for mp handler, idk why this works it just does
     if args.logger:
         setup_root_logger(args.logger)
-        multiprocessing_logging.install_mp_handler()
 
     local_args = copy.copy(args)
     local_args.pdate = pdate
@@ -347,18 +344,20 @@ def plot_single_pdate(pdate, args, style, map_config):
     PRODUCTS[local_args.product](fig, ax, plotter, reader, local_args)
 
     # Add optional features
-    if local_args.roads:
-        plotter.add_roads(major_only=local_args.major_roads_only)
-
     if local_args.cities:
         plotter.add_cities()
 
-    # Add NWS warnings if requested (BEFORE timestamp so warnings are below text)
-    if style.show_nws_warnings:
-        from earthnow.wxmaps_utils import parse_date_string
+    if map_config.name != "global":
+        # Only option for roads and nws if not global
+        if style.show_roads:
+            plotter.add_roads(major_only=style.major_only)
 
-        pdate_dt = parse_date_string(local_args.pdate)
-        plotter.add_nws_warnings(pdate_dt)
+        # Add NWS warnings if requested (BEFORE timestamp so warnings are below text)
+        if style.show_nws_warnings:
+            from earthnow.wxmaps_utils import parse_date_string
+
+            pdate_dt = parse_date_string(local_args.pdate)
+            plotter.add_nws_warnings(pdate_dt)
 
     if style.show_timestamp:
         plotter.add_forecast_timestamp(
