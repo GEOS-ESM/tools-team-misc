@@ -54,15 +54,15 @@ while [[ "$#" -gt 0 ]]; do
       LOGGER="$2"
       shift 2
       ;;
-    -b|--boundaries)
-      BOUNDARIES_LIST=()
-      # Check if a list follows, then loop to grab everything until the next flag
-      shift
-      while [[ $# -gt 0 && ! "$1" =~ ^- ]]; do
-        BOUNDARIES_LIST+=("$1")
-        shift
-      done
-      ;;
+    # -b|--boundaries)
+    #   BOUNDARIES_LIST=()
+    #   # Check if a list follows, then loop to grab everything until the next flag
+    #   shift
+    #   while [[ $# -gt 0 && ! "$1" =~ ^- ]]; do
+    #     BOUNDARIES_LIST+=("$1")
+    #     shift
+    #   done
+    #   ;;
     -h|--help)
       usage
       ;;
@@ -145,9 +145,10 @@ if [[ -n "$LOGGER" ]]; then
   PYTHON_CMD+=(--logger "$LOGGER")
 fi
 
-if [[ -n "$BOUNDARIES_LIST" ]]; then
-  PYTHON_CMD+=(--boundaries "${BOUNDARIES_LIST[@]}")
-fi
+#Why do we have this, the boundaries should be called in the style
+# if [[ -n "$BOUNDARIES_LIST" ]]; then
+#   PYTHON_CMD+=(--boundaries "${BOUNDARIES_LIST[@]}")
+# fi
 
 # Execute the array
 # ===================

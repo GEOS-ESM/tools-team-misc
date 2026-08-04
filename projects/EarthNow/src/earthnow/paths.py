@@ -68,6 +68,9 @@ SHAPEFILES_PATH = env_path(
     "SHAPEFILES_PATH", "/discover/swdev/gmao-tools/Visualization/shapefiles"
 )
 
+CARTOPY_CONFIG = env_path("CARTOPY_CONFIG", "/discover/swdev/gmao-tools/Visualization")
+# Set cartopy.config['data_dir'] = CARTOPY_CONFIG to use existing natural earth
+
 # ---------------------------------------------------------------------------
 # Derived constants
 # ---------------------------------------------------------------------------
@@ -108,7 +111,7 @@ COUNTY_BORDERS_5M = env_path(
 
 ROADS_10M = env_path(
     "ROADS_10M",
-    SHAPEFILES_PATH / "Natural_Earth" / "ne_10m_roads.shp",
+    SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads.shp",
 )
 
 # ---------------------------------------------------------------------------

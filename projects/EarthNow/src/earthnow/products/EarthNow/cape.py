@@ -60,8 +60,6 @@ def plot_cape(fig, ax, plotter, reader, args):
     """
     Plot CAPE (J/kg)
     """
-    # logger.info(f"colors: {len(CAPE_COLORS)}")
-    # logger.info(f"levels: {len(CAPE_LEVELS)}")
 
     # Read from reader (reader decides the collection)
     data, lats, lons, meta = reader.read_variable(
@@ -69,8 +67,6 @@ def plot_cape(fig, ax, plotter, reader, args):
     )
 
     data = data.astype(np.float32)
-    logger.info(f"CAPE min: {data.min()}")
-    # breakpoint()
 
     # Mask values below 100
     data = np.ma.masked_where(data < CAPE_LEVELS[0], data)
@@ -87,7 +83,15 @@ def plot_cape(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    plot = ax.contourf(lons, lats, data, cmap=cmap, norm=norm, levels=CAPE_LEVELS)
+    plot = ax.contourf(
+        lons,
+        lats,
+        data,
+        cmap=cmap,
+        norm=norm,
+        levels=CAPE_LEVELS,
+        transform=ccrs.PlateCarree(),
+    )
 
     # generate_colorbar(plot) # Uncomment to generate colorbar w every frame
 
