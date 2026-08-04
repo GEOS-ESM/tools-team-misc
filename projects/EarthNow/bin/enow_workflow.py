@@ -15,9 +15,9 @@ from earthnow.workflow.handlers import make_image, make_movie, purge
 
 def execute(**args):
     """
-    Executes the earthnow workflow.
+    Executes Earthnow workflow tasks.
 
-    This method executes the EarthNow workflow based on the supplied keyword
+    This method executes EarthNow workflow tasks based on the supplied keyword
     option arguments.
 
     Parameters
@@ -133,7 +133,11 @@ if __name__ == "__main__":
         type=str,
     )
     parser.add_argument(
-        "--task", metavar="task_name", required=True, help="Config task", type=str
+        "--task",
+        metavar="task_name",
+        required=True,
+        help="Workflow task to execute",
+        type=str,
     )
     parser.add_argument(
         "--nproc", metavar="nproc", default=None, help="Number of processors", type=int
