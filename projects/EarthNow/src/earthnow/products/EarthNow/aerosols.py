@@ -5,6 +5,7 @@ Aerosol Optical Thickness (Sea Salt, Dust, Sulfates, Nitrates)
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+import cartopy.crs as ccrs
 from earthnow.products.registry import register
 
 import logging
@@ -90,6 +91,7 @@ def plot_aerosols(fig, ax, plotter, reader, args):
             # norm=norm,
             vmin=levels[0],
             vmax=levels[-1],
+            transform=ccrs.PlateCarree(),
             # vmin, vmax maps colormap to min/max levels, values below are assigned first cmap color, values above are assigned last cmap color
         )
 
