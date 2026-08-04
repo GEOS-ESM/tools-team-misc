@@ -4,7 +4,7 @@ Aerosol Optical Thickness (Sea Salt, Dust, Sulfates, Nitrates)
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import Normalize
 import cartopy.crs as ccrs
 from earthnow.products.registry import register
 
@@ -66,8 +66,6 @@ def plot_aerosols(fig, ax, plotter, reader, args):
         data = data.squeeze()
         data = data.astype(np.float32)
 
-        levels = np.linspace(0, float(values["max_val"]), 11)
-
         # ------------------------------------------------------------
         # Colormap + normalization
         # ------------------------------------------------------------
@@ -77,6 +75,12 @@ def plot_aerosols(fig, ax, plotter, reader, args):
         cmap = colormaps[values["cmap"]]
         cmap = colorbar_alpha_fade(cmap, alpha_fade_pct)
 
+        norm = Normalize(0, float(values["max_val"]))
+
+        # Experiments with contourf:
+        # levels = np.linspace(0, float(values["max_val"]), 24)
+        # Pass levels=levels into contourf
+
         # ------------------------------------------------------------
         # Plot fields
         # ------------------------------------------------------------
@@ -84,22 +88,25 @@ def plot_aerosols(fig, ax, plotter, reader, args):
         # stride = 6
         # lons = lons[::stride]
         # lats = lats[::stride]
-        # data = data[::stride, ::stride]
+        # data = data[::stride]
 
-        plot = ax.pcolormesh(  # I think to get the aerosol effect we want we need to use pcolormesh, or a bunch of contours, but not sure that is worth it over just pcolormesh?
+        plot = ax.pcolormesh(
             lons,
             lats,
             data,
             cmap=cmap,
-            # norm=norm,
-            vmin=levels[0],
-            vmax=levels[-1],
+            norm=norm,
             transform=ccrs.PlateCarree(),
-            # vmin, vmax maps colormap to min/max levels, values below are assigned first cmap color, values above are assigned last cmap color
+            antialiased=True,
         )
 
         # plt.colorbar(
-        #     plot, orientation="horizontal", shrink=0.2, aspect=15, pad=0.01
+        #     plot,
+        #     orientation="horizontal",
+        #     aspect=40,
+        #     pad=0.05,
+        #     ticks=(np.linspace(0, float(values["max_val"]), 11)),
+        #     fraction=0.05,
         # )  # Testing the colorbar matches
 
         if create_colorbar == True:

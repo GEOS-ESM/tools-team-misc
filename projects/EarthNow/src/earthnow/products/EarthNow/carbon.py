@@ -4,6 +4,7 @@ Carbon Aerosol Optical Thickness
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
 import cartopy.crs as ccrs
 from earthnow.products.registry import register
 
@@ -78,6 +79,8 @@ def plot_aerosols(fig, ax, plotter, reader, args):
     cmap = colormaps["AOT-CARBON"]
     cmap = colorbar_alpha_fade(cmap, 0.125)
 
+    norm = Normalize(levels[0], levels[-1])
+
     # ------------------------------------------------------------
     # Plot fields
     # ------------------------------------------------------------
@@ -86,10 +89,9 @@ def plot_aerosols(fig, ax, plotter, reader, args):
         lats,
         data,
         cmap=cmap,
-        vmin=levels[0],
-        vmax=levels[-1],
+        norm=norm,
         transform=ccrs.PlateCarree(),
-        # vmin, vmax maps colormap to min/max levels, values below are assigned first cmap color, values above are assigned last cmap color
+        antialiased=True,
     )
 
     # plt.colorbar(
