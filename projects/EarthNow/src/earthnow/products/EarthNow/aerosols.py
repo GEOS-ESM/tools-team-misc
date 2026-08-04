@@ -103,7 +103,6 @@ def plot_aerosols(fig, ax, plotter, reader, args):
             # Store vars for generation of cbars out of loop
             import matplotlib.cm as cm
 
-            aerosols[name]["ticks"] = levels
             aerosols[name]["cm"] = cm.ScalarMappable(norm=plot.norm, cmap=plot.cmap)
 
     if create_colorbar == True:
@@ -114,10 +113,10 @@ def generate_colorbar(
     mappables_dict: dict,
     dpi=100,
     width=6600,
-    hspace=1,
+    hspace: float = 1,
 ):
     """
-    Generate colorbar grid for multi-variable plot
+    Generate colorbar grid for multi-variable plot (via dictionary of mapples)
     Parameters
     ----------
     mappables_dict:
@@ -139,19 +138,24 @@ def generate_colorbar(
     )
 
     fig_cbar.subplots_adjust(hspace=hspace)
+    fig_cbar.patch.set_facecolor("none")
+    # The width of these cbars are too fat...
 
     for i, (name, values) in enumerate(mappables_dict.items()):
+        ticks = np.linspace(0, float(values["max_val"]), 11)
         build_colorbar(
             fig=fig_cbar,
             ax=axes_cbar[i],
             mappable=values["cm"],
-            ticks=values["ticks"],
+            ticks=ticks,
             label=f"{name} Aerosol Optical Thickness",
-            # format="%.2f",
+            format="%.2f",
         )
 
     colorbar_output = (
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
-    fig_cbar.savefig(colorbar_output)
+    fig_cbar.savefig(
+        colorbar_output, bbox_inches="tight", pad_inches=0.2, transparent=True
+    )
     print(f"Saved cbar to {colorbar_output}")
