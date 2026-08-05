@@ -15,8 +15,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-cmap = colormaps["DBZ_MAX"]
-uphl_cmap = colormaps["UPHL"]
+cmap = colormaps["EN-maxreflectivity"]
+uphl_cmap = colormaps["EN-helicity"]
 
 
 # Level generation for Updraft Helicity

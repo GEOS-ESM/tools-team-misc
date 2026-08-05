@@ -21,22 +21,22 @@ variable = "aerosols"
 aerosols = {
     "Nitrate": {
         "varname": "NIEXTTAU",
-        "cmap": "AOT-NITRATE",
+        "cmap": "EN-nitrate",
         "max_val": 1.0,
     },
     "Sulfate": {
         "varname": "SUEXTTAU",
-        "cmap": "AOT-SULFATE",
+        "cmap": "EN-sulfate",
         "max_val": 0.5,
     },
     "Dust": {
         "varname": "DUEXTTAU",
-        "cmap": "AOT-DUST",
+        "cmap": "EN-dust",
         "max_val": 0.5,
     },
     "Sea Salt": {
         "varname": "SSEXTTAU",
-        "cmap": "AOT-SEASALT",
+        "cmap": "EN-seasalt",
         "max_val": 0.33,
     },
 }
