@@ -19,29 +19,29 @@ from matplotlib import colormaps
 
 variable = "aerosols"
 aerosols = {
-    "Nitrate": {
-        "varname": "NIEXTTAU",
-        "cmap": "EN-nitrate",
-        "max_val": 1.0,
-    },
-    "Sulfate": {
-        "varname": "SUEXTTAU",
-        "cmap": "EN-sulfate",
-        "max_val": 0.5,
+    "Sea Salt": {
+        "varname": "SSEXTTAU",
+        "cmap": "EN-seasalt",
+        "max_val": 0.33,
     },
     "Dust": {
         "varname": "DUEXTTAU",
         "cmap": "EN-dust",
         "max_val": 0.5,
     },
-    "Sea Salt": {
-        "varname": "SSEXTTAU",
-        "cmap": "EN-seasalt",
-        "max_val": 0.33,
+    "Sulfate": {
+        "varname": "SUEXTTAU",
+        "cmap": "EN-sulfate",
+        "max_val": 0.5,
+    },
+    "Nitrate": {
+        "varname": "NIEXTTAU",
+        "cmap": "EN-nitrate",
+        "max_val": 1.0,
     },
 }
 
-n_vars = len(aerosols.keys())
+nvars = len(aerosols.keys())
 create_colorbar = False
 
 
@@ -71,8 +71,11 @@ def plot_aerosols(fig, ax, plotter, reader, args):
         # ------------------------------------------------------------
         # Colormap + normalization
         # ------------------------------------------------------------
+        # Alpha varying linearly 0 to 1 from 0 to 0.125
+        alpha_fade_pct = 0.125 / float(values["max_val"])
+
         cmap = colormaps[values["cmap"]]
-        cmap = colorbar_alpha_fade(cmap, 0.30)
+        cmap = colorbar_alpha_fade(cmap, alpha_fade_pct)
 
         # ------------------------------------------------------------
         # Plot fields
@@ -132,16 +135,18 @@ def generate_colorbar(
     height = 600 * int(nvars)
     figsize = (width / dpi, height / dpi)
     fig_cbar, axes_cbar = plt.subplots(
-        nvars,
+        nrows=nvars,
         ncols=1,
         figsize=figsize,
+        dpi=dpi,
     )
 
-    fig_cbar.subplots_adjust(hspace=hspace)
     fig_cbar.patch.set_facecolor("none")
-    # The width of these cbars are too fat...
 
     for i, (name, values) in enumerate(mappables_dict.items()):
+
+        axes_cbar[i].set_position([0.15, 0.2 * (i + 1), 0.70, 0.25 / nvars])
+
         ticks = np.linspace(0, float(values["max_val"]), 11)
         build_colorbar(
             fig=fig_cbar,
@@ -156,6 +161,10 @@ def generate_colorbar(
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
     fig_cbar.savefig(
-        colorbar_output, bbox_inches="tight", pad_inches=0.2, transparent=True
+        colorbar_output,
+        dpi=dpi,
+        bbox_inches="tight",
+        pad_inches=0.2,
+        transparent=True,
     )
     print(f"Saved cbar to {colorbar_output}")
