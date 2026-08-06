@@ -1,4 +1,5 @@
 from wxvis.colors.registry import register
+from pathlib import Path
 
 colors = [
     [200, 200, 200],
@@ -25,4 +26,5 @@ colors = [
     [50, 10, 60],
 ]
 
-register("CAPE", colors)
+map_name = Path(__file__).stem
+register(map_name, colors)

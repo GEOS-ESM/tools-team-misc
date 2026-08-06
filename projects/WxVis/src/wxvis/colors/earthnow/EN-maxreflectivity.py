@@ -1,15 +1,7 @@
 from wxvis.colors.registry import register
+from pathlib import Path
 
-uphl_colors = [
-    [128, 128, 128],
-    [200, 231, 255],
-    [54, 224, 224],
-    [123, 62, 210],
-    [59, 54, 135],
-    [153, 0, 153],
-]
-
-dbz_colors = [
+colors = [
     [108, 237, 239],
     [50, 129, 246],
     [0, 33, 245],
@@ -26,5 +18,5 @@ dbz_colors = [
     [134, 106, 198],
 ]
 
-register("UPHL", uphl_colors)
-register("DBZ_MAX", dbz_colors)
+map_name = Path(__file__).stem
+register(map_name, colors)

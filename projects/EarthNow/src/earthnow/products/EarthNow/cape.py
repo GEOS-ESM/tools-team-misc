@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 from wxvis import colors
 from matplotlib import colormaps
 
-cmap = colormaps["CAPE"]
+cmap = colormaps["EN-cape"]
 
 variable = "cape"
 
