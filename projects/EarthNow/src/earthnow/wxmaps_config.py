@@ -339,8 +339,8 @@ class StyleConfig:
     @register_style("empty")
     def empty() -> "StyleConfig":
         return StyleConfig(
-            ocean_color="#808080",
-            land_color="#808080",
+            ocean_color="#00008B",
+            land_color="#00008B",
         )
 
 
