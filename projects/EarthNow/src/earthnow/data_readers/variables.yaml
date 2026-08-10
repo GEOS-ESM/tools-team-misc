@@ -12,6 +12,28 @@
 # A variable does not need an entry for every collection, and new collection
 # names can be added freely -- no code changes required.
 
+OCEXTTAU:
+  description: "Organic Carbon Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: OCEXTTAU
+    hwt_15mn_slv_LCC: OCEXTTAU
+    hwt_30mn_slv_LCC: OCEXTTAU
+
+BREXTTAU:
+  description: "Brown Carbon Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: BREXTTAU
+    hwt_15mn_slv_LCC: BREXTTAU
+    hwt_30mn_slv_LCC: BREXTTAU
+
+BCEXTTAU:
+  description: "Black Carbon Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: BCEXTTAU
+    hwt_15mn_slv_LCC: BCEXTTAU
+    hwt_30mn_slv_LCC: BCEXTTAU
+
+
 CAPE:
   description: "Convective Available Potential Energy (J/kg)"
   collection:
@@ -27,7 +49,7 @@ DBZ_MAX:
     hwt_30mn_slv_LCC: REFC
 
 DUEXTTAU:
-  description: "Dust Aerosol Optical Depth"
+  description: "Dust Aerosol Optical Thickness (550 nm)"
   collection:
     inst1_2d_asm_Nx: DUEXTTAU
     hwt_15mn_slv_LCC: DUEXTTAU
@@ -59,7 +81,7 @@ ICE:
     hwt_30mn_slv_LCC: ICE
 
 NIEXTTAU:
-  description: "Nitrate Aerosol Optical Depth"
+  description: "Nitrate Aerosol Optical Thickness (550 nm)"
   collection:
     inst1_2d_asm_Nx: NIEXTTAU
     hwt_15mn_slv_LCC: NIEXTTAU
@@ -92,14 +114,14 @@ SNOWACCUM:
     tavg1_2d_flx_Nx: SNOWACCUM
 
 SSEXTTAU:
-  description: "Sea Salt Aerosol Optical Depth"
+  description: "Sea Salt Aerosol Optical Thickness (550 nm)"
   collection:
     inst1_2d_asm_Nx: SSEXTTAU
     hwt_15mn_slv_LCC: SSEXTTAU
     hwt_30mn_slv_LCC: SSEXTTAU
 
 SUEXTTAU:
-  description: "Sulfate Aerosol Optical Depth"
+  description: "Sulfate Aerosol Optical Thickness (550 nm)"
   collection:
     inst1_2d_asm_Nx: SUEXTTAU
     hwt_15mn_slv_LCC: SUEXTTAU

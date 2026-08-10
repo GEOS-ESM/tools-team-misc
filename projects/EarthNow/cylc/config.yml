@@ -50,6 +50,12 @@ products:
     style: greyblue
     driver: "plotall.py"
     base-path: $BASE_PATH
+  Carbon:
+    product: carbon_EarthNow
+    style: greyblue
+    driver: "plotall.py"
+    base-path: $BASE_PATH
+
 
 
 data_readers:

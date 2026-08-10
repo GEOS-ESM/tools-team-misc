@@ -26,6 +26,9 @@ CONUS2KMFC_VARS = VARIABLE_REGISTRY.resolve_many(
         "SUEXTTAU": "inst1_2d_asm_Nx",
         "DUEXTTAU": "inst1_2d_asm_Nx",
         "SSEXTTAU": "inst1_2d_asm_Nx",
+        "OCEXTTAU": "inst1_2d_asm_Nx",
+        "BREXTTAU": "inst1_2d_asm_Nx",
+        "BCEXTTAU": "inst1_2d_asm_Nx",
     }
 )
 

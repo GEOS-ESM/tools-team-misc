@@ -486,9 +486,10 @@ def build_colorbar(
         cb = fig.colorbar(mappable, cax=ax, orientation="horizontal")
 
     # Set label with large font
-    cb.set_label(label, fontsize=60, loc="left", labelpad=15)
+    cb.set_label(label, fontsize=96, loc="left", labelpad=30, color="white")
     cb.ax.xaxis.set_label_position("top")
-    cb.ax.tick_params(labelsize=42, width=4, length=12)
+    cb.ax.tick_params(labelsize=48, width=4, length=12, colors="white")
+    cb.ax.tick_params(length=0)
     cb.ax.minorticks_off()
 
     tick_positions = ticks
@@ -504,7 +505,6 @@ def save_colorbar_single(
     label="",
     width=6600,
     height=600,
-    format=None,
 ):
     """
     Generate a single horizontal colorbar PNG.
@@ -529,17 +529,18 @@ def save_colorbar_single(
     dpi = 100
     figsize = (width / dpi, height / dpi)
 
-    fig = plt.figure(figsize=figsize, dpi=dpi, facecolor="white")
+    fig = plt.figure(figsize=figsize, dpi=dpi)
+    fig.patch.set_facecolor("none")
 
     # Single axes with margins
-    ax = fig.add_axes([0.15, 0.35, 0.70, 0.25])  # [left, bottom, width, height]
+    ax = fig.add_axes([0.15, 0.20, 0.70, 0.25])  # [left, bottom, width, height]
 
     build_colorbar(fig, ax, plot, ticks, label)
 
     # Save
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     plt.savefig(
-        output_path, dpi=dpi, bbox_inches="tight", facecolor="white", pad_inches=0.2
+        output_path, dpi=dpi, bbox_inches="tight", pad_inches=0.2, transparent=True
     )
     plt.close(fig)
 
