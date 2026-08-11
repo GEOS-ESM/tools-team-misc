@@ -309,6 +309,33 @@ def auto_enhance_rgb_histogram(red, green, blue, strength=0.5, debug=False):
     return out_r, out_g, out_b
 
 
+def boxcar_smooth_2D(array, window_size):
+    """
+    Perform 2D boxcar smoothing with a specified window_size
+
+    Args:
+    - window_size: int
+    """
+    import numpy as np
+    from scipy.ndimage import uniform_filter
+
+    # have to mask out NANs so they do not affect smoothing
+    mask = ~np.isnan(array)
+    array_clean = np.where(mask, array, 0)
+
+    sum_data = uniform_filter(array_clean, size=window_size, mode="constant", cval=0.0)
+    sum_weights = uniform_filter(
+        mask.astype(float), size=window_size, mode="constant", cval=0.0
+    )
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        array_smoothed = sum_data / sum_weights
+
+    array_smoothed[sum_weights == 0] = np.nan
+    array_smoothed[~mask] = np.nan
+    return array_smoothed
+
+
 def load_color_table(filepath):
     """
     Load a color table from a text file.
@@ -470,7 +497,6 @@ def build_and_save_colorbars(
 ):
     """
     Dynamically generates a colorbar figure with single or multiple rows of colorbars and saves it. This function completely replaces the build_colorbar + save_colorbar_single.
-
 
     Parameters
     ----------

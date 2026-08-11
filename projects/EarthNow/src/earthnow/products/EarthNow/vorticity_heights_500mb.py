@@ -9,44 +9,16 @@ from matplotlib.colors import BoundaryNorm
 from earthnow.products.registry import register
 from wxvis import colors
 from matplotlib import colormaps
-from earthnow.wxmaps_utils import colorbar_alpha_fade
+from earthnow.wxmaps_utils import colorbar_alpha_fade, boxcar_smooth_2D
 
 variable = "vorticity"
 vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
 create_colorbar = False
 
+
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
-
-
-def boxcar_smooth_2D(array, window_size):
-    """
-    Perform 2D boxcar smoothing with a specified window_size
-
-    Args:
-    - window_size: int
-    """
-    import numpy as np
-    from scipy.ndimage import uniform_filter
-
-    # have to mask out NANs so they do not affect smoothing
-    mask = ~np.isnan(array)
-    array_clean = np.where(mask, array, 0)
-
-    sum_data = uniform_filter(array_clean, size=window_size, mode="constant", cval=0.0)
-    sum_weights = uniform_filter(
-        mask.astype(float), size=window_size, mode="constant", cval=0.0
-    )
-
-    with np.errstate(invalid="ignore", divide="ignore"):
-        array_smoothed = sum_data / sum_weights
-
-    array_smoothed[sum_weights == 0] = np.nan
-    array_smoothed[~mask] = np.nan
-    return array_smoothed
-
-
 @register("vorticity_heights_500mb_EarthNow")
 def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     """
