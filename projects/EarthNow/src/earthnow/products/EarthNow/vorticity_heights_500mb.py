@@ -67,7 +67,9 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # Colormap + normalization
     # ------------------------------------------------------------
     cmap = colormaps["IDL-005-STD_GAMMA-II"].reversed()
-    cmap = colorbar_alpha_fade(cmap, 0.1)
+
+    alpha_fade_pct = 0.25 / max(vLEVELS)
+    cmap = colorbar_alpha_fade(cmap, alpha_fade_pct)
 
     norm = BoundaryNorm(vLEVELS, ncolors=cmap.N)
 
@@ -148,16 +150,16 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar(plot):
-    from earthnow.wxmaps_utils import save_colorbar_single
+    from earthnow.wxmaps_utils import build_and_save_colorbars
 
     colorbar_output = (
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
-    ticks = np.arange(0, 65, 5)
+    levels = np.arange(0, 65, 5)
 
-    save_colorbar_single(
+    build_and_save_colorbars(
         plot,
+        levels,
         colorbar_output,
-        label="500mb Cyclonic Relative Vorticity (×10⁻⁵ s⁻¹) and Height (m)",
-        ticks=ticks,
+        "500mb Cyclonic Relative Vorticity (×10⁻⁵ s⁻¹) and Height (m)",
     )

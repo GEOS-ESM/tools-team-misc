@@ -102,14 +102,14 @@ def plot_cape(fig, ax, plotter, reader, args):
 
 
 def generate_colorbar(plot):
-    from earthnow.wxmaps_utils import save_colorbar_single
+    from earthnow.wxmaps_utils import build_and_save_colorbars
 
     colorbar_output = (
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
-    save_colorbar_single(
+    build_and_save_colorbars(
         plot,
+        CAPE_LEVELS[::4],
         colorbar_output,
-        label="Surface-Based CAPE [J/kg]",
-        ticks=CAPE_LEVELS[::4],
+        "Surface-Based CAPE [J/kg]",
     )
