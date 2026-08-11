@@ -309,11 +309,14 @@ class StyleConfig:
     @staticmethod
     @register_style("greyblue")
     def greyblue() -> "StyleConfig":
-        """Simple image-only Natural Earth template"""
+        """Greyblue Topo Image with state/coastlines for conus"""
         return StyleConfig(
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
             use_gshhs=False,
+            boundaries=["coastlines", "states"],
+            coastline_width=0.4,
+            state_color="#333333",
         )
 
     @staticmethod
