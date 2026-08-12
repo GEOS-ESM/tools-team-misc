@@ -8,6 +8,7 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Tuple, Optional
+import matplotlib.pyplot as plt
 
 
 def parse_date_string(date_str: str) -> datetime:
@@ -308,6 +309,33 @@ def auto_enhance_rgb_histogram(red, green, blue, strength=0.5, debug=False):
     return out_r, out_g, out_b
 
 
+def boxcar_smooth_2D(array, window_size):
+    """
+    Perform 2D boxcar smoothing with a specified window_size
+
+    Args:
+    - window_size: int
+    """
+    import numpy as np
+    from scipy.ndimage import uniform_filter
+
+    # have to mask out NANs so they do not affect smoothing
+    mask = ~np.isnan(array)
+    array_clean = np.where(mask, array, 0)
+
+    sum_data = uniform_filter(array_clean, size=window_size, mode="constant", cval=0.0)
+    sum_weights = uniform_filter(
+        mask.astype(float), size=window_size, mode="constant", cval=0.0
+    )
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        array_smoothed = sum_data / sum_weights
+
+    array_smoothed[sum_weights == 0] = np.nan
+    array_smoothed[~mask] = np.nan
+    return array_smoothed
+
+
 def load_color_table(filepath):
     """
     Load a color table from a text file.
@@ -353,109 +381,6 @@ def colorbar_alpha_fade(
     return cmap
 
 
-# I think we should delete this function, since we can more simply generate colorbar rows using the build_colorbar below
-def save_colorbar_grid(
-    colorbar_specs, output_path, title="", width=6600, height=600, grid_shape=(2, 2)
-):
-    """
-    Generate a colorbar PNG with multiple colorbars arranged in a grid.
-
-    Parameters
-    ----------
-    colorbar_specs : list of dict
-        List of colorbar specifications, each containing:
-        - 'colors': array (N, 3) normalized to 0-1
-        - 'levels': array of contour levels
-        - 'label': label string
-        - 'extend': 'neither', 'both', 'min', 'max' (default 'neither')
-    output_path : str
-        Full path to save PNG
-    title : str
-        Overall title for the figure
-    width, height : int
-        Total image dimensions in pixels
-    grid_shape : tuple
-        (nrows, ncols) for grid layout
-    """
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import ListedColormap, BoundaryNorm
-
-    nrows, ncols = grid_shape
-    dpi = 100
-    figsize = (width / dpi, height / dpi)
-
-    fig = plt.figure(figsize=figsize, dpi=dpi, facecolor="white")
-
-    # Add title if provided with bigger font
-    if title:
-        fig.suptitle(title, fontsize=42, fontweight="bold", y=0.98)
-
-    # Create grid of subplots
-    for idx, spec in enumerate(colorbar_specs):
-        if idx >= nrows * ncols:
-            break
-
-        # Position: [left, bottom, width, height]
-        row = idx // ncols
-        col = idx % ncols
-
-        # Calculate position with larger margins
-        left_margin = 0.15  # 15% left margin
-        right_margin = 0.15  # 15% right margin
-        top_margin = 0.20  # 20% top margin
-        bottom_margin = 0.20  # 20% bottom margin
-        h_spacing = 0.08  # 8% horizontal spacing between panels
-        v_spacing = 0.12  # 12% vertical spacing between panels
-
-        plot_width = (
-            1.0 - left_margin - right_margin - h_spacing * (ncols - 1)
-        ) / ncols
-        plot_height = (
-            1.0 - top_margin - bottom_margin - v_spacing * (nrows - 1)
-        ) / nrows
-
-        left = left_margin + col * (plot_width + h_spacing)
-        bottom = 1.0 - top_margin - (row + 1) * plot_height - row * v_spacing
-
-        # Make colorbar thinner (reduce height)
-        cbar_height = plot_height * 0.4  # 30% of available height
-        bottom_adjusted = bottom + (plot_height - cbar_height) / 2
-
-        ax = fig.add_axes([left, bottom_adjusted, plot_width, cbar_height])
-
-        # Create colormap
-        cmap = ListedColormap(spec["colors"])
-        norm = BoundaryNorm(spec["levels"], ncolors=cmap.N, clip=True)
-
-        # Create colorbar
-        extend = spec.get("extend", "neither")
-        cb = plt.colorbar(
-            plt.cm.ScalarMappable(norm=norm, cmap=cmap),
-            cax=ax,
-            orientation="horizontal",
-            extend=extend,
-        )
-        # Set colorbar outline width
-        cb.outline.set_linewidth(3)
-
-        # Set label with even bigger font
-        cb.set_label(spec["label"], fontsize=36, fontweight="bold", labelpad=12)
-        cb.ax.tick_params(labelsize=24, width=3, length=10)
-
-        # Set tick positions (every other level for clarity)
-        tick_positions = spec["levels"][::2]
-        cb.set_ticks(tick_positions)
-
-    # Save
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(
-        output_path, dpi=dpi, bbox_inches="tight", facecolor="white", pad_inches=0.1
-    )
-    plt.close(fig)
-
-    print(f"Saved colorbar to: {output_path}")
-
-
 def build_colorbar(
     fig,
     ax,
@@ -463,15 +388,19 @@ def build_colorbar(
     ticks,
     label="",
     format=None,
+    **kwargs,
 ):
     """
     Build a single horizontal colorbar PNG given an existing fig, ax
 
     Parameters
     ----------
-    fig:
-    axis:
-    plot: matplotlib.pyplot obj
+    fig: matplotlib.pyplot.figure
+        Colorbar figure
+    axis: matplotlib.pyplot.axis
+        Colorbar axis
+    mappable: matplotlib.pyplot.plot or matplotlib.colorizer.ColorizingArtist
+        Mappable object
     ticks : np.array
         Colorbar tickmarks
     label : str
@@ -480,10 +409,12 @@ def build_colorbar(
         Tick value formatting
     """
 
+    cbar_kwargs = {}
+    cb = fig.colorbar(mappable, cax=ax, orientation="horizontal")
     if format:
-        cb = fig.colorbar(mappable, cax=ax, orientation="horizontal", format=format)
-    else:
-        cb = fig.colorbar(mappable, cax=ax, orientation="horizontal")
+        cbar_kwargs["format"] = format
+    cbar_kwargs.update(kwargs)
+    cb = fig.colorbar(mappable, cax=ax, orientation="horizontal", **cbar_kwargs)
 
     # Set label with large font
     cb.set_label(label, fontsize=96, loc="left", labelpad=30, color="white")
@@ -520,11 +451,7 @@ def save_colorbar_single(
         Label for the colorbar
     width, height : int
         Image dimensions in pixels
-    format: str
-        Tick value formatting
     """
-    import matplotlib.pyplot as plt
-    import os
 
     dpi = 100
     figsize = (width / dpi, height / dpi)
@@ -540,6 +467,125 @@ def save_colorbar_single(
     # Save
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     plt.savefig(
+        output_path, dpi=dpi, bbox_inches="tight", pad_inches=0.2, transparent=True
+    )
+    plt.close(fig)
+
+    print(f"Saved colorbar to: {output_path}")
+
+
+def build_and_save_colorbars(
+    mappables,
+    ticks,
+    output_path,
+    labels,
+    formats=None,
+    label_fontsize=96,
+    tick_labelsize=48,
+    text_color="white",
+    bg_color=None,
+    tick_width=4,
+    tick_length=0,
+    width=6600,
+    height=600,
+    dpi=100,
+    cbar_left=0.15,  # Left margin (figure fraction)
+    cbar_bottom=0.2,  # Distance from bottom (figure fraction)
+    cbar_width=0.7,  # Colorbar width (figure fraction)
+    cbar_height=0.25,  # Colorbar height (figure fraction)
+    **kwargs,
+):
+    """
+    Dynamically generates a colorbar figure with single or multiple rows of colorbars and saves it. This function completely replaces the build_colorbar + save_colorbar_single.
+
+    Parameters
+    ----------
+    mappables : object or list
+        Single mappable object or list of mappable objects.
+    ticks : array-like or list of array-like
+        Single tickmark array or list of arrays.
+    labels : str or list of str, optional
+        Label or list of labels. Defaults to empty strings.
+    formats : str or list of str, optional
+        Format string or list of format strings.
+    save_path : str
+        Filepath to save the final image (default: "colorbars.png").
+    figsize : tuple, optional
+        Figure size. If None, it dynamically scales based on the number of rows.
+    label_fontsize : int, optional
+        Font size for the label (default: 96)
+    """
+
+    # 1. Standardize inputs to lists if single objects are provided
+    if not isinstance(mappables, (list, tuple)):
+        mappables = [mappables]
+        ticks = [ticks]
+        labels = [labels]
+        if formats is not None and isinstance(formats, str):
+            formats = [formats]
+
+    n_bars = len(mappables)
+
+    # 2. Handle optional lists
+    if formats is None:
+        formats = [None] * n_bars
+
+    #  Validate lenghts
+    if not (n_bars == len(mappables) == len(ticks) == len(labels) == len(formats)):
+        raise ValueError(
+            "axes, mappables, ticks, labels, and formats must have the same length."
+        )
+
+    # 3. Generate Figure and Axes dynamically
+    height = 600 * n_bars
+    figsize = (width / dpi, height / dpi)
+
+    fig, axes = plt.subplots(nrows=n_bars, ncols=1, figsize=figsize)
+    fig.patch.set_facecolor(bg_color)
+
+    # Ensure axes is iterable
+    if n_bars == 1:
+        axes = [axes]
+    elif hasattr(axes, "flatten"):
+        axes = axes.flatten()
+
+    colorbars = []
+
+    for i, (ax, mappable, tick_arr, label, fmt) in enumerate(
+        zip(axes, mappables, ticks, labels, formats)
+    ):
+        # Set strict axis positioning
+        row_idx_from_bottom = n_bars - 1 - i
+        bottom = (row_idx_from_bottom + cbar_bottom) / n_bars
+        ax.set_position([cbar_left, bottom, cbar_width, cbar_height / n_bars])
+        # ax.set_position([0.15, 0.2 * (i + 1) * n_bars, 0.70, 0.25 / n_bars])
+        cbar_kwargs = kwargs.copy()
+        if fmt is not None:
+            cbar_kwargs["format"] = fmt
+
+        # Generate the colorbar on  the specific axis
+        cb = fig.colorbar(mappable, cax=ax, orientation="horizontal", **cbar_kwargs)
+
+        # Set label with configurable properties
+        cb.set_label(
+            label, fontsize=label_fontsize, loc="left", labelpad=30, color=text_color
+        )
+        cb.ax.xaxis.set_label_position("top")
+
+        # Format and set ticks
+        cb.ax.tick_params(
+            labelsize=tick_labelsize,
+            width=tick_width,
+            length=tick_length,
+            colors=text_color,
+        )
+        cb.ax.minorticks_off()
+        cb.set_ticks(tick_arr)
+
+        colorbars.append(cb)
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    fig.savefig(
         output_path, dpi=dpi, bbox_inches="tight", pad_inches=0.2, transparent=True
     )
     plt.close(fig)

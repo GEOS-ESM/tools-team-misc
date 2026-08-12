@@ -43,6 +43,9 @@ aerosols = {
 
 nvars = len(aerosols.keys())
 create_colorbar = False
+mappables = []
+levels = []
+labels = []
 
 
 # ------------------------------------------------------------------
@@ -113,65 +116,25 @@ def plot_aerosols(fig, ax, plotter, reader, args):
             # Store vars for generation of cbars out of loop
             import matplotlib.cm as cm
 
-            aerosols[name]["cm"] = cm.ScalarMappable(norm=plot.norm, cmap=plot.cmap)
+            mappables.append(cm.ScalarMappable(norm=plot.norm, cmap=plot.cmap))
+            levels.append(np.linspace(0, float(values["max_val"]), 11))
+            labels.append(f"{name} Aerosol Optical Thickness")
 
     if create_colorbar == True:
-        generate_colorbar(aerosols)
+        generate_colorbars(mappables[::-1], levels[::-1], labels[::-1])
 
 
-def generate_colorbar(
-    mappables_dict: dict,
-    dpi=100,
-    width=6600,
-    hspace: float = 1,
-):
-    """
-    Generate colorbar grid for multi-variable plot (via dictionary of mapples)
-    Parameters
-    ----------
-    mappables_dict:
-    label : str
-        Label for the colorbar
-    width, height : int
-        Image dimensions in pixels
-    hspace :
-    """
-    from earthnow.wxmaps_utils import build_colorbar
+def generate_colorbars(mappables: list, levels: list, labels: list):
+    """Generate colorbar for all aerosols plotted"""
 
-    nvars = len(mappables_dict.keys())
-    height = 600 * int(nvars)
-    figsize = (width / dpi, height / dpi)
-    fig_cbar, axes_cbar = plt.subplots(
-        nrows=nvars,
-        ncols=1,
-        figsize=figsize,
-        dpi=dpi,
-    )
-
-    fig_cbar.patch.set_facecolor("none")
-
-    for i, (name, values) in enumerate(mappables_dict.items()):
-
-        axes_cbar[i].set_position([0.15, 0.2 * (i + 1), 0.70, 0.25 / nvars])
-
-        ticks = np.linspace(0, float(values["max_val"]), 11)
-        build_colorbar(
-            fig=fig_cbar,
-            ax=axes_cbar[i],
-            mappable=values["cm"],
-            ticks=ticks,
-            label=f"{name} Aerosol Optical Thickness",
-            format="%.2f",
-        )
+    from earthnow.wxmaps_utils import build_and_save_colorbars
 
     colorbar_output = (
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
-    fig_cbar.savefig(
+    build_and_save_colorbars(
+        mappables,
+        levels,
         colorbar_output,
-        dpi=dpi,
-        bbox_inches="tight",
-        pad_inches=0.2,
-        transparent=True,
+        labels,
     )
-    print(f"Saved cbar to {colorbar_output}")

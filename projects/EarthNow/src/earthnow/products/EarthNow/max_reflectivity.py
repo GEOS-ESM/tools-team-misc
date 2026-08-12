@@ -5,8 +5,9 @@ and Maximum Updraft Helicity
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import BoundaryNorm
 import cartopy.crs as ccrs
-from matplotlib.colors import ListedColormap, BoundaryNorm, LinearSegmentedColormap
 from earthnow.products.registry import register
 from wxvis import colors
 from matplotlib import colormaps
@@ -15,21 +16,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-cmap = colormaps["EN-maxreflectivity"]
-uphl_cmap = colormaps["EN-helicity"]
-
+create_colorbar = False
+variable = "helicity"
 
 # Level generation for Updraft Helicity
 UPHL_LEVELS = np.arange(50, 800, 50)  # 50–750 m²/s²
-
 REFL_LEVELS = np.arange(5.0, 80.0, 5.0)  # 5–75 dBZ
 
 
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
-
-
 @register("max_reflectivity_EarthNow")
 def plot_max_reflectivity(fig, ax, plotter, reader, args):
     """
@@ -89,6 +86,8 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
+    cmap = colormaps["EN-maxreflectivity"]
+    uphl_cmap = colormaps["EN-helicity"]
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
 
     uphl_norm = BoundaryNorm(UPHL_LEVELS, ncolors=uphl_cmap.N, clip=True)
@@ -144,23 +143,25 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
         f"  Pixel ratio (image/data): {(img_height_px * img_width_px) / (data_shape[0] * data_shape[1]):.2f}x"
     )
 
-    # generate_colorbar("dbz_max", radar_plot, "Simulated Radar (dBZ)", REFL_LEVELS)
-    # generate_colorbar(
-    #     "uphl", uphl_plot, "Maximum Updraft Helicity (m2 s-2)", UPHL_LEVELS[1::2]
-    # )
+    if create_colorbar == True:
+        generate_colorbars(
+            [radar_plot, uphl_plot],
+            [REFL_LEVELS, UPHL_LEVELS[1::2]],
+            labels=["Simulated Radar (dBZ)", "Maximum Updraft Helicity (m2 s-2)"],
+        )
 
 
-def generate_colorbar(variable, plot, label, ticks):
-    """Generate colorbar for each var"""
-    from earthnow.wxmaps_utils import save_colorbar_single
+def generate_colorbars(mappables: list, levels: list, labels: list):
+    """Generate colorbar for both vars"""
+
+    from earthnow.wxmaps_utils import build_and_save_colorbars
 
     colorbar_output = (
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
-
-    save_colorbar_single(
-        plot,
+    build_and_save_colorbars(
+        mappables,
+        levels,
         colorbar_output,
-        label=label,
-        ticks=ticks,
+        labels,
     )

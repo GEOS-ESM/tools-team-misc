@@ -13,14 +13,12 @@ logger = logging.getLogger(__name__)
 from wxvis import colors
 from matplotlib import colormaps
 
-cmap = colormaps["EN-cape"]
-
 variable = "cape"
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # CAPE colormap + levels
 # ------------------------------------------------------------------
-# NOTE: Alpha values from IDL: alevs= [99,100] - I don't really know what this means I just clipped below 100?
 
 
 CAPE_LEVELS = np.array(
@@ -70,7 +68,9 @@ def plot_cape(fig, ax, plotter, reader, args):
 
     # Mask values below 100
     data = np.ma.masked_where(data < CAPE_LEVELS[0], data)
-    # data = np.ma.masked_where(data > CAPE_LEVELS[-1], data) # Don't mask out above values, will default to top color
+    # data = np.ma.masked_where(
+    #     data > CAPE_LEVELS[-1], data
+    # )  # Don't mask out above values, will default to top color
 
     logger.info(f"CAPE min: {data.min()}")
     logger.info(f"CAPE max: {data.max()}")
@@ -78,33 +78,38 @@ def plot_cape(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
+    cmap = colormaps["EN-cape"]
     norm = BoundaryNorm(CAPE_LEVELS, ncolors=cmap.N, clip=False)
+
+    # NOTE: Alpha values from IDL: alevs= [99,100] but this doesn't match his cbar, the 100s would have no color then, decide what we want to preserve, colorshading or colormap
+    # alpha_fade_pct = 99 / 10000
+    # cmap = colorbar_alpha_fade(cmap, alpha_fade_pct)
 
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    plot = ax.contourf(
+    plot = ax.pcolormesh(
         lons,
         lats,
         data,
         cmap=cmap,
         norm=norm,
-        levels=CAPE_LEVELS,
         transform=ccrs.PlateCarree(),
     )
 
-    # generate_colorbar(plot) # Uncomment to generate colorbar w every frame
+    if create_colorbar == True:
+        generate_colorbar(plot)
 
 
 def generate_colorbar(plot):
-    from earthnow.wxmaps_utils import save_colorbar_single
+    from earthnow.wxmaps_utils import build_and_save_colorbars
 
     colorbar_output = (
         f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
     )
-    save_colorbar_single(
+    build_and_save_colorbars(
         plot,
+        CAPE_LEVELS[::4],
         colorbar_output,
-        label="Surface-Based CAPE [J/kg]",
-        ticks=CAPE_LEVELS[::4],
+        "Surface-Based CAPE [J/kg]",
     )
