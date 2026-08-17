@@ -259,19 +259,21 @@ class DaytimeRGB:
     def get_reflectance_channels(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         print("Loading solar radiation bands...")
 
-        isr_blue = self._load_variable(self.isr_blue)
-        isr_red = self._load_variable(self.isr_red)
-        isr_nir = self._load_variable(self.isr_nir)
-
-        print(
-            f"ISR Blue: min={np.nanmin(isr_blue):.6f}, max={np.nanmax(isr_blue):.6f}, mean={np.nanmean(isr_blue):.6f}"
-        )
-        print(
-            f"ISR Red:  min={np.nanmin(isr_red):.6f}, max={np.nanmax(isr_red):.6f}, mean={np.nanmean(isr_red):.6f}"
-        )
-        print(
-            f"ISR NIR:  min={np.nanmin(isr_nir):.6f}, max={np.nanmax(isr_nir):.6f}, mean={np.nanmean(isr_nir):.6f}"
-        )
+        # These are not actually used and isr_blue is missing from inst1_2d_avg files
+        # comment out for now
+        #        isr_blue = self._load_variable(self.isr_blue)
+        #        isr_red = self._load_variable(self.isr_red)
+        #        isr_nir = self._load_variable(self.isr_nir)
+        #
+        #        print(
+        #            f"ISR Blue: min={np.nanmin(isr_blue):.6f}, max={np.nanmax(isr_blue):.6f}, mean={np.nanmean(isr_blue):.6f}"
+        #        )
+        #        print(
+        #            f"ISR Red:  min={np.nanmin(isr_red):.6f}, max={np.nanmax(isr_red):.6f}, mean={np.nanmean(isr_red):.6f}"
+        #        )
+        #        print(
+        #            f"ISR NIR:  min={np.nanmin(isr_nir):.6f}, max={np.nanmax(isr_nir):.6f}, mean={np.nanmean(isr_nir):.6f}"
+        #        )
 
         isr = self._load_variable(self.swtdn)
         print(
