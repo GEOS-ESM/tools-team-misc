@@ -12,6 +12,7 @@ GeoColor: True View of Earth
 Sandwich RGB - Blended LW IR and Veggie VIS
 - Assignee: Bennett/Emily
 - Status:
+- Function call:
 
 `ploteic_band16`
 13.3 micron - CO2 Longwave Band IR
@@ -28,7 +29,6 @@ Sandwich RGB - Blended LW IR and Veggie VIS
 - Assignee: Bennett/Emily
 - Status: Done!
 
-
 ## Surface variables
 `ploteic_radar`
 Radar Reflectivity [Rain/Snow/Ice]
@@ -39,16 +39,19 @@ Radar Reflectivity [Rain/Snow/Ice]
 Accumulated Precip [Rain & Snow]
 - Assignee: Emily
 - Status: Done!
+- Function call:
 
 `ploteic_winds`
 Near Surface Winds
 - Assignee: Emily
 - Status: Done!
+- Function call:
 
 `ploteic_t2m`
 2-meter Temperature
 - Assignee: Sandra
 - Status: Done!
+- Function call:
 
 `ploteic_tanom`
 2-meter Temperature Anomaly (1-day running mean)
@@ -87,3 +90,4 @@ Carbon Aerosol Optical Thickness
 250-mb Wind Speed and MSLP
 - Assignee: Emily
 - Status: Done!
+- Function call:
