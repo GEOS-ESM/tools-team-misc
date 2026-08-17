@@ -12,7 +12,15 @@ def make_image(request):
     defs = { k:v for k,v in request.items() if not isinstance(v, dict) }
 
     time_dt = request['time_dt']
-    oname = time_dt.strftime(request['pngname'])
+    fcst_dt = request['fcst_dt']
+
+    if request["isa_forecast"]:
+        oname = request['fcname']
+    else:
+        oname = request['rpname']
+
+    oname = time_dt.strftime(oname)
+    oname = fcst_dt.strftime(oname)
     oname = str_replace(oname, **defs)
 
     options = request['options']
@@ -41,8 +49,10 @@ def make_movie(request):
     defs['glob'] = os.path.join(tmpdir.name, '*.png')
     defs['resolution'] = request['pngsize']
 
-    iname = request['pngname']
-    iname = str_replace(iname, **defs)
+    fcname = request['fcname']
+    rpname = request['rpname']
+    fcname = str_replace(fcname, **defs)
+    rpname = str_replace(rpname, **defs)
     txtname = request['txtname']
     txtname = str_replace(txtname, **defs)
     
@@ -55,23 +65,26 @@ def make_movie(request):
     os.makedirs(os.path.dirname(txtname), mode=0o755, exist_ok=True)
     with open(txtname, 'w') as f:
 
+        seq = 0
         t = start_dt
         while (t <= end_dt):
 
-            src = t.strftime(iname)
+            cdattim = t.strftime("%Y-%m-%d, %H%M UTC")
+
+            dst = os.path.join(tmpdir.name, f"{seq:05d}.png")
+
+            if t >= fcst_dt:
+                tau  = round((t - fcst_dt).total_seconds() / 3600)
+                cdattim = f"{cdattim} [Forecast Hour: {tau:03d}]"
+                src = fcst_dt.strftime(t.strftime(fcname))
+            else:
+                src = t.strftime(rpname)
+
             if os.path.isfile(src):
-
-                dst = os.path.join(tmpdir.name, os.path.basename(src))
                 os.symlink(src, dst)
-                print(src)
-
-                cdattim = t.strftime("%Y-%m-%d, %H%M UTC")
-                if t >= fcst_dt:
-                    tau  = round((t - fcst_dt).total_seconds() / 3600)
-                    cdattim = f"{cdattim} [Forecast Hour: {tau:03d}]"
-
                 f.write(cdattim+'\n')
 
+            seq += 1
             t += delta_t
 
     resolutions = request['resolutions']

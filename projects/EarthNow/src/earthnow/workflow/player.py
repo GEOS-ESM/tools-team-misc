@@ -14,6 +14,7 @@ class Player(object):
 
         self.products = configuration["products"]
         self.streams = configuration["streams"]
+        self.regions = configuration["regions"]
 
         self.plays = self.get_plays(configuration, task_name)
 
@@ -50,10 +51,13 @@ class Player(object):
             for region in regions:
 
                 request["region"] = region
+                request["REGION"] = region.upper()
+                request["region_name"] = self.regions.get(region, region)
 
                 for product in products:
 
                     request["product"] = product
+                    request["PRODUCT"] = product.upper()
 
                     for name in streams:
 
@@ -70,6 +74,10 @@ class Player(object):
                             options["data-reader"] = reader
                             options.update(self.products[product])
                             request.update(self.streams[reader])
+
+                            request["isa_forecast"] = False
+                            if self.streams[reader].get("ftime", None):
+                                request["isa_forecast"] = True
 
                             self.add_user_options(request)
 
@@ -89,8 +97,6 @@ class Player(object):
                             request["start_dt"] = start_dt
                             request["end_dt"] = end_dt
                             request["ref_dt"] = time_dt
-
-                          # if self.streams[reader].get("ftime", None):
                             options["fdate"] = fcst_dt.strftime("%Y%m%d_%Hz")
 
                             t_start = start_dt

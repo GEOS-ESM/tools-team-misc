@@ -1,64 +1,135 @@
-#BASE_PATH: /discover/nobackup/dao_ops/jardizzo/EarthNow/plots
-#NPROC: 28
-BASE_PATH: /discover/nobackup/$USER/EarthNow/plots
-NPROC: 1
+# Default Settings
+# ================
 
-plot_current:
-  products: [RainSnow, T2m, Vort500, Wind10m, Wind250]
-  data_readers: [geos_cycled_replay]
-  regions: [global, conus]
-  nproc: $NPROC
+nproc: 24
+base_path: /discover/nobackup/$USER/EarthNow
+fcname: $base_path/OpsCONUS02KM_R/PLOTEIC_${PRODUCT}/Y%Y/M%m/D%d/ploteic_${product}-${region_name}_GMAO-GEOS_CONUS02KM-EIC-%%Y%%m%%d_%%Hz_%Y%m%d_%H%M.png
+rpname: $base_path/OpsCONUS02KM_R/PLOTEIC_${PRODUCT}/Y%Y/M%m/D%d/ploteic_${product}-${region_name}_GMAO-GEOS_CONUS02KM-EIC-REPLAY_%Y%m%d_%H%M.png
+mp4name: $base_path/MOVIES_EIC_NOW/ploteic_${product}-${region_name}_$resolution.mp4
+txtname: $base_path/WebGL/geos_earth/include/geos/timestamps_NOW_ploteic_$product-${region_name}.txt
+
+pngsize: 8k
+frame_rate: 12
+quality: 25
+codec: libx264
+mp4size: [8k, 4k, HD]
+driver: plotall.py
+
+# Tasks
+# =====
+
+plot_all: [plot_global, plot_conus]
+
+plot_global:
+  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
+  streams: [conus2km]
+  regions: [global]
+
+plot_conus:
+  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
+  streams: [conus2km_lcc]
+  regions: [conus]
+
+# Product Definitions
+# ===================
+
+#aerosols
+#band09
+#band14
+#band16
+#cape
+#carbon
+#geocolor
+#helicity
+#precip
+#radar
+#sandwich
+#t2m
+#tanom
+#vort500
+#wind250
+#winds
 
 products:
-  # RainSnow: # I don't think this product is complete, comment out for now
-  #   product: rain_snow_accumulation_total_EarthNow
-  #   style: light
-  #   driver: "plotall.py"
-  #   base-path: $BASE_PATH
-  T2m:
+  t2m:
     product: temperature_2m_EarthNow
     style: empty
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Vort500:
+  vort500:
     product: vorticity_heights_500mb_EarthNow
     style: greytopo
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Wind10m:
+  winds:
     product: winds_10m_EarthNow
     style: light # Create "Blank" style?
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Wind250:
+  wind250:
     product: winds_heights_250mb_EarthNow
     style: greyblue
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  HelicityMaxReflectivity:
+  helicity:
     product: max_reflectivity_EarthNow
     style: helicity
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Cape:
+  cape:
     product: cape_EarthNow
     style: greyblue
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Aerosols:
+  aerosols:
     product: aerosol_EarthNow
     style: greyblue
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Carbon:
+  carbon:
     product: carbon_EarthNow
     style: greyblue
-    driver: "plotall.py"
-    base-path: $BASE_PATH
 
+# Stream Definitions
+# ==================
 
+streams:
+  conus2kmfc:
+    model: conus2km
+    ftime: PT0H
+    stime: PT0H
+    etime: PT96H
+    tinc: PT30M
+  conus2kmrp:
+    model: conus2km
+    stime: -P5D
+    etime: -PT30M
+    tinc: PT30M
+  conus2kmfc_lcc:
+    model: conus2km
+    ftime: PT0H
+    stime: PT0H
+    etime: PT96H
+    tinc: PT30M
+  conus2kmrp_lcc:
+    model: conus2km
+    stime: -P5D
+    etime: -PT30M
+    tinc: PT30M
+  conus2km:
+    model: conus2km
+  # streams: [conus2kmfc, conus2kmrp]
+    streams: [conus2kmrp]
+    ftime: PT0H
+    stime: -P5D
+    etime: PT96H
+    tinc: PT30M
+  conus2km_lcc:
+    model: conus2km
+  # streams: [conus2kmfc_lcc, conus2kmrp_lcc]
+    streams: [conus2kmrp_lcc]
+    ftime: PT0H
+    stime: -P5D
+    etime: PT96H
+    tinc: PT30M
 
-data_readers:
-  geos_cycled_replay:
-    data-reader: geos_cycled_replays
-    fdate: PT0H
+# Resolution Definitions
+# ======================
+
+resolutions:
+  8k: 7680x4320
+  4k: 3840x2160
+  HD: 1920x1080
+
+# EIC Region Mapping
+# ==================
+
+regions:
+  global: globe
+  conus: eicusa_mapset
