@@ -29,6 +29,14 @@ CONUS2KMFC_VARS = VARIABLE_REGISTRY.resolve_many(
         "OCEXTTAU": "inst1_2d_asm_Nx",
         "BREXTTAU": "inst1_2d_asm_Nx",
         "BCEXTTAU": "inst1_2d_asm_Nx",
+        "TBRB06RG": "inst1_2d_asm_Nx",
+        "SWTDN": "inst1_2d_asm_Nx",
+        "ISRB11RG": "inst1_2d_asm_Nx",
+        "ISRB10RG": "inst1_2d_asm_Nx",
+        "ISRB09RG": "inst1_2d_asm_Nx",
+        "OSRB11RG": "inst1_2d_asm_Nx",
+        "OSRB10RG": "inst1_2d_asm_Nx",
+        "OSRB09RG": "inst1_2d_asm_Nx",
     }
 )
 

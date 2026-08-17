@@ -182,3 +182,55 @@ SLP:
     inst1_2d_asm_Nx: SLP
     hwt_15mn_slv_LCC: PRMSL
     hwt_30mn_slv_LCC: PRMSL
+
+TBRB06RG:
+  description: "Brightness temperature in RR LW Band 06"
+  collection:
+    inst1_2d_asm_Nx: TBRB06RG
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+
+SWTDN:
+  description: "TOA Incoming shortwave flux"
+  collection:
+    inst1_2d_asm_Nx: SWTDN
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+
+ISRB11RG:
+  description: "Downwelling shortwave flux at TOA in RR Band 11"
+  collection:
+    inst1_2d_asm_Nx: ISRB11RG
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+ISRB10RG:
+  description: "Downwelling shortwave flux at TOA in RR Band 10"
+  collection:
+    inst1_2d_asm_Nx: ISRB10RG
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+ISRB09RG:
+  description: "Downwelling shortwave flux at TOA in RR Band 09"
+  collection:
+    inst1_2d_asm_Nx: ISRB09RG
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+OSRB11RG:
+  description: "Upwelling shortwave flux at TOA in RR Band 11"
+  collection:
+    inst1_2d_asm_Nx: OSRB11RG
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+OSRB10RG:
+  description: "Upwelling shortwave flux at TOA in RR Band 10"
+  collection:
+    inst1_2d_asm_Nx: OSRB10RG
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+OSRB09RG:
+  description: "Upwelling shortwave flux at TOA in RR Band 09"
+  collection:
+    inst1_2d_asm_Nx: OSRB09RG
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+
