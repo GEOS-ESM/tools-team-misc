@@ -584,7 +584,9 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     )
     ir_rgba = cmap(normalized)
     # create IR alpha layer
-    ir_rgba[..., 3] = np.clip(255 - normalized, 0.0, 125.0) / 125.0
+    ir_rgba[..., 3] = (
+        np.clip(255 - normalized, 0.0, 175.0) / 175.0
+    )  # 175.0 matches IDL script
     # ------------------------------------------------------------
     # True Color Daytime field
     # ------------------------------------------------------------
