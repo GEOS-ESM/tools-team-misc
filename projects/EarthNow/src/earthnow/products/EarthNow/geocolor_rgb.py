@@ -550,7 +550,7 @@ LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 # ------------------------------------------------------------------
 
 
-@register("geocolor_rgb")
+@register("geocolor_rgb_EarthNow")
 def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     """
     Plot GeoColor RGB Image
