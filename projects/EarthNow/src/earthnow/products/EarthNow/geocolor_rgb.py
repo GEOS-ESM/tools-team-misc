@@ -327,7 +327,9 @@ class DaytimeRGB:
 
         print(f"\nCreating true-color composite (enhance={enhance}, gamma={gamma})...")
 
-        grn_refl = 0.45 * red_refl + 0.45 * blu_refl + 0.1 * nir_refl
+        grn_refl = (
+            0.35 * red_refl + 0.35 * blu_refl + 0.3 * nir_refl
+        )  # edited to match ratios used in IDL
 
         print(
             f"\nReflectance Red:  min={np.nanmin(red_refl):.6f}, max={np.nanmax(red_refl):.6f}, mean={np.nanmean(red_refl):.6f}"
@@ -391,7 +393,7 @@ class DaytimeRGB:
         print("Cache cleared.")
 
     def create_natural_color(
-        self, gamma: float = 2.2, veggie_factor: float = 0.4
+        self, gamma: float = 1.0, veggie_factor: float = 0.3
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Create a natural-color (vegetation-corrected) RGB composite.
@@ -410,8 +412,13 @@ class DaytimeRGB:
         tuple : (rgb_array, lats, lons)
         """
         # Get reflectance channels
-        blue_refl, red_refl, grn_refl = self.get_reflectance_channels(
-            veggie_factor=veggie_factor
+        blue_refl, red_refl, nir_refl, alpha = self.get_reflectance_channels()
+
+        # Veggie adjustment
+        grn_refl = (
+            (1.0 - veggie_factor) * 0.5 * red_refl
+            + (1.0 - veggie_factor) * 0.5 * blue_refl
+            + veggie_factor * nir_refl
         )
 
         print("Creating natural-color composite...")
@@ -426,7 +433,7 @@ class DaytimeRGB:
 
         print("Natural-color composite created.")
 
-        return rgb, self.lats, self.lons
+        return rgb, alpha, self.lats, self.lons
 
     def create_day_snow_fog(
         self, gamma: float = 1.7
@@ -542,7 +549,7 @@ class DaytimeRGB:
 
 COLORS = load_color_table(paths.colortable("NESDIS_IR_10p3micron.txt"))
 
-clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
+clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
 
 # ------------------------------------------------------------------
@@ -567,7 +574,7 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     # Colormap + normalization
     # ------------------------------------------------------------
     COLORS = load_color_table(paths.colortable("NESDIS_IR_10p3micron.txt"))
-    clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
+    clevs = [-110.0, -59, -20, 6, 31, 57]  # Celsius
     LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
     cmap = cm.get_cmap("gray_r", 256)  # discrete 256 colors
     norm = BoundaryNorm(LEVELS, ncolors=cmap.N, clip=True)
