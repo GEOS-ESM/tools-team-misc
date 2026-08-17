@@ -102,14 +102,14 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         variables=["TMP_2M"],
     )
 
-    refl = data.astype(np.float32)
+    refl = refl.astype(np.float32)
 
     # Mask invalid reflectivity
-    refl = np.ma.masked_where(data < 0.0, data)
-    refl = np.ma.masked_where(data > 80.0, data)
-    logger.debug("refl min: ", data.min())
-    logger.debug("refl max: ", data.max())
-    logger.debug("refl mean: ", data.mean())
+    refl = np.ma.masked_where(refl < 0.0, refl)
+    refl = np.ma.masked_where(refl > 80.0, refl)
+    logger.debug("refl min: ", refl.min())
+    logger.debug("refl max: ", refl.max())
+    logger.debug("refl mean: ", refl.mean())
     # sys.exit()
 
     # Only keep nonzero snow values where there's snow
@@ -123,10 +123,71 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     condition = (ice * 3600.0 / 25.4 > 0) & (twm <= 276.483)
     ice[~condition] = 0.0
 
+    # Elevation correction
+    # Use geopotential height to determine precip type
+    # -------------------------------------------------
+    i1000 = 0
+    i925 = 1
+    i850 = 2
+    i700 = 3
+    i500 = 4
+
+    hgt, lats, lons, meat = reader.read_variable(
+        args.fdate, args.pdate, variables=["HGT"]
+    )
+
+    # Replace missing heights (belowground) with surface pressure
+    phis_3d = phis[:, :, np.newaxis]  # dims X,Y,1
+    hgt = np.where(hgt == 1.0e15, phis, hgt)
+    # syntax here: where hgt is missing (= 1e15), insert phis value.
+    # where hgt is valid, keep it
+
+    # 500 - 925 mb thickness
+    thck = np.squeeze(hgt[:, :, i500] - hgt[:, :, i925])
+    elevFactor = (phis - 305.0) / 915.0
+    # apply 0 and 1 caps to elevFactor
+    elevFactor[elevFactor < 0] = 0.0
+    elevFactor[elevFactor > 1] = 1.0
+
+    elevFactor = elevFactor * 50.0
+    thLow = 5425.0 - 625 + elevFactor  # cold edge
+    thHigh = 5475.0 - 625 + elevFactor  # warm edge
+    # Explanation:
+    # between these edges you get sleet, freezing rain, or rain/snow mix.
+    # The 625 adjustment accounts for 1000-925 mb thickness:
+    # 5425 and 5475 are typicaly thresholds for 1000-500 mb thickness
+    # but we're using 925-500 so need to tweak.
+    # Add the elevation factor of up to 50 m depending on elevation
+    # (warmer/lower elevations snow melts further from the ground)
+
+    # Precip in this chunk of atmosphere is defined here as icefall (sleet)
+    ifind = (
+        (thck > thLow)
+        & (thck < thHigh)
+        & ((snow * 3600.0 / 25.4 > 1.0e-6) | (ice * 3600.0 / 25.4 > 1.0e-6))
+    )
+    # recall this *3600./25.4 converts to inches per hour
+    # so that line is checking for EITHER nonzero snowfall OR nonzero icefall
+
+    ice[ifind] = refl[ifind]  # fill reflectivity for ifind
+    snow[ifind] = 0.0
+    rain[ifind] = 0.0
+    ice[~ifind] = 0.0
+
+    # Snow does not fall below thHigh
+    snow[thck >= thHigh] = 0.0
+    # Rain reflectivity
+    rain[rain > 0.0] = refl[rain > 0.0]
+    # Snow reflectivity
+    snow[snow > 0.0] = ref[snow > 0.0]
+    # Freezing rain reflectivity
+    frzr = rain
+    frzr[t2m > 273.15] = 0.0
+
     # ------------------------------------------------------------
     # Report data resolution
     # ------------------------------------------------------------
-    data_shape = data.shape
+    refl_shape = refl.shape
     #    print(f"Data resolution: {data_shape[0]} x {data_shape[1]} (height x width)")
     #    print(f"  Total data points: {data_shape[0] * data_shape[1]:,}")
     #
