@@ -14,11 +14,12 @@ CONUS2KMFC_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "VORT500": "hwt_15mn_slv_LCC",
         "H500": "hwt_15mn_slv_LCC",
         "T2M": "hwt_15mn_slv_LCC",
-        "DBZ_MAX": "hwt_15mn_slv_LCC",
         "UH25": "hwt_15mn_slv_LCC",
         "CAPE": "hwt_15mn_slv_LCC",
         "RAIN": "hwt_15mn_slv_LCC",
         "SNOW": "hwt_15mn_slv_LCC",
+        "ICE": "hwt_15mn_slv_LCC",
+        "DBZ_MAX": "hwt_15mn_slv_LCC",
         "U10M": "hwt_15mn_slv_LCC",
         "V10M": "hwt_15mn_slv_LCC",
         "U250": "hwt_15mn_slv_LCC",
@@ -38,6 +39,8 @@ CONUS2KMFC_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "OSRB11RG": "hwt_15mn_slv_LCC",
         "OSRB10RG": "hwt_15mn_slv_LCC",
         "OSRB09RG": "hwt_15mn_slv_LCC",
+        "HGT": "hwt_15mn_prs_LCC",
+        "HGT_SFC": "hwt_15mn_slv_LCC",
     }
 )
 

@@ -72,6 +72,7 @@ HGT:
   description: "Layer edge heights (m)"
   collection:
     hwt_15mn_prs_LCC: HGT
+    hwt_30mn_prs_LCC: HGT
 
 ICE:
   description: "Icefall (kg m-2 s-1)"
