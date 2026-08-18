@@ -6,8 +6,7 @@ For IDL script references, look in this dir:
 `ploteic_geocolor`
 GeoColor: True View of Earth
 - Assignee: Emily
-- Status:
-- Function call:
+- Status: Done!
 
 `ploteic_sandwich`
 Sandwich RGB - Blended LW IR and Veggie VIS
@@ -96,4 +95,3 @@ Carbon Aerosol Optical Thickness
 250-mb Wind Speed and MSLP
 - Assignee: Emily
 - Status: Done!
-- Function call:
