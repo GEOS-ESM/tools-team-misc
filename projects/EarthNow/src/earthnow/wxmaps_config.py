@@ -239,7 +239,6 @@ class StyleConfig:
             state_width=0.5,
             state_alpha=0.8,
             show_nws_warnings=False,
-            show_timestamp=True,
             show_frame=False,
             show_gridlines=False,
             show_title=False,

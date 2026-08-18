@@ -12,3 +12,4 @@ from . import max_reflectivity
 from . import cape
 from . import aerosols
 from . import carbon
+from . import geocolor_rgb
