@@ -73,7 +73,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     refl, lats, lons, meta = reader.read_variable(
         args.fdate,
         args.pdate,
-        variables=["REFC"],
+        variables=["DBZ_MAX"],
     )
     phis, lats, lons, meta = reader.read_variable(
         args.fdate,
@@ -99,7 +99,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     t2m, lats, lons, meta = reader.read_variable(
         args.fdate,
         args.pdate,
-        variables=["TMP_2M"],
+        variables=["T2M"],
     )
 
     refl = refl.astype(np.float32)
@@ -120,7 +120,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
 
     # Only keep nonzero ice values where there's ice
     # and t2m is below freezing
-    condition = (ice * 3600.0 / 25.4 > 0) & (twm <= 276.483)
+    condition = (ice * 3600.0 / 25.4 > 0) & (t2m <= 276.483)
     ice[~condition] = 0.0
 
     # Elevation correction
@@ -148,6 +148,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # apply 0 and 1 caps to elevFactor
     elevFactor[elevFactor < 0] = 0.0
     elevFactor[elevFactor > 1] = 1.0
+    print("thck.shape: ", thck.shape)
 
     elevFactor = elevFactor * 50.0
     thLow = 5425.0 - 625 + elevFactor  # cold edge
@@ -159,6 +160,9 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # but we're using 925-500 so need to tweak.
     # Add the elevation factor of up to 50 m depending on elevation
     # (warmer/lower elevations snow melts further from the ground)
+
+    print("thLow: ", thLow)
+    print("thHigh: ", thHigh)
 
     # Precip in this chunk of atmosphere is defined here as icefall (sleet)
     ifind = (
@@ -224,24 +228,50 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     #        )
 
     # ------------------------------------------------------------
-    # Colormap + normalization
-    # ------------------------------------------------------------
+    # Base Reflectivity
     cmap = ListedColormap(REFL_COLORS)
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
 
-    # ------------------------------------------------------------
-    # Plot field
-    # ------------------------------------------------------------
     ax.pcolormesh(
         lons,
         lats,
-        data,
+        refl,
         cmap=cmap,
         norm=norm,
         transform=ccrs.PlateCarree(),
         shading="nearest",
         zorder=4,
         #        rasterized=True,
+    )
+
+    # Snow reflectivity
+    cmap = ListedColormap(SNOW_COLORS)
+    norm = BoundaryNorm(REFL_LEVELS, len(REFL_LEVELS), clip=True)
+
+    ax.pcolormesh(
+        lons,
+        lats,
+        snow,
+        cmap=cmap,
+        norm=norm,
+        transform=ccrs.PlateCarree(),
+        shading="nearest",
+        zorder=5,
+    )
+
+    # Ice/mix reflectivity
+    cmap = ListerColormap(MIX_COLORS)
+    norm = BoundaryNorm(REFL_LEVELS, len(REFL_LEVELS), clip=True)
+
+    ax.pcolormesh(
+        lons,
+        lats,
+        frzr,
+        cmap=cmap,
+        norm=norm,
+        transform=ccrs.PlateCarree(),
+        shading="nearest",
+        zorder=6,
     )
 
     # ------------------------------------------------------------
@@ -261,14 +291,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     #    print(
     #        f"  Pixel ratio (image/data): {(img_height_px * img_width_px) / (data_shape[0] * data_shape[1]):.2f}x"
     #    )
-
-    # ========
-    # Snow
-    # ========
-    # Read from reader (reader decides the collection)
-    data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["SNOW"]
-    )
 
 
 def generate_colorbar():
