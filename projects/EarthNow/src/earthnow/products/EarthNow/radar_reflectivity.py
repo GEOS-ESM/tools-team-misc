@@ -209,13 +209,30 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     logger.debug("refl max: ", refl.max())
     logger.debug("refl mean: ", refl.mean())
 
-    # Colormap + normalization
+    # ========
+    # Reflectivity
+    # ========
+    # Read from reader (reader decides the collection)
+    data, lats, lons, meta = reader.read_variable(
+        args.fdate, args.pdate, variables=["REFC"]
+    )
+
+    data = data.astype(np.float32)
+
+    # Mask invalid reflectivity
+    data = np.ma.masked_where(data < 0.0, data)
+    data = np.ma.masked_where(data > 80.0, data)
+    print("rain refl min: ", data.min())
+    print("rain refl max: ", data.max())
+    print("rain refl mean: ", data.mean())
+    print("meta :", meta)
+    # sys.exit()
+
+    # Plot rain reflectivity
     # ------------------------------------------------------------
     cmap = ListedColormap(REFL_COLORS)
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
 
-    # ------------------------------------------------------------
-    # Plot rain reflectivity
     ax.pcolormesh(
         lons,
         lats,
