@@ -214,7 +214,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # ========
     # Read from reader (reader decides the collection)
     data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["REFC"]
+        args.fdate, args.pdate, variables=["DBZ_MAX"]
     )
 
     data = data.astype(np.float32)
