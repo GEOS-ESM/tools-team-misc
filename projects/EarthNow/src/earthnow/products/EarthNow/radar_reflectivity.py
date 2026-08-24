@@ -6,6 +6,7 @@ Maximum Composite Reflectivity (DBZ_MAX / REFC)
 import numpy as np
 import cartopy.crs as ccrs
 from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib.colors import LinearSegmentedColormap
 from earthnow.products.registry import register
 import logging
 import sys
@@ -75,6 +76,8 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         args.pdate,
         variables=["DBZ_MAX"],
     )
+    refl = refl.astype(np.float32)
+
     phis, lats, lons, meta = reader.read_variable(
         args.fdate,
         args.pdate,
@@ -104,18 +107,10 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
 
     refl = refl.astype(np.float32)
 
-    # Mask invalid reflectivity
-    refl = np.ma.masked_where(refl < 0.0, refl)
-    refl = np.ma.masked_where(refl > 80.0, refl)
-    logger.debug("refl min: ", refl.min())
-    logger.debug("refl max: ", refl.max())
-    logger.debug("refl mean: ", refl.mean())
-    # sys.exit()
-
     # Only keep nonzero snow values where there's snow
     # and t2m is below freezing
     # Convert snow kg m-2 s-1 to inches hr-1
-    condition = (snow * 3600.0 / 25.4 > 0) & (t2m <= 276.483)
+    condition = ((snow * 3600.0 / 25.4) > 0) & (t2m <= 276.483)
     snow[~condition] = 0.0
 
     # Only keep nonzero ice values where there's ice
@@ -132,27 +127,34 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     i700 = 3
     i500 = 4
 
-    hgt, lats, lons, meat = reader.read_variable(
+    hgt, lats, lons, meta = reader.read_variable(
         args.fdate, args.pdate, variables=["HGT"]
     )
 
     # Replace missing heights (belowground) with surface pressure
     phis_3d = phis[:, :, np.newaxis]  # dims X,Y,1
     hgt = np.where(hgt == 1.0e15, phis, hgt)
-    # syntax here: where hgt is missing (= 1e15), insert phis value.
-    # where hgt is valid, keep it
+    # Syntax here: where hgt is missing (= 1e15), insert phis value.
+    # Where hgt is valid, keep it.
+    # This works bc of "broadcasting" - numpy automatically
+    # copies phis_3d to match every Z level of the full 3D hgt array.
+    # And can compare it to every Z level
+    # for replacing where hgt = 1e15.
 
     # 500 - 925 mb thickness
-    thck = np.squeeze(hgt[:, :, i500] - hgt[:, :, i925])
+    thck = np.squeeze(hgt[i500, :, :] - hgt[i925, :, :])
     elevFactor = (phis - 305.0) / 915.0
     # apply 0 and 1 caps to elevFactor
     elevFactor[elevFactor < 0] = 0.0
     elevFactor[elevFactor > 1] = 1.0
-    print("thck.shape: ", thck.shape)
+    # print("phis.shape: ",phis.shape)
+    # print("elevFactor.shape: ",elevFactor.shape)
+    # print("thck.shape: ", thck.shape)
+    # print("hgt.shape: ",hgt.shape)
 
     elevFactor = elevFactor * 50.0
-    thLow = 5425.0 - 625 + elevFactor  # cold edge
-    thHigh = 5475.0 - 625 + elevFactor  # warm edge
+    thLow = 5425.0 - 625 + elevFactor  # warm edge
+    thHigh = 5475.0 - 625 + elevFactor  # cold edge
     # Explanation:
     # between these edges you get sleet, freezing rain, or rain/snow mix.
     # The 625 adjustment accounts for 1000-925 mb thickness:
@@ -161,8 +163,9 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # Add the elevation factor of up to 50 m depending on elevation
     # (warmer/lower elevations snow melts further from the ground)
 
-    print("thLow: ", thLow)
-    print("thHigh: ", thHigh)
+    # print("thLow.shape: ", thLow.shape)
+    # print("thHigh.shape: ", thHigh.shape)
+    # sys.exit()
 
     # Precip in this chunk of atmosphere is defined here as icefall (sleet)
     ifind = (
@@ -183,35 +186,34 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # Rain reflectivity
     rain[rain > 0.0] = refl[rain > 0.0]
     # Snow reflectivity
-    snow[snow > 0.0] = ref[snow > 0.0]
+    snow[snow > 0.0] = refl[snow > 0.0]
     # Freezing rain reflectivity
     frzr = rain
     frzr[t2m > 273.15] = 0.0
 
-
-    # ========
-    # Reflectivity
-    # ========
-    # Read from reader (reader decides the collection)
-    data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["REFC"]
-    )
-
-    data = data.astype(np.float32)
-
     # Mask invalid reflectivity
-    data = np.ma.masked_where(data < 0.0, data)
-    data = np.ma.masked_where(data > 80.0, data)
-    print("rain refl min: ", data.min())
-    print("rain refl max: ", data.max())
-    print("rain refl mean: ", data.mean())
-    print("meta :", meta)
+    # Note: This was not explicit in the IDL code,
+    # but IDL's plotting automatically masks out values
+    # beyond the colorbar limits.
+    # pcolormesh does not, so we do that here.
+    refl_min = min(REFL_LEVELS)
+    refl_max = max(REFL_LEVELS)
+    refl = np.ma.masked_where(refl <= refl_min, refl)
+    refl = np.ma.masked_where(refl > refl_max, refl)
+    snow = np.ma.masked_where(snow <= refl_min, snow)
+    snow = np.ma.masked_where(snow > refl_max, snow)
+    frzr = np.ma.masked_where(frzr <= refl_min, frzr)
+    frzr = np.ma.masked_where(frzr > refl_max, frzr)
+
+    logger.debug("refl min: ", refl.min())
+    logger.debug("refl max: ", refl.max())
+    logger.debug("refl mean: ", refl.mean())
     # sys.exit()
 
     # ------------------------------------------------------------
     # Report data resolution
     # ------------------------------------------------------------
-    data_shape = data.shape
+    ##data_shape = data.shape
     #    print(f"Data resolution: {data_shape[0]} x {data_shape[1]} (height x width)")
     #    print(f"  Total data points: {data_shape[0] * data_shape[1]:,}")
     #
@@ -245,8 +247,10 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     )
 
     # Snow reflectivity
-    cmap = ListedColormap(SNOW_COLORS)
-    norm = BoundaryNorm(REFL_LEVELS, len(REFL_LEVELS), clip=True)
+    cmap = LinearSegmentedColormap.from_list(
+        "snow_cmap", SNOW_COLORS, N=len(REFL_LEVELS) - 1
+    )
+    norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
 
     ax.pcolormesh(
         lons,
@@ -260,8 +264,10 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     )
 
     # Ice/mix reflectivity
-    cmap = ListerColormap(MIX_COLORS)
-    norm = BoundaryNorm(REFL_LEVELS, len(REFL_LEVELS), clip=True)
+    cmap = LinearSegmentedColormap.from_list(
+        "mix_cmap", MIX_COLORS, N=len(REFL_LEVELS) - 1
+    )
+    norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
 
     ax.pcolormesh(
         lons,
