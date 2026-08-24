@@ -13,3 +13,4 @@ from . import cape
 from . import aerosols
 from . import carbon
 from . import geocolor_rgb
+from . import radar_reflectivity
