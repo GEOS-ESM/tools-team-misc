@@ -10,11 +10,11 @@ plot_current:
   nproc: $NPROC
 
 products:
-  # RainSnow: # I don't think this product is complete, comment out for now
-  #   product: rain_snow_accumulation_total_EarthNow
-  #   style: light
-  #   driver: "plotall.py"
-  #   base-path: $BASE_PATH
+   RainSnow:
+     product: rain_snow_accumulation_total_EarthNow
+     style: dark
+     driver: "plotall.py"
+     base-path: $BASE_PATH
   T2m:
     product: temperature_2m_EarthNow
     style: empty
