@@ -12,7 +12,12 @@ environment variables to adapt to a different HPC cluster or local install:
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        return False
 
 CONFIG_DIR = Path(__file__).resolve().parent
 load_dotenv(CONFIG_DIR / ".env")
@@ -68,6 +73,9 @@ SHAPEFILES_PATH = env_path(
     "SHAPEFILES_PATH", "/discover/swdev/gmao-tools/Visualization/shapefiles"
 )
 
+CARTOPY_CONFIG = env_path("CARTOPY_CONFIG", "/discover/swdev/gmao-tools/Visualization")
+# Set cartopy.config['data_dir'] = CARTOPY_CONFIG to use existing natural earth
+
 # ---------------------------------------------------------------------------
 # Derived constants
 # ---------------------------------------------------------------------------
@@ -104,6 +112,11 @@ STATE_BORDERS_5M = env_path(
 COUNTY_BORDERS_5M = env_path(
     "COUNTRY_BORDERS",
     SHAPEFILES_PATH / "US_census_files" / "cb_2018_us_county_5m.shp",
+)
+
+ROADS_10M = env_path(
+    "ROADS_10M",
+    SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads.shp",
 )
 
 # ---------------------------------------------------------------------------

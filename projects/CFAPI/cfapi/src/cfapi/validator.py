@@ -13,7 +13,7 @@ from .aliases import _dedup_keep_order, parse_list_value
 from .api_config import aliases as al
 from .constants import ArgumentTypeError, CliConfig
 
-logger = logging.getLogger("cfapi.validator")
+logger = logging.getLogger("cfapi")
 
 
 # --------------------
@@ -120,6 +120,16 @@ class SplitLegacyProducts(argparse.Action):
 # --------------------
 # Normalization & constraints
 # --------------------
+
+
+def parse_datakey(raw: Mapping[str, Any]):
+    datakey = raw.get("datakey")
+    level = raw.get("level")
+    dataset = raw.get("dataset")
+    if "_" in dataset:
+        datakey = dataset
+
+
 def _check_value(
     value: str,
     options: List[str],

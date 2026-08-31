@@ -10,44 +10,16 @@ from earthnow.products.registry import register
 import logging
 
 logger = logging.getLogger(__name__)
+from wxvis import colors
+from matplotlib import colormaps
 
+variable = "cape"
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # CAPE colormap + levels
 # ------------------------------------------------------------------
-CAPE_RGB = (
-    np.array(
-        [
-            [200, 200, 200],
-            [160, 160, 160],
-            [125, 125, 125],
-            [91, 91, 91],
-            [116, 170, 255],
-            [83, 125, 226],
-            [52, 84, 197],
-            [23, 43, 158],
-            [117, 255, 117],
-            [79, 197, 79],
-            [45, 142, 45],
-            [16, 91, 16],
-            [255, 255, 91],
-            [221, 170, 60],
-            [188, 91, 31],
-            [156, 24, 0],
-            [255, 142, 255],
-            [212, 106, 212],
-            [170, 70, 170],
-            [129, 39, 129],
-            [90, 10, 90],
-            [50, 10, 60],
-        ]
-    )
-    / 255.0
-)
-CAPE_ALPHA = np.ones(CAPE_RGB.shape[0])
-# NOTE: Alpha values from IDL: alevs= [99,100] - I don't really know what this means I just clipped below 100?
 
-CAPE_COLORS = np.column_stack((CAPE_RGB, CAPE_ALPHA))
 
 CAPE_LEVELS = np.array(
     [
@@ -86,8 +58,6 @@ def plot_cape(fig, ax, plotter, reader, args):
     """
     Plot CAPE (J/kg)
     """
-    # logger.info(f"colors: {len(CAPE_COLORS)}")
-    # logger.info(f"levels: {len(CAPE_LEVELS)}")
 
     # Read from reader (reader decides the collection)
     data, lats, lons, meta = reader.read_variable(
@@ -95,12 +65,12 @@ def plot_cape(fig, ax, plotter, reader, args):
     )
 
     data = data.astype(np.float32)
-    logger.info(f"CAPE min: {data.min()}")
-    # breakpoint()
 
     # Mask values below 100
     data = np.ma.masked_where(data < CAPE_LEVELS[0], data)
-    # data = np.ma.masked_where(data > CAPE_LEVELS[-1], data) # Don't mask out above values, will default to top color
+    # data = np.ma.masked_where(
+    #     data > CAPE_LEVELS[-1], data
+    # )  # Don't mask out above values, will default to top color
 
     logger.info(f"CAPE min: {data.min()}")
     logger.info(f"CAPE max: {data.max()}")
@@ -108,30 +78,38 @@ def plot_cape(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Colormap + normalization
     # ------------------------------------------------------------
-    cmap = ListedColormap(CAPE_COLORS)
+    cmap = colormaps["EN-cape"]
     norm = BoundaryNorm(CAPE_LEVELS, ncolors=cmap.N, clip=False)
+
+    # NOTE: Alpha values from IDL: alevs= [99,100] but this doesn't match his cbar, the 100s would have no color then, decide what we want to preserve, colorshading or colormap
+    # alpha_fade_pct = 99 / 10000
+    # cmap = colorbar_alpha_fade(cmap, alpha_fade_pct)
 
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    plot = ax.contourf(lons, lats, data, cmap=cmap, norm=norm, levels=CAPE_LEVELS)
-    # fig.colorbar(plot)  # Confirm plot colorbar matches
+    plot = ax.pcolormesh(
+        lons,
+        lats,
+        data,
+        cmap=cmap,
+        norm=norm,
+        transform=ccrs.PlateCarree(),
+    )
 
-    # generate_colorbar()
+    if create_colorbar == True:
+        generate_colorbar(plot)
 
 
-def generate_colorbar():
-    """Generate colorbar"""
-    from earthnow.wxmaps_utils import save_colorbar_single
+def generate_colorbar(plot):
+    from earthnow.wxmaps_utils import build_and_save_colorbars
 
-    # Reflectivity colorbar
-    refl_output = "/discover/nobackup/hzafar/EarthNow/plots/cape_colorbar.png"
-
-    save_colorbar_single(
-        CAPE_COLORS,
-        CAPE_LEVELS,
-        refl_output,
-        label="Surface-Based CAPE [J/kg]",
-        extend="max",
-        ticks=CAPE_LEVELS[::4],
+    colorbar_output = (
+        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
+    )
+    build_and_save_colorbars(
+        plot,
+        CAPE_LEVELS[::4],
+        colorbar_output,
+        "Surface-Based CAPE [J/kg]",
     )

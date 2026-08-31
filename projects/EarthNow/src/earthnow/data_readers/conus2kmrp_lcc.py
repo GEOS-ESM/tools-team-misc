@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from .dataservice import DataService
 from .registry import register
+from .variables import VARIABLE_REGISTRY
 
 CONUS2KMRP_LCC_URI = "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/holding/$collection/%Y%m/Feature-c2160_L137.$collection.%Y%m%d_%H%Mz.nc4"
 
@@ -8,10 +9,36 @@ CONUS2KMRP_LCC_COORDS = (
     "/discover/nobackup/projects/gmao/osse2/stage/BCS_FILES/lambert_grid.nc4"
 )
 
-CONUS2KMRP_LCC_VARS = dict(
-    VORT500="VORT500.hwt_30mn_slv_LCC",
-    H500="H500.hwt_30mn_slv_LCC",
-    T2M="T2M.hwt_30mn_slv_LCC",
+CONUS2KMRP_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
+    {
+        "VORT500": "hwt_30mn_slv_LCC",
+        "H500": "hwt_30mn_slv_LCC",
+        "T2M": "hwt_30mn_slv_LCC",
+        "DBZ_MAX": "hwt_30mn_slv_LCC",
+        "UH25": "hwt_30mn_slv_LCC",
+        "CAPE": "hwt_30mn_slv_LCC",
+        "SNOW": "hwt_30mn_slv_LCC",
+        "RAIN": "hwt_30mn_slv_LCC",
+        "U10M": "hwt_30mn_slv_LCC",
+        "V10M": "hwt_30mn_slv_LCC",
+        "U250": "hwt_30mn_slv_LCC",
+        "V250": "hwt_30mn_slv_LCC",
+        "SLP": "hwt_30mn_slv_LCC",
+        "SNOWACCUM": "hwt_01hr_acc_LCC",
+        "PRECACCUM": "hwt_01hr_acc_LCC",
+        "NIEXTTAU": "hwt_30mn_slv_LCC",
+        "SUEXTTAU": "hwt_30mn_slv_LCC",
+        "DUEXTTAU": "hwt_30mn_slv_LCC",
+        "SSEXTTAU": "hwt_30mn_slv_LCC",
+        "OCEXTTAU": "hwt_30mn_slv_LCC",
+        "BREXTTAU": "hwt_30mn_slv_LCC",
+        "BCEXTTAU": "hwt_30mn_slv_LCC",
+        "TBRB06RG": "hwt_30mn_slv_LCC",
+        "SWTDN": "hwt_30mn_slv_LCC",
+        "OSRB11RG": "hwt_30mn_slv_LCC",
+        "OSRB10RG": "hwt_30mn_slv_LCC",
+        "OSRB09RG": "hwt_30mn_slv_LCC",
+    }
 )
 
 CONUS2KMRP_LCC = SimpleNamespace(

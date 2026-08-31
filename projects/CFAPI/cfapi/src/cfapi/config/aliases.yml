@@ -21,6 +21,8 @@ products:
     rh35_gcc: [rh35]
     rh35: [rh35_gcc]
     pm25: [pm2.5,pm_25]
+    "_rh35_gcc": ['']
+    "_rh35": ['']
 legacy_products: 
   CO: [co]
   NO2: [no2]

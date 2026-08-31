@@ -18,7 +18,7 @@ __all__ = ["CONFIG_DIR", "ROOT", "versionConfig", "ProductAliases"]
 here = Path(__file__).parent
 CONFIG_DIR = here / "config_files"
 ROOT = here.parent
-logger = logging.getLogger("cfapi.api_config")
+_log = logging.getLogger("cfapi")
 
 
 def _dedup_preserve_order(seq: Iterable[str]) -> List[str]:
@@ -41,15 +41,15 @@ class versionConfig:
         dataset_key: Optional[str] = None,
     ):
         config_dir = config_dir or CONFIG_DIR
-        config_dir = Path(config_dir)
-        self.config_dir = config_dir
+        self.config_dir = Path(config_dir)
+        version = version or "v2"
         if not config_data:
             config_data = loader.load_yaml("config_data.yml")
         if not config_params:
-            config_params = loader.load_yaml("config_params.yml")
+            config_params = loader.load_yaml(f"config_params_{version}.yml")
 
         data = self._check_version(config_data, version)
-        params_in = self._check_version(config_params, version)
+        params_in = config_params
         if dataset_key and dataset_key in params_in.keys():
             params_in = params_in.get(dataset_key)
         self.dataset = data.get("dataset", {})
@@ -84,7 +84,9 @@ class versionConfig:
     def _normalize_params(self, params):
         params_norm = {}
         for k, v in params.items():
-            if k == "fields":
+            if k.startswith("_"):
+                continue
+            elif k == "fields":
                 params_norm[k] = self._parse_defs(v)
             else:
                 params_norm[k] = self._parse_ds_fields(v)

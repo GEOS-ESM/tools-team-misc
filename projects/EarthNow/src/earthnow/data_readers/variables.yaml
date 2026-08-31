@@ -1,0 +1,220 @@
+# Registry of valid variables and their per-collection names.
+#
+# TEMPLATE TO ADD A VARIABLE:
+# ALIAS:
+#   description: "DESCRIPTION"  # Long name description
+#   collection:
+#     inst1_2d_asm_Nx: VARIABLE_NAME
+#     hwt_15mn_slv_LCC: VARIABLE_NAME
+#     hwt_30mn_slv_LCC: VARIABLE_NAME
+#
+# The top-level key is the alias (must match that used across collections).
+# A variable does not need an entry for every collection, and new collection
+# names can be added freely -- no code changes required.
+
+OCEXTTAU:
+  description: "Organic Carbon Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: OCEXTTAU
+    hwt_15mn_slv_LCC: OCEXTTAU
+    hwt_30mn_slv_LCC: OCEXTTAU
+
+BREXTTAU:
+  description: "Brown Carbon Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: BREXTTAU
+    hwt_15mn_slv_LCC: BREXTTAU
+    hwt_30mn_slv_LCC: BREXTTAU
+
+BCEXTTAU:
+  description: "Black Carbon Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: BCEXTTAU
+    hwt_15mn_slv_LCC: BCEXTTAU
+    hwt_30mn_slv_LCC: BCEXTTAU
+
+
+CAPE:
+  description: "Convective Available Potential Energy (J/kg)"
+  collection:
+    inst1_2d_asm_Nx: CAPE
+    hwt_15mn_slv_LCC: CAPE
+    hwt_30mn_slv_LCC: CAPE
+
+DBZ_MAX:
+  description: "Maximum Composite Radar Reflectivity"
+  collection:
+    inst1_2d_asm_Nx: DBZ_MAX
+    hwt_15mn_slv_LCC: REFC
+    hwt_30mn_slv_LCC: REFC
+
+DUEXTTAU:
+  description: "Dust Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: DUEXTTAU
+    hwt_15mn_slv_LCC: DUEXTTAU
+    hwt_30mn_slv_LCC: DUEXTTAU
+
+H500:
+  description: "Height at 500 hPa (m)"
+  collection:
+    inst1_2d_asm_Nx: H500
+    hwt_15mn_slv_LCC: H500
+    hwt_30mn_slv_LCC: H500
+
+HGT_SFC:
+  description: "Surface geopotential height (m+2 s-2)"
+  collection:
+    hwt_15mn_slv_LCC: HGT_SFC
+    hwt_30mn_slv_LCC: HGT_SFC
+
+HGT:
+  description: "Layer edge heights (m)"
+  collection:
+    hwt_15mn_prs_LCC: HGT
+
+ICE:
+  description: "Icefall (kg m-2 s-1)"
+  collection:
+    inst1_2d_asm_Nx: ICE
+    hwt_15mn_slv_LCC: ICE
+    hwt_30mn_slv_LCC: ICE
+
+NIEXTTAU:
+  description: "Nitrate Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: NIEXTTAU
+    hwt_15mn_slv_LCC: NIEXTTAU
+    hwt_30mn_slv_LCC: NIEXTTAU
+
+RAIN:
+  description: "Rainfall (kg m-2 s-1)"
+  collection:
+    inst1_2d_asm_Nx: RAIN
+    hwt_15mn_slv_LCC: RAIN
+    hwt_30mn_slv_LCC: RAIN
+
+PRECACCUM:
+  description: "Precipitation total (mm)" # rain only? seems correct
+  collection:
+    hwt_01hr_acc_LCC: APCP
+    tavg1_2d_flx_Nx: PRECACCUM
+
+SNOW:
+  description: "Snowfall (kg m-2 s-1)"
+  collection:
+    inst1_2d_asm_Nx: SNOW
+    hwt_15mn_slv_LCC: SNOW
+    hwt_30mn_slv_LCC: SNOW
+
+SNOWACCUM:
+  description: "Snowfall total (mm)"
+  collection:
+    hwt_01hr_acc_LCC: SNOWACCUM
+    tavg1_2d_flx_Nx: SNOWACCUM
+
+SSEXTTAU:
+  description: "Sea Salt Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: SSEXTTAU
+    hwt_15mn_slv_LCC: SSEXTTAU
+    hwt_30mn_slv_LCC: SSEXTTAU
+
+SUEXTTAU:
+  description: "Sulfate Aerosol Optical Thickness (550 nm)"
+  collection:
+    inst1_2d_asm_Nx: SUEXTTAU
+    hwt_15mn_slv_LCC: SUEXTTAU
+    hwt_30mn_slv_LCC: SUEXTTAU
+
+T2M:
+  description: "2 Meter Air Temperature (K)"
+  collection:
+    inst1_2d_asm_Nx: T2M
+    hwt_15mn_slv_LCC: TMP_2M
+    hwt_30mn_slv_LCC: TMP_2M
+
+UH25:
+  description: "Updraft Helicity 2-5 KM (m2 s-2)"
+  collection:
+    inst1_2d_asm_Nx: UH25
+    hwt_15mn_slv_LCC: UPHL_2-5KM
+    hwt_30mn_slv_LCC: UPHL_2-5KM
+
+VORT500:
+  description: "500 mb Relative Vorticity"
+  collection:
+    inst1_2d_asm_Nx: VORT500
+    hwt_15mn_slv_LCC: VORT500
+    hwt_30mn_slv_LCC: VORT500
+
+U10M:
+  description: "10-meter Eastward wind (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: U10M
+    hwt_15mn_slv_LCC: UGRD_10M
+    hwt_30mn_slv_LCC: UGRD_10M
+
+V10M:
+  description: "10-meter Northward wind (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: V10M
+    hwt_15mn_slv_LCC: VGRD_10M
+    hwt_30mn_slv_LCC: VGRD_10M
+
+U250:
+  description: "Eastward wind at 250 hPa (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: U250
+    hwt_15mn_slv_LCC: U250
+    hwt_30mn_slv_LCC: U250
+
+V250:
+  description: "Northward wind at 250 hPa (m s-1)"
+  collection:
+    inst1_2d_asm_Nx: V250
+    hwt_15mn_slv_LCC: V250
+    hwt_30mn_slv_LCC: V250
+
+SLP:
+  description: "Sea level pressure (Pa)"
+  collection:
+    inst1_2d_asm_Nx: SLP
+    hwt_15mn_slv_LCC: PRMSL
+    hwt_30mn_slv_LCC: PRMSL
+
+TBRB06RG:
+  description: "Brightness temperature in RR LW Band 06 (K)"
+  collection:
+    inst1_2d_asm_Nx: TBRB06RG
+    hwt_15mn_slv_LCC: TBRB06RG
+    hwt_30mn_slv_LCC: TBRB06RG
+
+SWTDN:
+  description: "TOA Incoming shortwave flux (W m-2)"
+  collection:
+    inst1_2d_asm_Nx: SWTDN
+    hwt_15mn_slv_LCC: SWTDN
+    hwt_30mn_slv_LCC: SWTDN
+
+OSRB11RG:
+  description: "Upwelling shortwave flux at TOA in RR Band 11 (W m-2)"
+  collection:
+    inst1_2d_asm_Nx: OSRB11RG
+    hwt_15mn_slv_LCC: OSRB11RG
+    hwt_30mn_slv_LCC: OSRB11RG
+
+OSRB10RG:
+  description: "Upwelling shortwave flux at TOA in RR Band 10 (W m-2)"
+  collection:
+    inst1_2d_asm_Nx: OSRB10RG
+    hwt_15mn_slv_LCC: OSRB10RG
+    hwt_30mn_slv_LCC: OSRB10RG
+    
+OSRB09RG:
+  description: "Upwelling shortwave flux at TOA in RR Band 09 (W m-2)"
+  collection:
+    inst1_2d_asm_Nx: OSRB09RG
+    hwt_15mn_slv_LCC: OSRB09RG
+    hwt_30mn_slv_LCC: OSRB09RG
+

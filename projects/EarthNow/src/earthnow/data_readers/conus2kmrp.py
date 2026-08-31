@@ -1,13 +1,40 @@
 from types import SimpleNamespace
 from .dataservice import DataService
 from .registry import register
+from .variables import VARIABLE_REGISTRY
 
 CONUS2KMRP_URI = "/discover/nobackup/projects/gmao/osse2/HWT/CONUS02KM/Feature-c2160_L137/holding/$collection/%Y%m/Feature-c2160_L137.$collection.%Y%m%d_%H%Mz.nc4"
 
-CONUS2KMRP_VARS = dict(
-    VORT500="VORT500.inst1_2d_asm_Nx",
-    H500="H500.inst1_2d_asm_Nx",
-    T2M="T2M.inst1_2d_asm_Nx",
+CONUS2KMRP_VARS = VARIABLE_REGISTRY.resolve_many(
+    {
+        "VORT500": "inst1_2d_asm_Nx",
+        "H500": "inst1_2d_asm_Nx",
+        "T2M": "inst1_2d_asm_Nx",
+        "DBZ_MAX": "inst1_2d_asm_Nx",
+        "UH25": "inst1_2d_asm_Nx",
+        "CAPE": "inst1_2d_asm_Nx",
+        "RAIN": "inst1_2d_asm_Nx",
+        "SNOW": "inst1_2d_asm_Nx",
+        "U10M": "inst1_2d_asm_Nx",
+        "V10M": "inst1_2d_asm_Nx",
+        "U250": "inst1_2d_asm_Nx",
+        "V250": "inst1_2d_asm_Nx",
+        "SLP": "inst1_2d_asm_Nx",
+        "SNOWACCUM": "tavg1_2d_flx_Nx",
+        "PRECACCUM": "tavg1_2d_flx_Nx",
+        "NIEXTTAU": "inst1_2d_asm_Nx",
+        "SUEXTTAU": "inst1_2d_asm_Nx",
+        "DUEXTTAU": "inst1_2d_asm_Nx",
+        "SSEXTTAU": "inst1_2d_asm_Nx",
+        "OCEXTTAU": "inst1_2d_asm_Nx",
+        "BREXTTAU": "inst1_2d_asm_Nx",
+        "BCEXTTAU": "inst1_2d_asm_Nx",
+        "TBRB06RG": "inst1_2d_asm_Nx",
+        "SWTDN": "inst1_2d_asm_Nx",
+        "OSRB11RG": "inst1_2d_asm_Nx",
+        "OSRB10RG": "inst1_2d_asm_Nx",
+        "OSRB09RG": "inst1_2d_asm_Nx",
+    }
 )
 
 CONUS2KMRP = SimpleNamespace(

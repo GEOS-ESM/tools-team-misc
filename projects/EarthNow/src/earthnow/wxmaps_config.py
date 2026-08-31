@@ -105,7 +105,7 @@ class StyleConfig:
     state_width: float = 0.4
     state_alpha: float = 0.6
 
-    county_color: str = "#B0B0B0"
+    county_color: str = "#A4A4A4"
     county_width: float = 0.2
     county_alpha: float = 0.4
 
@@ -113,9 +113,11 @@ class StyleConfig:
     river_width: float = 0.2
     river_alpha: float = 0.6
 
-    road_color: str = "#FF8C00"
+    show_roads: bool = False
+    major_only: bool = True
+    road_color: str = "#A4A4A4"
     road_width: float = 0.3
-    road_alpha: float = 0.7
+    road_alpha: float = 0.9
 
     # Frame
     show_frame: bool = False
@@ -187,7 +189,6 @@ class StyleConfig:
             state_width=0.5,
             state_alpha=0.8,
             show_nws_warnings=False,
-            show_timestamp=True,
             show_frame=False,
             show_gridlines=False,
             show_title=False,
@@ -213,7 +214,6 @@ class StyleConfig:
             state_width=0.5,
             state_alpha=0.8,
             show_nws_warnings=False,
-            show_timestamp=True,
             show_frame=False,
             show_gridlines=False,
             show_title=False,
@@ -239,7 +239,6 @@ class StyleConfig:
             state_width=0.5,
             state_alpha=0.8,
             show_nws_warnings=False,
-            show_timestamp=True,
             show_frame=False,
             show_gridlines=False,
             show_title=False,
@@ -304,17 +303,19 @@ class StyleConfig:
             base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
             use_gshhs=False,
             # ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
-            show_timestamp=True,  # Defaults is False now, add it in your style for testing
         )
 
     @staticmethod
     @register_style("greyblue")
     def greyblue() -> "StyleConfig":
-        """Simple image-only Natural Earth template"""
+        """Greyblue Topo Image with state/coastlines for conus"""
         return StyleConfig(
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
             use_gshhs=False,
+            boundaries=["coastlines", "states"],
+            coastline_width=0.4,
+            state_color="#333333",
         )
 
     @staticmethod
@@ -328,9 +329,17 @@ class StyleConfig:
             coastline_width=0.4,
             country_color="#333333",
             state_color="#333333",
+            show_roads=True,
             show_nws_warnings=True,
             nws_severe_only=True,
-            show_timestamp=True,  # Take this out once finished
+        )
+
+    @staticmethod
+    @register_style("empty")
+    def empty() -> "StyleConfig":
+        return StyleConfig(
+            ocean_color="#808080",
+            land_color="#808080",
         )
 
 

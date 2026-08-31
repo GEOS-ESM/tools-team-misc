@@ -16,15 +16,15 @@ ROOT = Path(__file__).parents[2]
 def get_cache_dir(root: Path | str = ROOT) -> Path:
     root = Path(root)
     if any([d in str(root.parent) for d in ["fluiddev", "fluidprod"]]):
-        return root.parents[1] / "static" / "plots" / "cf_map_grams" / "file_cache"
+        return root.parents[1] / "static" / "plots" / "cf_map_grams"
     else:
-        return ROOT / "file_cache"
+        return ROOT
 
 
-CACHE = get_cache_dir()
-CACHE_ROOT = CACHE / "file_cache"
+CACHE_ROOT = get_cache_dir()
+CACHE = CACHE_ROOT / "file_cache"
 
-logger = logging.getLogger("cfapi.core")
+logger = logging.getLogger("cfapi")
 
 
 # --------------------
@@ -62,7 +62,9 @@ class CliConfig:
 @dc.dataclass(frozen=True)
 class dataIndex:
     lon: float
+    ilon: int
     lat: float
+    ilat: int
     t0: dt.datetime
     nlevs: int
     longnames: Dict[str, str]

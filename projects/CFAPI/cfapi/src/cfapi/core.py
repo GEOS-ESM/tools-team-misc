@@ -19,34 +19,17 @@ import xarray as xr
 from .validator import CliConfig
 from .validator import coerce_inputs, validate_and_build_config
 from .data_config import fileHelper, cacheHelper, MISSING
+from .constants import dataIndex, BadRequest
 
 # ----------------------------
 # Config loading / management
 # ----------------------------
 
-logger = logging.getLogger("cfapi.core")
-
-# ----------------------------
-# Validation helpers
-# ----------------------------
-
-
-class BadRequest(ValueError):
-    """Raised when inputs fail validation (replaces flask.abort(404))."""
-
+logger = logging.getLogger("cfapi")
 
 # ----------------------------
 # Core compute helpers
 # ----------------------------
-@dc.dataclass(frozen=True)
-class dataIndex:
-    lon: float
-    ilon: int
-    lat: float
-    ilat: int
-    t0: dt.datetime
-    nlevs: int
-    longnames: Dict[str, str]
 
 
 def _nearest_index(arr: np.ndarray, value: float) -> int:
@@ -80,23 +63,6 @@ def _get_init_points(
             t0=t0,
             longnames=longnames,
         )
-
-
-def _extract_isel(
-    data_file: str,
-    keys: List[str],
-    ilat: int,
-    ilon: int,
-    engine: str,
-) -> Tuple[pd.DataFrame]:
-    with xr.open_dataset(data_file, decode_times=True, engine=engine) as ds:
-        sub = ds[keys].isel(lat=ilat, lon=ilon)
-        levs = sub.coords.get("lev", None)  # or 'pfull', adapt as needed
-        df = sub.to_dataframe()
-        for c in ("lat", "lon"):
-            if c in df.columns:
-                df.drop(columns=[c], inplace=True)
-        return df
 
 
 def get_interp_dat(
@@ -476,15 +442,3 @@ def get_root_schema(schema_file: Union[str, Path] = None) -> dict:
 
     schema = loader.load_yaml("cfapi_root_schema.yml")
     return schema
-
-
-# if __name__ == "__main__":
-#     # from cfapi_interface import parse_args
-#     SCRIPT = Path(__file__).name
-#     cfg = parse_args(script=SCRIPT)
-
-#     # resp = build_response(**dict_in)
-#     resp = build_response_cfg(cfg, use_cache=False)
-#     print(resp)
-#     print("="*25+'Response Time'+"="*25)
-#     print(resp["schema"]["response time"])

@@ -2,6 +2,10 @@ import os
 import datetime as dt
 from netCDF4 import Dataset
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class SimpleNetCDFDataService(object):
 
@@ -52,6 +56,7 @@ class SimpleNetCDFDataService(object):
         for name in variables:
 
             if name not in self.stream.vars:
+                logger.debug(f"{name} not in {self.stream} variable list.")
                 continue
 
             expr = self.stream.vars[name]
@@ -69,15 +74,19 @@ class SimpleNetCDFDataService(object):
                 "file": os.path.basename(filename),
             }
 
-            print(f"Using file      : {filename}")
-            print(f"Using collection: {collection}")
-            print(f"Using variable  : {varname}")
+            logger.info(f"Using file      : {filename}")
+            logger.info(f"Using collection: {collection}")
+            logger.info(f"Using variable  : {varname}")
 
             data = var[:]
             if data.ndim >= 3:
                 data = data[0]
 
             return data, lats, lons, metadata
+
+        raise ValueError(
+            f"None of the specified variables were found. Searched for: {variables}"
+        )
 
     def resolve_file(self, fdate, pdate, **kwargs):
         return "none", "none", "none"

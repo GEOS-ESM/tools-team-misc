@@ -52,39 +52,36 @@ Near Surface Winds
 
 `ploteic_tanom`
 2-meter Temperature Anomaly (1-day running mean)
-- Assignee:
+- Assignee: Skip this product for now
 
 `ploteic_cape`
 Convective Available Potential Energy
 - Assignee: Hannah
 - Status: Done
-- Function call: plotall.py --product "cape_EarthNow" --style "greyblue"
 
 `ploteic_helicity`
 2-5km Helicity and Radar Reflectivity
 - Assignee: Hannah
 - Status: Complete but do not have existing animation to compare (see emails with Bill)
-- Function call: plotall.py --product "max_reflectivity_EarthNow" --style "helicity"
 
 
 ## Composition
 `ploteic_aerosols`
 Aerosol Optical Thickness [SS, DU, SU, NI]
-- Assignee: Sandra / Hannah
-- Status:
+- Assignee: Hannah
+- Status: Done
 
 `ploteic_carbon`
 Carbon Aerosol Optical Thickness
-- Assignee: Sandra
-- Status:
+- Assignee: Hannah
+- Status: Done
 
 
 ## Global Dynamics
 `ploteic_vort500`
 500-mb Vorticity and Heights
 - Assignee:Hannah
-- Status: Done! Except for locating the identical basemap that the IDL code uses.
-- Function call: plotall.py --product "vorticity_heights_500mb_EarthNow"  --style "grey_topo"
+- Status: Done!
 
 `ploteic_wind250`
 250-mb Wind Speed and MSLP

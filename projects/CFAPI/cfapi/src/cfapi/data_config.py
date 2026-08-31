@@ -25,7 +25,7 @@ MISSING = 1.0e15
 # Config loading / management
 # ----------------------------
 
-logger = logging.getLogger("cfapi.core")
+_log = logging.getLogger("fluid")
 # ----------------------------
 # Validation helpers
 # ----------------------------
@@ -39,7 +39,7 @@ def format_fill_value_scientific(obj, fill_value: float = 1.0e15, fmt: str = "%.
             else:
                 return obj
         except TypeError:
-            logger.warning(f"obj: {obj}, fill_value: {fill_value}")
+            _log.warning(f"obj: {obj}, fill_value: {fill_value}")
             return obj
     elif isinstance(obj, dict):
         return {
@@ -97,10 +97,34 @@ class fileHelper(versionConfig):
         try:
             return dt.datetime.strptime(s, "%Y%m%d")
         except Exception:
-            logger.exception(f"Unable to convert date input: {s}")
+            _log.exception(f"Unable to convert date input: {s}")
             raise BadRequest(f"Invalid date input: {s}. Allowed format: YYYYMMDD")
 
+    def get_fcsts(self, dataset: str):
+        fcsts_base = self.data.get("dataset", {}).get("latest")
+        collection = self.data.get("data", {}).get(dataset)
+        ft = f"{collection}.%Y%m%d_%Hz"
+        fcsts = Path(fcsts_base) / collection
+        return [
+            dt.datetime.strptime(f.name, ft)
+            for f in sorted(fcsts.glob(f"{collection}*"))
+        ]
+
+    def get_latest2(self, base, dt_path: str, delta: int = 24):
+        time = dt.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        files = list(Path(base).glob(f"{time.strftime(dt_path)}/"))
+        i = 10
+        while not files and i > 0:
+            time -= dt.timedelta(hours=delta)
+            files = list(Path(base).glob(f"{time.strftime(dt_path)}/"))
+            i -= 1
+        return time
+
     def get_latest(self) -> dt.datetime:
+        if self.version == "v1":
+            _, latest = self.get_date_range()
+            _log.debug(latest)
+            return latest
         ctrl_key = self.cfg.datakey.replace("v72", "slv")
         ctrl = self.data.get("data", {}).get(ctrl_key)
         latest_file = self.latest_dir / f"{ctrl}.latest"
@@ -135,7 +159,7 @@ class fileHelper(versionConfig):
         files = sorted(d.glob(f"*{self.stream_name}*"))
         flist = [str(file) for file in files]
         if not flist:
-            logger.info(str(d / f"*{self.stream_name}*"))
+            _log.info(str(d / f"*{self.stream_name}*"))
             raise BadRequest(
                 "No data for this period or bad request (empty file list)."
             )
@@ -209,8 +233,14 @@ class fileHelper(versionConfig):
         return self.get_index_by_time(file_list, time_period, time_flag)
 
     def get_index_by_time(self, file_list, time_period, time_flag):
+        if self.version == "v1":
+            fi = -2
+        else:
+            fi = -3
+        _log.debug(file_list[:10])
+        _log.debug([f.rsplit(".", 3)[fi] for f in file_list])
         dt_list = [
-            dt.datetime.strptime(f.rsplit(".", 3)[-3], "%Y%m%d_%H%Mz")
+            dt.datetime.strptime(f.rsplit(".", 3)[fi], "%Y%m%d_%H%Mz")
             for f in file_list
         ]
         if time_flag == "end":
@@ -396,7 +426,7 @@ class cacheHelper:
             else:
                 return out
         except Exception:
-            logger.exception(f"File {str(self.path)} could not be read!")
+            _log.exception(f"File {str(self.path)} could not be read!")
             out = {}
         return out
 
@@ -415,4 +445,4 @@ class cacheHelper:
                     json.dump(result, fp)
                 os.chmod(self.path, 0o755)
             except Exception:
-                logger.exception(f"File {str(self.path)} not saved")
+                _log.exception(f"File {str(self.path)} not saved")

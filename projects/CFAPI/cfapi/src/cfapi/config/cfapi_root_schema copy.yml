@@ -1,8 +1,30 @@
+forecast:
+
+forcast:
+  start_date: 
+    format: "YYYYMMDD or latest"
+    default: "latest"
+  lat:
+    format: float value in range [-90,90]
+    default: "38.9"
+  lon:
+    format: float value in range [-180,180]
+    default: "-77.0"
+  dataset:
+    format: str 
+    default: "chm_slv"
+  
+  
+
+  Default Values:
+
+
+
 Forecast and Replay Model Fields:
   Chem:
     Base URI: "/cfapi/<collection>/chm/<level>/<product>/<lat>x<lon>/<start_date>/<end_date>/"
     collections: ["fcast", "assim"]
-    level: ["v1", "p23", "v72"]
+    level: ["slv", "p23", "v72"]
     product: ["CO", "NO2", "O3", "PM25", "SO2", "HCHO", "MET"]
     lat: "float value of some latitude"
     lon: "float value of some longitude"
@@ -47,3 +69,5 @@ Historical AQC Data Sets:
       lon: "-77.0"
       start_date: "latest"
       end_date: "None"
+
+
