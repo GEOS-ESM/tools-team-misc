@@ -19,6 +19,8 @@ CONUS2KMRP_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "CAPE": "hwt_30mn_slv_LCC",
         "SNOW": "hwt_30mn_slv_LCC",
         "RAIN": "hwt_30mn_slv_LCC",
+        "ICE": "hwt_30mn_slv_LCC",
+        "DBZ_MAX": "hwt_30mn_slv_LCC",
         "U10M": "hwt_30mn_slv_LCC",
         "V10M": "hwt_30mn_slv_LCC",
         "U250": "hwt_30mn_slv_LCC",
@@ -38,6 +40,8 @@ CONUS2KMRP_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "OSRB11RG": "hwt_30mn_slv_LCC",
         "OSRB10RG": "hwt_30mn_slv_LCC",
         "OSRB09RG": "hwt_30mn_slv_LCC",
+        "HGT": "hwt_30mn_prs_LCC",
+        "HGT_SFC": "hwt_30mn_slv_LCC",
     }
 )
 
