@@ -60,6 +60,11 @@ products:
     style: satellite
     driver: "plotall.py"
     base-path: $BASE_PATH
+  Radar Reflectivity:
+    product: radar_reflectivity_EarthNow
+    style: greyblue
+    driver: "plotall.py"
+    base-path: $BASE_PATH
 
 
 data_readers:
