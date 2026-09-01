@@ -6,7 +6,7 @@ For IDL script references, look in this dir:
 `ploteic_geocolor`
 GeoColor: True View of Earth
 - Assignee: Emily
-- Status:
+- Status: Done!
 
 `ploteic_sandwich`
 Sandwich RGB - Blended LW IR and Veggie VIS
@@ -33,7 +33,7 @@ Sandwich RGB - Blended LW IR and Veggie VIS
 `ploteic_radar`
 Radar Reflectivity [Rain/Snow/Ice]
 - Assignee: Emily
-- Status:
+- Status: CONUS works with existing LCC files; Global requires in situ interpolation from cube sphere to lat/lon. Future work.
 
 `ploteic_precip`
 Accumulated Precip [Rain & Snow]
