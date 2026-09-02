@@ -59,7 +59,7 @@ products:
     style: greytopo
   winds:
     product: winds_10m_EarthNow
-    style: light
+    style: light_states 
   wind250:
     product: winds_heights_250mb_EarthNow
     style: light_states
