@@ -104,14 +104,14 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot wind field
     # ------------------------------------------------------------
-    ax.pcolormesh(
-        lons,
-        lats,
+    ax.imshow(
         wspd,
         cmap=cmap,
         norm=norm,
+        extent=[lons.min(), lons.max(), lats.min(), lats.max()],
+        origin="lower",
         transform=ccrs.PlateCarree(),
-        shading="nearest",
+        interpolation="nearest",
         zorder=4,
     )
 
@@ -133,13 +133,19 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # Plot SLP contours
     # ------------------------------------------------------------
     hlevs = np.arange(958, 1138, 2)  # 960 mb to 1140 mb every 4 mb
+    lw = 0.5
+    fontsize = 6
+    if args.map_type == "conus":
+        lw = 1.25
+        fontsize = 18
+
     cs = ax.contour(
         lons,
         lats,
         slp_smoothed,
         levels=hlevs,
         colors="white",
-        linewidths=0.5,
+        linewidths=lw,
         transform=ccrs.PlateCarree(),
         zorder=4,
     )
@@ -147,7 +153,7 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     clabels = ax.clabel(
         cs,
         fmt="%d",
-        fontsize=6,
+        fontsize=fontsize,
         inline=True,
         inline_spacing=5,
     )
