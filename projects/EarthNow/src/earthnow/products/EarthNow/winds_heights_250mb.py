@@ -12,13 +12,23 @@ from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 import sys
 from earthnow.products.EarthNow.vorticity_heights_500mb import boxcar_smooth_2D
+import logging
+
+logger = logging.getLogger(__name__)
+# logger.info('====> Starting plotting script')
+
+variable = "winds_heights_250mb_EarthNow"
+create_colorbar = True
 
 # ------------------------------------------------------------------
 # Windspeed colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
 
 # Color table (30 colors, normalized)
-# This is jet. ew.
+# This is jet, but is not used.
+# Currently using the "turbo" colormap
+# which matches the *colorbar* shown
+# on the EarthNow website.
 wCOLORS = (
     np.array(
         [
@@ -46,7 +56,7 @@ wCOLORS = (
     / 255.0
 )
 
-wLEVELS = np.linspace(0, 100, 10)
+wLEVELS = np.linspace(0, 100, 11)
 
 # Wind speed alpha values
 aLEVELS = [0, 12.5]  # opacity kicks in at 12.5 m/s
@@ -70,6 +80,7 @@ rgba_table = cmap_base(np.linspace(0, 1, 256))  # shape (256,4)
 alphas = np.clip((clevs - aLEVELS[0]) / (aLEVELS[1] - aLEVELS[0]), 0.0, 1.0)
 rgba_table[:, 3] = alphas  # overwrite alpha channel
 cmap = ListedColormap(rgba_table, name="custom_wind")
+
 
 # ------------------------------------------------------------------
 # Main product function
@@ -104,7 +115,7 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot wind field
     # ------------------------------------------------------------
-    ax.imshow(
+    plot = ax.imshow(
         wspd,
         cmap=cmap,
         norm=norm,
@@ -160,6 +171,19 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # Make labels bold/thicker
     # for label in clabels:
     #    label.set_fontweight("bold")
+
+    if create_colorbar == True:
+        from earthnow.wxmaps_utils import save_colorbar_single
+
+        colorbar_output = (
+            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
+        )
+        save_colorbar_single(
+            plot,
+            colorbar_output,
+            label="250mb Wind Speed [m/s] and Mean Sea Level Pressure [hPa]",
+            ticks=wLEVELS,
+        )
 
 
 def generate_colorbar():
