@@ -13,6 +13,10 @@ from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 from scipy.ndimage import gaussian_filter
 from matplotlib.colors import LinearSegmentedColormap
+import logging
+
+variable = "winds_10m_EarthNow"
+create_colorbar = True
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -103,7 +107,7 @@ def plot_winds_10m(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    ax.pcolormesh(
+    plot = ax.pcolormesh(
         lons,
         lats,
         wspd,
@@ -113,6 +117,19 @@ def plot_winds_10m(fig, ax, plotter, reader, args):
         shading="nearest",
         zorder=4,
     )
+
+    if create_colorbar:
+        from earthnow.wxmaps_utils import save_colorbar_single
+
+        colorbar_output = (
+            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
+        )
+        save_colorbar_single(
+            plot,
+            colorbar_output,
+            label="Wind Speed at 10-meters [m/s]",
+            ticks=LEVELS,
+        )
 
 
 def generate_colorbar():
