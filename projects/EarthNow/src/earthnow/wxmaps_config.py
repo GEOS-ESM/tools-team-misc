@@ -165,7 +165,6 @@ class StyleConfig:
             state_color="black",
             state_width=0.5,
             state_alpha=0.6,
-            show_nws_warnings=False,
             show_timestamp=True,
         )
 
@@ -187,10 +186,27 @@ class StyleConfig:
             state_color="black",
             state_width=0.5,
             state_alpha=0.8,
-            show_nws_warnings=False,
-            show_frame=False,
-            show_gridlines=False,
-            show_title=False,
+        )
+
+    @staticmethod
+    @register_style("light_states")
+    def light_states() -> "StyleConfig":
+        """Light theme style"""
+        return StyleConfig(
+            background_color="white",
+            text_color="black",
+            ocean_color="#EEEEEE",
+            land_color="#FFFFFF",
+            boundaries=["coastlines", "states"],
+            coastline_color="white",
+            coastline_width=0.5,
+            coastline_alpha=0.8,
+            country_color="black",
+            country_width=0.5,
+            country_alpha=0.8,
+            state_color="white",
+            state_width=0.5,
+            state_alpha=0.8,
         )
 
     @staticmethod
@@ -211,10 +227,6 @@ class StyleConfig:
             state_color="#FFFFFF",
             state_width=0.5,
             state_alpha=0.8,
-            show_nws_warnings=False,
-            show_frame=False,
-            show_gridlines=False,
-            show_title=False,
         )
 
     @staticmethod
@@ -235,10 +247,6 @@ class StyleConfig:
             state_color="#FFFFFF",
             state_width=0.5,
             state_alpha=0.8,
-            show_nws_warnings=False,
-            show_frame=False,
-            show_gridlines=False,
-            show_title=False,
         )
 
     @staticmethod
@@ -258,9 +266,6 @@ class StyleConfig:
             state_color="#FFFFFF",
             state_width=0.3,
             state_alpha=0.4,
-            show_frame=False,
-            show_gridlines=False,
-            show_title=False,
         )
 
     @staticmethod

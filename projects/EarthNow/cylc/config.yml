@@ -27,7 +27,7 @@ products:
     base-path: $BASE_PATH
   Wind10m:
     product: winds_10m_EarthNow
-    style: light # Create "Blank" style?
+    style: light_states # Create "Blank" style?
     driver: "plotall.py"
     base-path: $BASE_PATH
   Wind250:
