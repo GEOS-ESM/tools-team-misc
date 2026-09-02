@@ -59,10 +59,10 @@ products:
     style: greytopo
   winds:
     product: winds_10m_EarthNow
-    style: light # Create "Blank" style?
+    style: light 
   wind250:
     product: winds_heights_250mb_EarthNow
-    style: greyblue
+    style: light_states
   helicity:
     product: max_reflectivity_EarthNow
     style: helicity
