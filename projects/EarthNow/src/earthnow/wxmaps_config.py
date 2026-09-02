@@ -176,7 +176,6 @@ class StyleConfig:
         return StyleConfig(
             background_color="white",
             text_color="black",
-            use_gshhs=False,
             ocean_color="#EEEEEE",
             land_color="#FFFFFF",
             coastline_color="black",
@@ -201,7 +200,6 @@ class StyleConfig:
         return StyleConfig(
             background_color="#454545",
             text_color="white",
-            use_gshhs=False,
             ocean_color="#454545",
             land_color="#6e6e6e",
             coastline_color="#FFFFFF",
@@ -226,7 +224,6 @@ class StyleConfig:
         return StyleConfig(
             background_color="black",
             text_color="white",
-            use_gshhs=False,
             use_base_image=True,
             base_image_type="dnb_nightlights",
             coastline_color="#FFFFFF",
@@ -301,7 +298,6 @@ class StyleConfig:
         return StyleConfig(
             use_base_image=True,
             base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
-            use_gshhs=False,
             # ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
         )
 
@@ -312,10 +308,18 @@ class StyleConfig:
         return StyleConfig(
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
-            use_gshhs=False,
             boundaries=["coastlines", "states"],
             coastline_width=0.4,
             state_color="#333333",
+        )
+
+    @staticmethod
+    @register_style("greyblue_plain")
+    def greyblue_plain() -> "StyleConfig":
+        """Greyblue topo image with no state/coastlines"""
+        return StyleConfig(
+            use_base_image=True,
+            base_image_type="natural_earth_greyblue",
         )
 
     @staticmethod
