@@ -61,10 +61,10 @@ products:
     style: grey_topo
   winds:
     product: winds_10m_EarthNow
-    style: light # Create "Blank" style?
+    style: light 
   wind250:
     product: winds_heights_250mb_EarthNow
-    style: greyblue
+    style: light_states
   helicity:
     product: max_reflectivity_EarthNow
     style: helicity
@@ -77,25 +77,18 @@ products:
   carbon:
     product: carbon_EarthNow
     style: greyblue
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Geocolor:
+  geocolor:
     product: geocolor_rgb_EarthNow
     style: satellite
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  CO2 Longwave IR:
+  co2 longwave IR:
     product: co2_longwave_ir_EarthNow
     style: white_state_coast
-    driver: "plotall.py"
-  Mid Level Water Vapor IR:
+  mid level water vapor IR:
     product: mid_level_water_vapor_EarthNow
     style: red_state_coast
-    driver: "plotall.py"
-  Longwave Window IR:
+  longwave window IR:
     product: longwave_window_ir_EarthNow
     style:   greytopo_state_coast
-    driver: "plotall.py"
 
 # Stream Definitions
 # ==================
