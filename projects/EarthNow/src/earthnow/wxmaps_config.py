@@ -295,8 +295,8 @@ class StyleConfig:
         )
 
     @staticmethod
-    @register_style("grey_topo")
-    def grey_topo() -> "StyleConfig":
+    @register_style("greytopo")
+    def greytopo() -> "StyleConfig":
         """Testing to create grey topo style"""
         return StyleConfig(
             use_base_image=True,
