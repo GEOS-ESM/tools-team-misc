@@ -8,6 +8,11 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib.pyplot as plt
 from earthnow.products.registry import register
 from earthnow import paths
+import logging
+import sys
+
+variable = "rain_snow_accumulation_total_EarthNow"
+create_colorbar = True
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -91,6 +96,14 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     """
     Plot total rain & snow accumulation (inches)
     """
+    if create_colorbar:
+        import matplotlib.cm as cm
+
+        # Create mappable dict for multi-variable colorbar
+        mappables = []
+        levels = []
+        labels = []
+        ticks = []
     # ============
     # SNOW FIRST
     # ============
@@ -119,7 +132,7 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    ax.pcolormesh(
+    snowplot = ax.pcolormesh(
         lons,
         lats,
         data,
@@ -129,6 +142,11 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
         shading="nearest",
         zorder=4,
     )
+
+    if create_colorbar:
+        mappables.append(cm.ScalarMappable(norm=snowplot.norm, cmap=snowplot.cmap))
+        levels.append(snowLEVELS[::3])
+        labels.append("Accumulated Snow [mm]")
 
     # ============
     # RAIN NEXT
@@ -155,7 +173,7 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    ax.pcolormesh(
+    rainplot = ax.pcolormesh(
         lons,
         lats,
         data,
@@ -166,12 +184,21 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
+    if create_colorbar:
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
-def generate_colorbar():
-    """Generate colorbar for snow accumulation"""
-    from earthnow.wxmaps_utils import save_colorbar_single
+        mappables.append(cm.ScalarMappable(norm=rainplot.norm, cmap=rainplot.cmap))
+        levels.append(rainLEVELS)
+        labels.append("Accumulated Rain [mm]")
+        ticks.append(rainLEVELS)
 
-    output = paths.colorbar_output("snow_accumulation_total.png")
-    save_colorbar_single(
-        COLORS, LEVELS, output, label="Total Snow Accumulation (mm)", extend="max"
-    )
+        colorbar_output = (
+            f"/discover/nobackup/eibell/Earthnow/plots/{variable}_colorbar.png"
+        )
+
+        build_and_save_colorbars(
+            mappables,
+            levels,
+            colorbar_output,
+            labels,
+        )
