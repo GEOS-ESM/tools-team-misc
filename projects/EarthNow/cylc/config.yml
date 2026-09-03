@@ -43,6 +43,7 @@ plot_conus:
 #helicity
 #precip
 #radar
+#rainsnow
 #sandwich
 #t2m
 #tanom
@@ -54,6 +55,9 @@ products:
   t2m:
     product: temperature_2m_EarthNow
     style: empty
+  rainsnow: 
+     product: rain_snow_accumulation_total_EarthNow
+     style: light
   vort500:
     product: vorticity_heights_500mb_EarthNow
     style: greytopo
