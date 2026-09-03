@@ -340,7 +340,6 @@ def plot_single_pdate(pdate, args, style, map_config):
     logger.info(return_valid_directory(reader, local_args))
 
     # Call product function
-    local_args.contour_label_size = map_config.contour_label_size
     PRODUCTS[local_args.product](fig, ax, plotter, reader, local_args)
 
     # Add optional features

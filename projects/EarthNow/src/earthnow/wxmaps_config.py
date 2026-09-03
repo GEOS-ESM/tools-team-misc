@@ -37,6 +37,7 @@ class MapConfig:
     center_lon: Optional[float] = None
     center_lat: Optional[float] = None
     standard_parallels: Optional[Tuple[float, float]] = None
+    contour_lineweight: float = 0.5
     contour_label_size: int = 8
 
 
@@ -295,8 +296,8 @@ class StyleConfig:
         )
 
     @staticmethod
-    @register_style("grey_topo")
-    def grey_topo() -> "StyleConfig":
+    @register_style("greytopo")
+    def greytopo() -> "StyleConfig":
         """Testing to create grey topo style"""
         return StyleConfig(
             use_base_image=True,
@@ -456,6 +457,7 @@ class WxMapsConfig:
             center_lon=-96,
             center_lat=37,
             standard_parallels=(33, 45),
+            contour_lineweight=1.25,
             contour_label_size=12,
         )
 
