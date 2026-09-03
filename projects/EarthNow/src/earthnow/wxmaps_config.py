@@ -68,6 +68,10 @@ class StyleConfig:
     base_image_target_resolution: int = 4000
     image_cache_directory: Optional[str] = None
 
+    # Sea ice overlay options
+    show_seaice: bool = False
+    seaice_alpha: float = 1.0  # Max opacity for fully ice-covered pixels
+
     # GSHHS options
     use_gshhs: bool = False
     gshhs_path: str = str(paths.GSHHS_DIR)
@@ -347,6 +351,7 @@ class StyleConfig:
             boundaries=["coastlines", "countries", "states"],
             coastline_width=0.3,
             state_width=0.2,
+            show_seaice=True,
         )
 
     @staticmethod
