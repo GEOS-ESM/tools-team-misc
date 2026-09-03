@@ -493,6 +493,8 @@ def build_and_save_colorbars(
     cbar_bottom=0.2,  # Distance from bottom (figure fraction)
     cbar_width=0.7,  # Colorbar width (figure fraction)
     cbar_height=0.25,  # Colorbar height (figure fraction)
+    title=None,  # This adds a title on top of all bars
+    subtitles=False,  # If true print labels to the side of bars
     **kwargs,
 ):
     """
@@ -567,10 +569,25 @@ def build_and_save_colorbars(
         cb = fig.colorbar(mappable, cax=ax, orientation="horizontal", **cbar_kwargs)
 
         # Set label with configurable properties
-        cb.set_label(
-            label, fontsize=label_fontsize, loc="left", labelpad=30, color=text_color
-        )
-        cb.ax.xaxis.set_label_position("top")
+        if subtitles is False:
+            cb.set_label(
+                label,
+                fontsize=label_fontsize,
+                loc="left",
+                labelpad=30,
+                color=text_color,
+            )
+            cb.ax.xaxis.set_label_position("top")
+        else:
+            cb.ax.set_ylabel(
+                label,
+                fontsize=label,
+                va="center",
+                ha="right",
+                labelpad=15,
+                rotation=0,
+                color=text_color,
+            )
 
         # Format and set ticks
         cb.ax.tick_params(

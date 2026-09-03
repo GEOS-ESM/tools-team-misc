@@ -11,6 +11,9 @@ from earthnow.products.registry import register
 import logging
 import sys
 
+variable = "rdara_reflectivity_EarthNow"
+colorbar_only = True
+
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
@@ -66,6 +69,13 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     """
     # Initialize logger
     logger = logging.getLogger(__name__)
+
+    if colorbar_only:
+        import matplotlib.cm as cm
+
+        mappables = []
+        levels = []
+        labels = []
 
     # ========
     # Read all variables
@@ -232,52 +242,78 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     cmap = ListedColormap(REFL_COLORS)
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
-
-    ax.pcolormesh(
-        lons,
-        lats,
-        refl,
-        cmap=cmap,
-        norm=norm,
-        transform=ccrs.PlateCarree(),
-        shading="nearest",
-        zorder=4,
-        #        rasterized=True,
-    )
+    if colorbar_only:
+        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+        levels.append(REFL_LEVELS)
+        labels.append("Rain")
+    else:
+        ax.pcolormesh(
+            lons,
+            lats,
+            refl,
+            cmap=cmap,
+            norm=norm,
+            transform=ccrs.PlateCarree(),
+            shading="nearest",
+            zorder=4,
+            #        rasterized=True,
+        )
 
     # Snow reflectivity
     cmap = LinearSegmentedColormap.from_list(
         "snow_cmap", SNOW_COLORS, N=len(REFL_LEVELS) - 1
     )
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
-
-    ax.pcolormesh(
-        lons,
-        lats,
-        snow,
-        cmap=cmap,
-        norm=norm,
-        transform=ccrs.PlateCarree(),
-        shading="nearest",
-        zorder=5,
-    )
+    if colorbar_only:
+        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+        levels.append(REFL_LEVELS)
+        labels.append("Snow")
+    else:
+        ax.pcolormesh(
+            lons,
+            lats,
+            snow,
+            cmap=cmap,
+            norm=norm,
+            transform=ccrs.PlateCarree(),
+            shading="nearest",
+            zorder=5,
+        )
 
     # Ice/mix reflectivity
     cmap = LinearSegmentedColormap.from_list(
         "mix_cmap", MIX_COLORS, N=len(REFL_LEVELS) - 1
     )
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+    if colorbar_only:
+        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+        levels.append(REFL_LEVELS)
+        labels.append("Mix")
+    else:
+        ax.pcolormesh(
+            lons,
+            lats,
+            frzr,
+            cmap=cmap,
+            norm=norm,
+            transform=ccrs.PlateCarree(),
+            shading="nearest",
+            zorder=6,
+        )
 
-    ax.pcolormesh(
-        lons,
-        lats,
-        frzr,
-        cmap=cmap,
-        norm=norm,
-        transform=ccrs.PlateCarree(),
-        shading="nearest",
-        zorder=6,
-    )
+    if colorbar_only:
+        from earthnow.wxmaps.utils import build_and_save_colorbars
+
+        colorbar_output = (
+            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
+        )
+
+        build_and_save_colorbars(
+            mappables,
+            levels,
+            colorbar_output,
+            labels,
+        )
 
     # ------------------------------------------------------------
     # Report image resolution
