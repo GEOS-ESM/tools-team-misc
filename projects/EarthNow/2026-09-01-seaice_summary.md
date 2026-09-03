@@ -7,8 +7,6 @@ This file contains the user/assistant conversation and findings about how sea-ic
 
 ---
 
-User: Test that my API key works right now
-
 User: Look in the current directory at the file ploteic_carbon.pro. Provide an explanation of how the IDL code and others in this folder plot seaice (sice)
 
 Assistant: (actions)
@@ -184,3 +182,36 @@ This file was created to satisfy that request. If you want the exact raw transcr
 ---
 
 End of file.
+
+---
+
+Date: 2026-09-03
+Title: Follow-up sea-ice workflow notes
+
+Conversation follow-up summary
+
+- User asked how IDL obtains lat/lon for sea ice and whether `get_seaice_map.pro` or `ploteic_aerosols.pro` constructs coordinates.
+- Assistant read:
+  - `links/IDL_BASE/get_seaice_map.pro`
+  - `links/IDL_BASE/ploteic_aerosols.pro`
+  - Supporting files: `links/IDL_BASE/read_and_interpolate_cube2.pro`, `links/IDL_BASE/interpolate_cube2.pro`, `links/IDL_BASE/get_mapped_data.pro`, `links/IDL_BASE/setup_region.pro`
+
+Key findings from source code
+
+- `get_seaice_map.pro` reads OSTIA F77 records (header + sice), performs day/hour interpolation, and returns mapped/regridded sea-ice arrays.
+- It does not return explicit lat/lon arrays for sea ice.
+- In `ploteic_aerosols.pro`, sea ice is consumed as an image/grid layer and composited with other layers.
+- The active path in `ploteic_aerosols.pro` does not build standalone sea-ice lat/lon vectors for plotting; mapping is handled through `regrid`, `map_image`, and related map/projection utilities.
+- A separate LCC lon/lat read exists in `ploteic_aerosols.pro` but that branch is disabled in the shown flow (`hwtexists = 0`).
+
+Python conversion update requested and completed
+
+- User requested changes only in `src/earthnow/get_seaice.py` to infer grid from `nx, ny` and handle reshape/order/orientation.
+- Assistant updated `src/earthnow/get_seaice.py` to:
+  - infer regular grid coordinates from dimensions via `_infer_ostia_grid(nx, ny)`
+  - read one sea-ice record with orientation handling via `_read_sice_record(...)`
+  - preserve interpolation behavior
+  - return `(sice_interp, lats, lons, hdr)`
+- No other files were modified for that code request.
+
+End of follow-up entry.
