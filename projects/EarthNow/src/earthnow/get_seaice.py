@@ -7,6 +7,30 @@ from scipy.io import FortranFile
 from datetime import datetime
 
 
+def _infer_ostia_grid(nx, ny):
+    """Infer regular lat/lon cell-center coordinates from grid size."""
+    dlon = 360.0 / float(nx)
+    dlat = 180.0 / float(ny)
+
+    lons = -180.0 + (np.arange(nx, dtype=np.float32) + 0.5) * dlon
+    lats = -90.0 + (np.arange(ny, dtype=np.float32) + 0.5) * dlat
+    return lats, lons
+
+
+def _read_sice_record(fortran_file, nx, ny):
+    """Read one sea-ice record and orient to (lat, lon) = (ny, nx)."""
+    raw = fortran_file.read_reals(dtype=np.float32)
+
+    if raw.size != nx * ny:
+        raise ValueError(f"Unexpected sea-ice record size: {raw.size}, expected {nx * ny}")
+
+    # IDL reads FLTARR(nx, ny); use Fortran order to preserve axis layout,
+    # then transpose to Python's common (lat, lon) orientation.
+    sice_xy = raw.reshape((nx, ny), order="F")
+    sice_yx = sice_xy.T
+    return sice_yx
+
+
 def get_seaice_map(year, month, day, hour):
     filename = f"/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440/dataoceanfile_OSTIA_REYNOLDS_ICE.2880x1440.{year:04d}.data"
 
@@ -27,11 +51,10 @@ def get_seaice_map(year, month, day, hour):
         ny = int(hdr[13])
 
         file_date = datetime(file_y, file_m, file_d)
+        lats, lons = _infer_ostia_grid(nx, ny)
 
         # Read the first data record
-        # Note: We use order='F' (Fortran/Column-major order) to ensure the
-        # array shape matches IDL's FLTARR(nx, ny) identically
-        sice = f.read_reals(dtype=np.float32).reshape((nx, ny))
+        sice = _read_sice_record(f, nx, ny)
 
         # Calculate the byte size of one full day of data
         # IDL calculated this as: 4 + 14 (HDR floats) + nx*ny (SICE floats)
@@ -52,7 +75,7 @@ def get_seaice_map(year, month, day, hour):
         while True:
             try:
                 hdr = f.read_reals(dtype=np.float32)
-                sice = f.read_reals(dtype=np.float32).reshape((nx, ny))
+                sice = _read_sice_record(f, nx, ny)
 
                 cur_y = int(hdr[0])
                 cur_m = int(hdr[1])
@@ -74,4 +97,4 @@ def get_seaice_map(year, month, day, hour):
     weight = hour / 24.0
     sice_interp = sice * weight + sice0 * (1.0 - weight)
 
-    return sice_interp, hdr
+    return sice_interp, lats, lons, hdr
