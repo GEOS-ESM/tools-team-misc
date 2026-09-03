@@ -635,7 +635,11 @@ def build_and_save_colorbars(
         else:
             cb.ax.set_ylabel(
                 label,
+<<<<<<< HEAD
                 fontsize=label_fontsize,
+=======
+                fontsize=label,
+>>>>>>> cc9596d (colorbar start)
                 va="center",
                 ha="right",
                 labelpad=15,
