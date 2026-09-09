@@ -63,6 +63,13 @@ class StyleConfig:
     base_image_interpolation: str = "nearest"
     base_image_target_resolution: int = 4000
 
+    # Sea ice overlay options
+    show_seaice: bool = False
+    seaice_alpha: float = 0.9  # Max opacity for fully ice-covered pixels
+    seaice_threshold: float = (
+        0.15  # Minimum concentration to render (standard 15% cutoff)
+    )
+
     # Transform cache fields (set by plotall.py before forking workers)
     cached_target_extent: Optional[Tuple[float, float, float, float]] = None
     cached_target_shape: Optional[Tuple[int, int]] = None
@@ -317,6 +324,7 @@ class StyleConfig:
             boundaries=["coastlines", "states"],
             coastline_width=0.4,
             state_color="#333333",
+            # show_seaice=True,
         )
 
     @staticmethod

@@ -134,6 +134,7 @@ class WxMapPlotter:
         self.ax = self.fig.add_axes([0, 0, 1, 1], projection=self.config.projection)
 
         # Set extent - handle geostationary projections differently
+        # I'm not sure this works how we want without extents, probably just need to route to error for now
         if self.config.extent is None:
             print("Skipping set_extent")
         else:
@@ -173,6 +174,15 @@ class WxMapPlotter:
                 facecolor=self.style.ocean_color,
                 zorder=0,
             )
+
+        # ===================================================================
+        # Add sea ice overlay if requested
+        # ===================================================================
+        if self.style.show_seaice:
+            try:
+                self._add_seaice_overlay(pdate)
+            except Exception as e:
+                print(f"Warning: Could not add sea ice overlay: {e}")
 
         # ===================================================================
         # Add boundary features (countries, states, etc.)
@@ -356,6 +366,61 @@ class WxMapPlotter:
                 facecolor=self.style.ocean_color,
                 zorder=0,
             )
+
+    # Move get seaice to this or a utils function?
+    def _add_seaice_overlay(self, pdate_str: str):
+        """
+        Overlay sea ice concentration as white fill on the basemap.
+
+        Parameters:
+        -----------
+        pdate_str : str
+            Plot date string (e.g., '20260118_1200z')
+        """
+        from earthnow.get_seaice import get_seaice_map
+
+        # Parse pdate to get year/month/day/hour
+        pdate_dt = parse_date_string(pdate_str)
+        year, month, day, hour = (
+            pdate_dt.year,
+            pdate_dt.month,
+            pdate_dt.day,
+            pdate_dt.hour,
+        )
+
+        # Read sea ice concentration (1440x2880, float32 [0,1], origin='lower')
+        sice, slats, slons, hdr = get_seaice_map(year, month, day, hour)
+
+        # Apply threshold — zero out low concentrations
+        sice[sice < self.style.seaice_threshold] = 0.0
+
+        # Convert to RGBA uint8: white fill with alpha = concentration * max_alpha
+        h, w = sice.shape
+        rgba = np.zeros((h, w, 4), dtype=np.uint8)
+        rgba[..., 0] = 255  # R
+        rgba[..., 1] = 255  # G
+        rgba[..., 2] = 255  # B
+        rgba[..., 3] = (
+            (sice * self.style.seaice_alpha * 255).clip(0, 255).astype(np.uint8)
+        )
+
+        if self.style.cached_target_extent is not None:
+            target_extent = self.style.cached_target_extent
+            target_shape = self.style.cached_target_shape
+        else:
+            # Might need to quit here?
+            target_extent = self.ax.get_extent()
+            target_shape = (2160, 4320)
+
+        self.ax.imshow(
+            rgba,
+            extent=target_extent,
+            origin="lower",
+            transform=self.ax.projection,
+            zorder=1,
+            interpolation="nearest",
+        )
+        print(f"    Added sea ice overlay for {year}-{month:02d}-{day:02d}")
 
     def apply_limb_darkening(
         self,
