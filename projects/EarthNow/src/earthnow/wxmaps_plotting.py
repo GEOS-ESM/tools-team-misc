@@ -20,6 +20,8 @@ import numpy as np
 import warnings
 from datetime import datetime
 import pytz
+from scipy.io import FortranFile
+import os
 
 from earthnow.wxmaps_config import (
     MapConfig,
@@ -188,6 +190,7 @@ class WxMapPlotter:
         # Add boundary features (countries, states, etc.)
         # Skip coastlines if using GSHHS (already included)
         # ===================================================================
+        # This is probably a good time to clean up these class/method stuff, these should be within a method seprate like basemap+sea ice
         if "coastlines" in boundaries:
             self.ax.coastlines(
                 resolution=feature_resolution,
@@ -351,7 +354,7 @@ class WxMapPlotter:
 
             traceback.print_exc()
             print(f"  Falling back to solid color background")
-            # Fallback to solid colors
+            # Fallback to solid colors - Make this a method and duplicate it with the no basemap above
             self.ax.add_feature(
                 cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
             )
@@ -377,7 +380,7 @@ class WxMapPlotter:
         pdate_str : str
             Plot date string (e.g., '20260118_1200z')
         """
-        from earthnow.get_seaice import get_seaice_map
+        # from earthnow.get_seaice import get_seaice_map
 
         # Parse pdate to get year/month/day/hour
         pdate_dt = parse_date_string(pdate_str)
@@ -389,7 +392,7 @@ class WxMapPlotter:
         )
 
         # Read sea ice concentration (1440x2880, float32 [0,1], origin='lower')
-        sice, slats, slons, hdr = get_seaice_map(year, month, day, hour)
+        sice, slats, slons, hdr = _get_seaice_map(year, month, day, hour)
 
         # Apply threshold — zero out low concentrations
         sice[sice < self.style.seaice_threshold] = 0.0
@@ -421,6 +424,104 @@ class WxMapPlotter:
             interpolation="nearest",
         )
         print(f"    Added sea ice overlay for {year}-{month:02d}-{day:02d}")
+
+    @staticmethod
+    def _get_seaice_map(year, month, day, hour):
+        filename = f"/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440/dataoceanfile_OSTIA_REYNOLDS_ICE.2880x1440.{year:04d}.data"
+
+        if not os.path.exists(filename):
+            raise FileNotFoundError(f"File not found: {filename}")
+
+        target_date = datetime(year, month, day)
+
+        with FortranFile(filename, "r") as f:
+            # Read the first header (14 floats)
+            # scipy.io.FortranFile handles the 4-byte F77 record markers automatically
+            hdr = f.read_reals(dtype=np.float32)
+
+            file_y = int(hdr[0])
+            file_m = int(hdr[1])
+            file_d = int(hdr[2])
+            nx = int(hdr[12])
+            ny = int(hdr[13])
+
+            file_date = datetime(file_y, file_m, file_d)
+
+            # lats, lons = _infer_ostia_grid(nx, ny)
+
+            # Read the first data record
+            sice = read_sice_record(f, nx, ny)
+
+            # Calculate the byte size of one full day of data
+            # IDL calculated this as: 4 + 14 (HDR floats) + nx*ny (SICE floats)
+            # Why the extra 4? 2 records per day * two 4-byte markers per record = 16 bytes.
+            # 16 bytes is exactly 4 float32s.
+            byte_size = 16 + (14 * 4) + (nx * ny * 4)
+
+            # Calculate days to skip to reach the day *before* the target date
+            skip_days = (target_date - file_date).days - 1
+
+            if skip_days > 0:
+                # f._fp accesses the underlying python file object to perform an absolute skip
+                f._fp.seek(skip_days * byte_size, os.SEEK_SET)
+
+            # Keep reading to find the exact target date
+            sice0 = sice.copy()
+
+            while True:
+                try:
+                    hdr = f.read_reals(dtype=np.float32)
+                    sice = _read_sice_record(f, nx, ny)
+
+                    cur_y = int(hdr[0])
+                    cur_m = int(hdr[1])
+                    cur_d = int(hdr[2])
+
+                    # Check if we reached the target date
+                    if cur_y == year and cur_m == month and cur_d == day:
+                        break
+                    else:
+                        sice0 = sice.copy()  # Store as previous day's info
+
+                except Exception as e:
+                    print(
+                        f"Reached EOF or encountered an error before finding {target_date.date()}"
+                    )
+                    break
+
+        # Interpolate based on the hour
+        # What is happening here again?
+        weight = hour / 24.0
+        sice_interp = sice * weight + sice0 * (1.0 - weight)
+
+        return sice_interp, hdr
+
+    @staticmethod
+    def read_sice_record(fortran_file, nx, ny):
+        """Read one sea-ice record and orient to (lat, lon) = (ny, nx)."""
+        raw = fortran_file.read_reals(dtype=np.float32)
+
+        if raw.size != nx * ny:
+            raise ValueError(
+                f"Unexpected sea-ice record size: {raw.size}, expected {nx * ny}"
+            )
+
+        # IDL reads FLTARR(nx, ny); use Fortran order to preserve axis layout,
+        # then transpose to Python's common (lat, lon) orientation.
+        sice_xy = raw.reshape((nx, ny), order="F")
+        sice_yx = sice_xy.T
+        return sice_yx
+
+    # I actually don't need to infer the grid...
+    # @staticmethod
+    # def _infer_ostia_grid(nx, ny):
+    #     """Infer regular lat/lon cell-center coordinates from grid size."""
+    #     dlon = 360.0 / float(nx)
+    #     dlat = 180.0 / float(ny)
+    #
+    #     lons = -180.0 + (np.arange(nx, dtype=np.float32) + 0.5) * dlon
+    #     lats = -90.0 + (np.arange(ny, dtype=np.float32) + 0.5) * dlat
+    #     return lats, lons
 
     def apply_limb_darkening(
         self,

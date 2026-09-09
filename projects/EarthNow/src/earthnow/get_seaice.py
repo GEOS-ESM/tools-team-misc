@@ -22,7 +22,9 @@ def _read_sice_record(fortran_file, nx, ny):
     raw = fortran_file.read_reals(dtype=np.float32)
 
     if raw.size != nx * ny:
-        raise ValueError(f"Unexpected sea-ice record size: {raw.size}, expected {nx * ny}")
+        raise ValueError(
+            f"Unexpected sea-ice record size: {raw.size}, expected {nx * ny}"
+        )
 
     # IDL reads FLTARR(nx, ny); use Fortran order to preserve axis layout,
     # then transpose to Python's common (lat, lon) orientation.
