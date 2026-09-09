@@ -338,6 +338,7 @@ def plot_single_pdate(pdate, args, style, map_config):
     )
 
     fig, ax = plotter.create_basemap(
+        pdate=local_args.pdate,
         feature_resolution=local_args.feature_resolution,
     )
     # Create reader for this worker
