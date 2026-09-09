@@ -218,3 +218,9 @@ OSRB09RG:
     hwt_15mn_slv_LCC: OSRB09RG
     hwt_30mn_slv_LCC: OSRB09RG
 
+TBRB10RG:
+  description: "Brightness temperature in RR LW Band 10 (K)"
+  collection:
+    inst1_2d_asm_Nx: TBRB10RG
+    hwt_15mn_slv_LCC: TBRB10RG
+    hwt_30mn_slv_LCC: TBRB10RG
