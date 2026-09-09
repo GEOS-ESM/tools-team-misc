@@ -27,6 +27,9 @@ from earthnow.wxmaps_config import (
     ResolutionConfig,
     StyleConfig,
 )
+
+from earthnow.wxmaps_utils import parse_date_string
+
 from earthnow.paths import (
     COUNTRY_BORDERS,
     STATE_BORDERS_5M,
@@ -107,7 +110,10 @@ class WxMapPlotter:
         )
 
     def create_basemap(
-        self, boundaries: Optional[list[str]] = None, feature_resolution: str = "50m"
+        self,
+        pdate: str,  # Required arg for plotting sea ice
+        boundaries: Optional[list[str]] = None,
+        feature_resolution: str = "50m",
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
@@ -910,15 +916,15 @@ class WxMapPlotter:
         except Exception as e:
             print(f"Warning: Could not load roads feature from {ROADS_10M}: {e}")
 
-    def add_nws_warnings(self, valid_time: datetime):
+    def add_nws_warnings(self, pdate: str):
         """
         Add NWS watches/warnings overlay
 
         Parameters:
         -----------
-        valid_time : datetime
-            Valid time for warnings
+        pdate: str
         """
+        valid_time = parse_date_string(pdate)
         try:
             from earthnow.wxmaps_nws_warnings import NWSWarnings, get_nws_shapefile_path
 
@@ -1497,7 +1503,7 @@ class WxMapPlotter:
         if not self.style.show_timestamp:
             return
 
-        from earthnow.wxmaps_utils import parse_date_string, calculate_forecast_hour
+        from earthnow.wxmaps_utils import calculate_forecast_hour
 
         fontsize_scale = {"hd": 8, "fhd": 8, "2k": 8, "4k": 14, "8k": 28}
 
