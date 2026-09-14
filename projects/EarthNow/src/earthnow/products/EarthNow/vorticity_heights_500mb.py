@@ -103,7 +103,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
         hgts_smoothed,
         levels=hlevs,
         colors="black",
-        linewidths=0.5,
+        linewidths=plotter.config.contour_lineweight,
         transform=ccrs.PlateCarree(),
         zorder=4,
     )
@@ -112,7 +112,7 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
         cs,
         cs.levels[::2],
         fmt="%d",
-        fontsize=args.contour_label_size,
+        fontsize=plotter.config.contour_label_size,
         inline=True,
         inline_spacing=5,
     )
