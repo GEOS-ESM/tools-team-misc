@@ -224,3 +224,10 @@ TBRB10RG:
     inst1_2d_asm_Nx: TBRB10RG
     hwt_15mn_slv_LCC: TBRB10RG
     hwt_30mn_slv_LCC: TBRB10RG
+
+TBRB05RG:
+  description: "Brightness temperature in RR LW Band 5 (K)"
+  collection:
+    inst1_2d_asm_Nx: TBRB05RG
+    hwt_15mn_slv_LCC: TBRB05RG
+    hwt_30mn_slv_LCC: TBRB05RG
