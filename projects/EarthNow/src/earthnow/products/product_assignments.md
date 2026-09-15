@@ -6,34 +6,34 @@ For IDL script references, look in this dir:
 `ploteic_geocolor`
 GeoColor: True View of Earth
 - Assignee: Emily
-- Status:
+- Status: Done!
 
 `ploteic_sandwich`
 Sandwich RGB - Blended LW IR and Veggie VIS
-- Assignee: Bennett
+- Assignee: Bennett/Emily
 - Status:
 
 `ploteic_band16`
 13.3 micron - CO2 Longwave Band IR
-- Assignee: Bennett
+- Assignee: Bennett/Emily
 - Status:
 
 `ploteic_band14`
 11.2 micron - Longwave Band IR
-- Assignee: Bennett
+- Assignee: Bennett/Emily
 - Status:
 
 `ploteic_band09`
 6.9 micron - Mid Level Water Vapor IR
-- Assignee: Bennett
-- Status:
+- Assignee: Bennett/Emily
+- Status: Done!
 
 
 ## Surface variables
 `ploteic_radar`
 Radar Reflectivity [Rain/Snow/Ice]
 - Assignee: Emily
-- Status:
+- Status: CONUS works with existing LCC files; Global requires in situ interpolation from cube sphere to lat/lon. Future work.
 
 `ploteic_precip`
 Accumulated Precip [Rain & Snow]

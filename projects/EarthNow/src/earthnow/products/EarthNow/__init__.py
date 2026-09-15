@@ -14,4 +14,5 @@ from . import mid_level_water_vapor
 from . import aerosols
 from . import carbon
 from . import geocolor_rgb
-404363bfa1f392c0420746e67943908660327ebf
+from . import mid_level_water_vapor
+from . import co2_longwave_ir
