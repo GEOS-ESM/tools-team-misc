@@ -60,6 +60,14 @@ products:
     style: satellite
     driver: "plotall.py"
     base-path: $BASE_PATH
+  CO2 Longwave IR:
+    product: co2_longwave_ir_EarthNow
+    style: white_state_coast
+    driver: "plotall.py"
+  Mid Level Water Vapor IR:
+    product: mid_level_water_vapor_EarthNow
+    style: red_state_coast
+    driver: "plotall.py"
 
 
 
