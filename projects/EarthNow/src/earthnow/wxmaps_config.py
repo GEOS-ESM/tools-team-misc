@@ -307,6 +307,21 @@ class StyleConfig:
         )
 
     @staticmethod
+    @register_style("greytopo_state_coast")
+    def greytopo() -> "StyleConfig":
+        """Testing to create grey topo style"""
+        return StyleConfig(
+            use_base_image=True,
+            base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
+            use_gshhs=False,
+            boundaries=["coastlines", "states"],
+            state_color="white",
+            coastline_color="white",
+            coastline_width=0.25,
+            state_width=1.0,
+        )
+
+    @staticmethod
     @register_style("greyblue")
     def greyblue() -> "StyleConfig":
         """Greyblue Topo Image with state/coastlines for conus"""
