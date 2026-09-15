@@ -39,6 +39,7 @@ CONUS2KMRP_LCC_VARS = VARIABLE_REGISTRY.resolve_many(
         "OSRB10RG": "hwt_30mn_slv_LCC",
         "OSRB09RG": "hwt_30mn_slv_LCC",
         "TBRB10RG": "hwt_30mn_slv_LCC",
+        "TBRB05RG": "hwt_30mn_slv_LCC",
     }
 )
 
