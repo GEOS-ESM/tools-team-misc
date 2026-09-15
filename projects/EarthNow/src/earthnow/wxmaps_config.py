@@ -356,6 +356,19 @@ class StyleConfig:
             state_width=1.0,
         )
 
+    @staticmethod
+    @register_style("white_state_coast")
+    def white_state_coast() -> "StyleConfig":
+        return StyleConfig(
+            ocean_color="#808080",
+            land_color="#808080",
+            boundaries=["coastlines", "states"],
+            state_color="white",
+            coastline_color="white",
+            coastline_width=0.25,
+            state_width=1.0,
+        )
+
 
 @dataclass
 class ResolutionConfig:
