@@ -34,7 +34,7 @@ from earthnow.wxmaps_config import (
     StyleConfig,
 )
 
-from earthnow.wxmaps_utils import parse_date_string
+from earthnow.wxmaps_utils import parse_date_string, colorbar_alpha_fade
 
 from earthnow.paths import (
     COUNTRY_BORDERS,
@@ -406,6 +406,7 @@ class WxMapPlotter:
 
         # Create greyscale colormap with linear alpha values
         seaice_cmap = colormaps["IDL-000-B-W_LINEAR"]
+        seaice_cmap = colorbar_alpha_fade(seaice_cmap, self.style.seaice_alpha)
         seaice_norm = Normalize(vmin=0.0, vmax=1.0, clip=True)
 
         # Plot directly in geographic coordinates.
