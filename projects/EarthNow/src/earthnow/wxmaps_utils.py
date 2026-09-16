@@ -316,7 +316,6 @@ def boxcar_smooth_2D(array, window_size):
     Args:
     - window_size: int
     """
-    import numpy as np
     from scipy.ndimage import uniform_filter
 
     # have to mask out NANs so they do not affect smoothing
@@ -350,7 +349,6 @@ def load_color_table(filepath):
     colors : np.ndarray
         Color table normalized to [0, 1], shape (N, 3)
     """
-    import numpy as np
 
     colors = np.loadtxt(filepath)
     return colors / 255.0
@@ -359,6 +357,7 @@ def load_color_table(filepath):
 def colorbar_alpha_fade(
     cmap,
     pct_float: float,
+    max_alpha=1.0,
     ncolors=256,
 ):
     """
@@ -366,13 +365,18 @@ def colorbar_alpha_fade(
     Parameters
     -------------
     cmap: matplotlib.colors.Colormap
+    pct_float: float
+        Percent of cmap to linearly space alpha gradient
+    max_alpha: float
+        Max alpha value at gradient end
+    ncolors:
     """
     if not (0 <= pct_float <= 1):
         raise ValueError("Percent must be between 0 and 1")
     color_matrix = cmap(np.linspace(0, 1, ncolors))
     alphas = np.ones(ncolors)
     n_fade = int(256 * pct_float)
-    alphas[:n_fade] = np.linspace(0, 1, n_fade)
+    alphas[:n_fade] = np.linspace(0, max_alpha, n_fade)
     color_matrix[:, -1] = alphas
 
     from matplotlib.colors import ListedColormap

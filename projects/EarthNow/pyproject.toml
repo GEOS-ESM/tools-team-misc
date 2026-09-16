@@ -25,6 +25,7 @@ dependencies = [
   "python_dotenv",
   "wxvis",
   "pyyaml",
+  "global-land-mask>=1.0.0",
 ]
 
 
