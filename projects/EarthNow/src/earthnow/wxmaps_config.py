@@ -65,7 +65,10 @@ class StyleConfig:
 
     # Sea ice overlay options
     show_seaice: bool = False
-    seaice_alpha: float = 1.0  # Max opacity for fully ice-covered pixels
+    seaice_pctfade: float = 1.0  # Percent of cmap to linearly space alpha across
+    seaice_maxalpha: float = (
+        1.0  # Max opacity for fully ice-covered pixels, 0.9 max alpha in IDL, but doesn't seem to be correct based on how the plot looks
+    )
 
     # Transform cache fields (set by plotall.py before forking workers)
     cached_target_extent: Optional[Tuple[float, float, float, float]] = None
