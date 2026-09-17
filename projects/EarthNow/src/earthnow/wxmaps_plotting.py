@@ -405,8 +405,11 @@ class WxMapPlotter:
         sice_plot = np.ma.masked_invalid(sice_masked)
 
         # Create greyscale colormap with linear alpha values
+        # TODO: This still doesn't match EarthNow exactly?
         seaice_cmap = colormaps["IDL-000-B-W_LINEAR"]
-        seaice_cmap = colorbar_alpha_fade(seaice_cmap, self.style.seaice_alpha)
+        seaice_cmap = colorbar_alpha_fade(
+            seaice_cmap, self.style.seaice_pctfade, self.style.seaice_maxalpha
+        )
         seaice_norm = Normalize(vmin=0.0, vmax=1.0, clip=True)
 
         # Plot directly in geographic coordinates.
