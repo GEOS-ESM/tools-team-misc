@@ -329,6 +329,7 @@ def plot_single_pdate(pdate, args, style, map_config):
     plotter = WxMapPlotter(map_config, resolution=local_args.resolution, style=style)
 
     fig, ax = plotter.create_basemap(
+        pdate=local_args.pdate,
         feature_resolution=local_args.feature_resolution,
     )
 
@@ -353,10 +354,7 @@ def plot_single_pdate(pdate, args, style, map_config):
 
         # Add NWS warnings if requested (BEFORE timestamp so warnings are below text)
         if style.show_nws_warnings:
-            from earthnow.wxmaps_utils import parse_date_string
-
-            pdate_dt = parse_date_string(local_args.pdate)
-            plotter.add_nws_warnings(pdate_dt)
+            plotter.add_nws_warnings(pdate)
 
     if style.show_timestamp:
         plotter.add_forecast_timestamp(

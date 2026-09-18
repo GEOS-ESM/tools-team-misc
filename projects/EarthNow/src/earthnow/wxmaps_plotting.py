@@ -11,6 +11,9 @@ import matplotlib
 
 matplotlib.use("Agg")  # Use non-interactive backend for high-res rendering
 import matplotlib.pyplot as plt
+from matplotlib import colormaps
+from matplotlib.colors import Normalize
+from wxvis import colors
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
@@ -20,6 +23,9 @@ import numpy as np
 import warnings
 from datetime import datetime
 import pytz
+from scipy.io import FortranFile
+import os
+from global_land_mask import globe
 
 from earthnow.wxmaps_config import (
     MapConfig,
@@ -27,6 +33,9 @@ from earthnow.wxmaps_config import (
     ResolutionConfig,
     StyleConfig,
 )
+
+from earthnow.wxmaps_utils import parse_date_string, colorbar_alpha_fade
+
 from earthnow.paths import (
     COUNTRY_BORDERS,
     STATE_BORDERS_5M,
@@ -107,7 +116,10 @@ class WxMapPlotter:
         )
 
     def create_basemap(
-        self, boundaries: Optional[list[str]] = None, feature_resolution: str = "50m"
+        self,
+        pdate: str,  # Required arg for plotting sea ice
+        boundaries: Optional[list[str]] = None,
+        feature_resolution: str = "50m",
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
@@ -167,6 +179,15 @@ class WxMapPlotter:
                 facecolor=self.style.ocean_color,
                 zorder=0,
             )
+
+        # ===================================================================
+        # Add sea ice overlay if requested
+        # ===================================================================
+        if self.style.show_seaice:
+            try:
+                self._add_seaice_overlay(pdate)
+            except Exception as e:
+                print(f"Warning: Could not add sea ice overlay: {e}")
 
         # ===================================================================
         # Add boundary features (countries, states, etc.)
@@ -350,6 +371,152 @@ class WxMapPlotter:
                 facecolor=self.style.ocean_color,
                 zorder=0,
             )
+
+    def _add_seaice_overlay(self, pdate_str: str):
+        """
+        Overlay sea ice concentration as white fill on the basemap.
+
+        Parameters:
+        -----------
+        pdate_str : str
+            Plot date string (e.g., '20260118_1200z')
+        """
+
+        # Parse pdate to get year/month/day/hour
+        pdate_dt = parse_date_string(pdate_str)
+        year, month, day, hour = (
+            pdate_dt.year,
+            pdate_dt.month,
+            pdate_dt.day,
+            pdate_dt.hour,
+        )
+
+        # Read sea ice concentration (ny,nx), coordinates are cell centers.
+        sice, slats, slons = self._get_seaice_map(year, month, day, hour)
+
+        # Mask land and zeroes
+        slat_grid, slon_grid = np.meshgrid(slats, slons, indexing="ij")
+        land_mask = globe.is_land(slat_grid, slon_grid)
+
+        sice_masked = sice.copy()
+        sice_masked = np.where(land_mask, np.nan, sice_masked)
+        sice_masked = np.where(sice == 0, np.nan, sice_masked)
+
+        sice_plot = np.ma.masked_invalid(sice_masked)
+
+        # Create greyscale colormap with linear alpha values
+        # TODO: This still doesn't match EarthNow exactly?
+        seaice_cmap = colormaps["IDL-000-B-W_LINEAR"]
+        seaice_cmap = colorbar_alpha_fade(
+            seaice_cmap, self.style.seaice_pctfade, self.style.seaice_maxalpha
+        )
+        seaice_norm = Normalize(vmin=0.0, vmax=1.0, clip=True)
+
+        # Plot directly in geographic coordinates.
+        self.ax.pcolormesh(
+            slons,
+            slats,
+            sice_plot,
+            transform=ccrs.PlateCarree(),
+            shading="nearest",
+            cmap=seaice_cmap,
+            norm=seaice_norm,
+            zorder=1,
+            rasterized=True,
+        )
+        print(f"    Added sea ice overlay for {year}-{month:02d}-{day:02d}")
+
+    @staticmethod
+    def _get_seaice_map(year, month, day, hour):
+        filename = f"/discover/nobackup/projects/gmao/share/dao_ops/fvInput/g5gcm/bcs/realtime/OSTIA_REYNOLDS/2880x1440/dataoceanfile_OSTIA_REYNOLDS_ICE.2880x1440.{year:04d}.data"
+
+        if not os.path.exists(filename):
+            raise FileNotFoundError(f"File not found: {filename}")
+
+        target_date = datetime(year, month, day)
+
+        with FortranFile(filename, "r") as f:
+            # Read the first header (14 floats)
+            # scipy.io.FortranFile handles the 4-byte F77 record markers automatically
+            hdr = f.read_reals(dtype=np.float32)
+
+            file_y = int(hdr[0])
+            file_m = int(hdr[1])
+            file_d = int(hdr[2])
+            nx = int(hdr[12])
+            ny = int(hdr[13])
+
+            file_date = datetime(file_y, file_m, file_d)
+
+            # Read the first data record
+            sice, slats, slons = WxMapPlotter._read_ostia_sice(f, nx, ny)
+
+            # Calculate the byte size of one full day of data
+            # IDL calculated this as: 4 + 14 (HDR floats) + nx*ny (SICE floats)
+            # Why the extra 4? 2 records per day * two 4-byte markers per record = 16 bytes.
+            # 16 bytes is exactly 4 float32s.
+            byte_size = 16 + (14 * 4) + (nx * ny * 4)
+
+            # Calculate days to skip to reach the day *before* the target date
+            skip_days = (target_date - file_date).days - 1
+
+            if skip_days > 0:
+                # f._fp accesses the underlying python file object to perform an absolute skip
+                f._fp.seek(skip_days * byte_size, os.SEEK_SET)
+
+            # Keep reading to find the exact target date
+            sice0 = sice.copy()
+
+            while True:
+                try:
+                    hdr = f.read_reals(dtype=np.float32)
+                    sice, slats, slons = WxMapPlotter._read_ostia_sice(f, nx, ny)
+
+                    cur_y = int(hdr[0])
+                    cur_m = int(hdr[1])
+                    cur_d = int(hdr[2])
+
+                    # Check if we reached the target date
+                    if cur_y == year and cur_m == month and cur_d == day:
+                        break
+                    else:
+                        sice0 = sice.copy()  # Store as previous day's info
+
+                except Exception as e:
+                    print(
+                        f"Reached EOF or encountered an error before finding {target_date.date()}"
+                    )
+                    print(e)
+
+        # Interpolate based on the hour between days
+        weight = hour / 24.0
+        sice_interp = sice * weight + sice0 * (1.0 - weight)
+
+        return sice_interp, slats, slons
+
+    @staticmethod
+    def _read_ostia_sice(fortran_file, nx, ny):
+        """Read one sea-ice record and orient to (lat, lon) = (ny, nx)."""
+        raw = fortran_file.read_reals(dtype=np.float32)
+
+        if raw.size != nx * ny:
+            raise ValueError(
+                f"Unexpected sea-ice record size: {raw.size}, expected {nx * ny}"
+            )
+
+        # Infer regular lat/lon cell-center coordinates from grid size.
+        dlon = 360.0 / float(nx)
+        dlat = 180.0 / float(ny)
+
+        lons = -180.0 + (np.arange(nx, dtype=np.float32) + 0.5) * dlon
+        lats = -90.0 + (np.arange(ny, dtype=np.float32) + 0.5) * dlat
+
+        # IDL reads FLTARR(nx, ny); use Fortran order to preserve axis layout,
+        # then transpose to Python's common (lat, lon) orientation.
+        sice_xy = raw.reshape((nx, ny), order="F")
+        sice_yx = np.array(sice_xy.T)
+
+        return sice_yx, lats, lons
 
     def apply_limb_darkening(
         self,
@@ -910,15 +1077,15 @@ class WxMapPlotter:
         except Exception as e:
             print(f"Warning: Could not load roads feature from {ROADS_10M}: {e}")
 
-    def add_nws_warnings(self, valid_time: datetime):
+    def add_nws_warnings(self, pdate: str):
         """
         Add NWS watches/warnings overlay
 
         Parameters:
         -----------
-        valid_time : datetime
-            Valid time for warnings
+        pdate: str
         """
+        valid_time = parse_date_string(pdate)
         try:
             from earthnow.wxmaps_nws_warnings import NWSWarnings, get_nws_shapefile_path
 
@@ -1497,7 +1664,7 @@ class WxMapPlotter:
         if not self.style.show_timestamp:
             return
 
-        from earthnow.wxmaps_utils import parse_date_string, calculate_forecast_hour
+        from earthnow.wxmaps_utils import calculate_forecast_hour
 
         fontsize_scale = {"hd": 8, "fhd": 8, "2k": 8, "4k": 14, "8k": 28}
 
