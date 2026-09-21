@@ -75,6 +75,8 @@ def execute(**args):
         iterator = Player(config, task, time_dt, tloop=False, seamless=True, **args)
         pool = Pool(ntasks)
         pool.map(make_movie, iterator)
+        pool.close()
+        pool.join()
 
     # Removed expired image and movie files
     # =====================================
@@ -86,6 +88,8 @@ def execute(**args):
         iterator = Player(config, task, time_dt, tloop=False, seamless=True, **options)
         pool = Pool(1)
         pool.map(purge, iterator)
+        pool.close()
+        pool.join()
 
 
 if __name__ == "__main__":
