@@ -2,79 +2,81 @@ import os
 import glob
 import shlex
 import shutil
-import tempfile 
+import tempfile
 import subprocess
 
 from earthnow.workflow.utils import str_replace
 
+
 def make_image(request):
 
-    defs = { k:v for k,v in request.items() if not isinstance(v, dict) }
+    defs = {k: v for k, v in request.items() if not isinstance(v, dict)}
 
-    time_dt = request['time_dt']
-    fcst_dt = request['fcst_dt']
+    time_dt = request["time_dt"]
+    fcst_dt = request["fcst_dt"]
 
     if request["isa_forecast"]:
-        oname = request['fcname']
+        oname = request["fcname"]
     else:
-        oname = request['rpname']
+        oname = request["rpname"]
 
     oname = time_dt.strftime(oname)
     oname = fcst_dt.strftime(oname)
     oname = str_replace(oname, **defs)
 
-    options = request['options']
-    options['output'] = oname
-    options['resolution'] = request['pngsize']
+    options = request["options"]
+    options["output"] = oname
+    options["resolution"] = request["pngsize"]
 
     cmd = [
         f"--{k} {v}"
         for k, v in options.items()
-        if v is not None and not isinstance(v, bool) and k[0] != '_'
+        if v is not None and not isinstance(v, bool) and k[0] != "_"
     ]
     cmd += [f"--{k}" for k, v in options.items() if isinstance(v, bool)]
 
     cmd = " ".join(cmd)
-    cmd = request['driver'] + " " + cmd
+    cmd = request["driver"] + " " + cmd
 
     print(cmd)
 
-    subprocess.call(cmd, shell=True, executable='/bin/bash')
+    subprocess.call(cmd, shell=True, executable="/bin/bash")
+
 
 def make_movie(request):
-    
+
     tmpdir = tempfile.TemporaryDirectory()
 
-    defs = { k:v for k,v in request.items() if not isinstance(v, dict) }
-    defs['glob'] = os.path.join(tmpdir.name, '*.png')
-    defs['resolution'] = request['pngsize']
+    defs = {k: v for k, v in request.items() if not isinstance(v, dict)}
+    defs["glob"] = os.path.join(tmpdir.name, "*.png")
+    defs["resolution"] = request["pngsize"]
 
-    fcname = request['fcname']
-    rpname = request['rpname']
+    fcname = request["fcname"]
+    rpname = request["rpname"]
     fcname = str_replace(fcname, **defs)
     rpname = str_replace(rpname, **defs)
-    txtname = request['txtname']
+    txtname = request["txtname"]
     txtname = str_replace(txtname, **defs)
-    
-    time_dt = request['time_dt']
-    fcst_dt = request['fcst_dt']
-    start_dt = request['start_dt']
-    end_dt = request['end_dt']
-    delta_t = request['delta_t']
+
+    time_dt = request["time_dt"]
+    fcst_dt = request["fcst_dt"]
+    start_dt = request["start_dt"]
+    end_dt = request["end_dt"]
+    delta_t = request["delta_t"]
 
     os.makedirs(os.path.dirname(txtname), mode=0o755, exist_ok=True)
-    with open(txtname, 'w') as f:
+    with open(txtname, "w") as f:
 
         seq = 0
         t = start_dt
-        while (t <= end_dt):
+        while t <= end_dt:
 
             cdattim = t.strftime("%Y-%m-%d, %H%M UTC")
 
             dst = os.path.join(tmpdir.name, f"{seq:05d}.png")
 
             if t >= fcst_dt:
-                tau  = round((t - fcst_dt).total_seconds() / 3600)
+                tau = round((t - fcst_dt).total_seconds() / 3600)
                 cdattim = f"{cdattim} [Forecast Hour: {tau:03d}]"
                 src = fcst_dt.strftime(t.strftime(fcname))
             else:
@@ -82,18 +84,18 @@ def make_movie(request):
 
             if os.path.isfile(src):
                 os.symlink(src, dst)
-                f.write(cdattim+'\n')
+                f.write(cdattim + "\n")
 
             seq += 1
             t += delta_t
 
-    resolutions = request['resolutions']
+    resolutions = request["resolutions"]
 
-    for resolution in request['mp4size']:
+    for resolution in request["mp4size"]:
 
-        defs['resolution'] = resolution
-        defs['frame_size'] = resolutions[resolution]
-        oname = request['mp4name']
+        defs["resolution"] = resolution
+        defs["frame_size"] = resolutions[resolution]
+        oname = request["mp4name"]
         oname = str_replace(oname, **defs)
 
         tname = os.path.join(tmpdir.name, os.path.basename(oname))
@@ -102,31 +104,32 @@ def make_movie(request):
 
         cmd = 'ffmpeg -loglevel debug -threads 6 -pattern_type glob -r $frame_rate -i "$glob" -y -s $frame_size -c:v libx264 -pix_fmt yuv420p -preset ultrafast -crf $quality $tname'
 
-        defs.update({'oname': oname, 'tname': tname})
+        defs.update({"oname": oname, "tname": tname})
         cmd = str_replace(cmd, **defs)
         print(cmd)
 
-        subprocess.call(cmd, shell=True, executable='/bin/bash')
+        subprocess.call(cmd, shell=True, executable="/bin/bash")
         shutil.move(tname, oname)
 
     tmpdir.cleanup()
 
+
 def purge(request):
 
-    defs = { k:v for k,v in request.items() if not isinstance(v, dict) }
-        
-    iname = request['pngname']
+    defs = {k: v for k, v in request.items() if not isinstance(v, dict)}
+
+    iname = request["pngname"]
     iname = str_replace(iname, **defs)
 
-    time_dt = request['time_dt']
-    fcst_dt = request['fcst_dt']
-    start_dt = request['start_dt']
-    end_dt = request['end_dt']
-    delta_t = request['delta_t']
-        
+    time_dt = request["time_dt"]
+    fcst_dt = request["fcst_dt"]
+    start_dt = request["start_dt"]
+    end_dt = request["end_dt"]
+    delta_t = request["delta_t"]
+
     t = start_dt
-    while (t <= end_dt):
-    
+    while t <= end_dt:
+
         src = t.strftime(iname)
         if os.path.isfile(src):
             os.remove(src)

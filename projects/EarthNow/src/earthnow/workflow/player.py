@@ -4,7 +4,9 @@ from earthnow.workflow.utils import parse_duration
 
 class Player(object):
 
-    def __init__(self, configuration, task_name, ref_dt, tloop=True, seamless=False, **kwargs):
+    def __init__(
+        self, configuration, task_name, ref_dt, tloop=True, seamless=False, **kwargs
+    ):
 
         self.config = configuration
         self.tloop = tloop
@@ -32,7 +34,7 @@ class Player(object):
 
     def add_user_options(self, request):
 
-        user_options = { k:v for k,v in self.options.items() if v }
+        user_options = {k: v for k, v in self.options.items() if v}
         request.update(user_options)
 
     def __iter__(self):
@@ -62,7 +64,7 @@ class Player(object):
                     for name in streams:
 
                         stream = self.streams[name]
-                        readers = stream.get('streams', [name])
+                        readers = stream.get("streams", [name])
                         if self.seamless:
                             readers = [name]
 
