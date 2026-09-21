@@ -21,12 +21,14 @@ driver: plotall.py
 plot_all: [plot_global, plot_conus]
 
 plot_global:
-  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
+  products: [t2m, vort500, winds, wind250, cape, carbon]
+# products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
   streams: [conus2km]
   regions: [global]
 
 plot_conus:
-  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
+  products: [t2m, vort500, winds, wind250, cape, carbon]
+# products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
   streams: [conus2km_lcc]
   regions: [conus]
 
@@ -56,7 +58,7 @@ products:
     style: empty
   vort500:
     product: vorticity_heights_500mb_EarthNow
-    style: greytopo
+    style: grey_topo
   winds:
     product: winds_10m_EarthNow
     style: light # Create "Blank" style?
@@ -88,7 +90,7 @@ streams:
     tinc: PT30M
   conus2kmrp:
     model: conus2km
-    stime: -P5D
+    stime: -P1D
     etime: -PT30M
     tinc: PT30M
   conus2kmfc_lcc:
@@ -99,21 +101,19 @@ streams:
     tinc: PT30M
   conus2kmrp_lcc:
     model: conus2km
-    stime: -P5D
+    stime: -P1D
     etime: -PT30M
     tinc: PT30M
   conus2km:
     model: conus2km
-  # streams: [conus2kmfc, conus2kmrp]
-    streams: [conus2kmrp]
+    streams: [conus2kmfc, conus2kmrp]
     ftime: PT0H
     stime: -P5D
     etime: PT96H
     tinc: PT30M
   conus2km_lcc:
     model: conus2km
-  # streams: [conus2kmfc_lcc, conus2kmrp_lcc]
-    streams: [conus2kmrp_lcc]
+    streams: [conus2kmfc_lcc, conus2kmrp_lcc]
     ftime: PT0H
     stime: -P5D
     etime: PT96H
