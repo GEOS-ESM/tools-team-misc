@@ -144,7 +144,8 @@ def parse_args():
     )
 
     parser.add_argument(
-         "--output", default="",
+        "--output",
+        default="",
     )
 
     parser.add_argument("--base-path", default=paths._G6DEV_PUB / "WxMaps")
@@ -368,7 +369,7 @@ def plot_single_pdate(pdate, args, style, map_config):
         )
 
     output = local_args.output
-    
+
     if not output:
         output = get_output_filepath(
             local_args.base_path,
@@ -378,7 +379,7 @@ def plot_single_pdate(pdate, args, style, map_config):
             local_args.map_type,
             local_args.fdate,
             local_args.pdate,
-    ) 
+        )
 
     plotter.save(output, optimize=True)
     plotter.close()
