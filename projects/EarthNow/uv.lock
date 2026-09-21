@@ -2075,7 +2075,7 @@ wheels = [
 [[package]]
 name = "wxvis"
 version = "0.1.0"
-source = { git = "https://github.com/GEOS-ESM/tools-team-misc.git?subdirectory=projects%2FWxVis&branch=main#d1dd1a41a420fc282bb8ada7c09f08c002ceafc2" }
+source = { git = "https://github.com/GEOS-ESM/tools-team-misc.git?subdirectory=projects%2FWxVis&branch=main#936aec400f97f93efaa3fa4c9e0d6ab17a3e3a5d" }
 
 [[package]]
 name = "xarray"
