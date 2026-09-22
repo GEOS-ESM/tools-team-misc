@@ -61,6 +61,13 @@ H500:
     inst1_2d_asm_Nx: H500
     hwt_15mn_slv_LCC: H500
     hwt_30mn_slv_LCC: H500
+      
+H1000:
+  description: "Height at 1000 hPa (m)"
+  collection:
+    inst1_2d_asm_Nx: H1000
+    hwt_15mn_slv_LCC: H1000
+    hwt_30mn_slv_LCC: H1000
 
 HGT_SFC:
   description: "Surface geopotential height (m+2 s-2)"
