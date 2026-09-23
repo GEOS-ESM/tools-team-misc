@@ -68,6 +68,10 @@ products:
     product: mid_level_water_vapor_EarthNow
     style: red_state_coast
     driver: "plotall.py"
+  Longwave Window IR:
+    product: longwave_window_ir_EarthNow
+    style:   greytopo_state_coast
+    driver: "plotall.py"
 
 
 
