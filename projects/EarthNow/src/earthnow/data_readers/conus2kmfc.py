@@ -34,6 +34,8 @@ CONUS2KMFC_VARS = VARIABLE_REGISTRY.resolve_many(
         "OSRB11RG": "inst1_2d_asm_Nx",
         "OSRB10RG": "inst1_2d_asm_Nx",
         "OSRB09RG": "inst1_2d_asm_Nx",
+        "TBRB10RG": "inst1_2d_asm_Nx",
+        "TBRB05RG": "inst1_2d_asm_Nx",
     }
 )
 

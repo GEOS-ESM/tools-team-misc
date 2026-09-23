@@ -13,3 +13,6 @@ from . import cape
 from . import aerosols
 from . import carbon
 from . import geocolor_rgb
+from . import mid_level_water_vapor
+from . import co2_longwave_ir
+from . import longwave_window_ir
