@@ -25,7 +25,7 @@ MERRA2 = SimpleNamespace(
 )
 
 
-@register("MERRA2")
+@register("merra2")
 class merra2(DataService):
     def __init__(self, **kwargs):
         super().__init__(MERRA2)

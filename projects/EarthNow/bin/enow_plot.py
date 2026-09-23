@@ -345,6 +345,7 @@ def plot_single_pdate(pdate, args, style, map_config):
     logger.info(return_valid_directory(reader, local_args))
 
     # Call product function
+    local_args.contour_label_size = map_config.contour_label_size
     PRODUCTS[local_args.product](fig, ax, plotter, reader, local_args)
 
     # Add optional features
@@ -497,33 +498,10 @@ def main():
     reader = create_data_reader(args)
 
     # -------------------------------------------------------------------------
-    # Determine pdates
+    # PRODUCT DISPATCH
     # -------------------------------------------------------------------------
-    if args.pdate is None:
-        # If pdate not provided, plot ALL available times
-        pdates = reader.find_available_times(args.fdate)
-        pdates = [dt.strftime("%Y%m%d_%H%Mz") for dt in pdates]
-        logger.info(f"Available pdates for fdate {args.fdate}: {pdates}")
-    else:
-        pdates = [args.pdate]
 
-    print(f"Processing {len(pdates)} plot times on {args.nproc} CPUs")
-
-    # -------------------------------------------------------------------------
-    # PRODUCT DISPATCH (parallel)
-    # -------------------------------------------------------------------------
-    from functools import partial
-    from concurrent.futures import ProcessPoolExecutor
-
-    worker = partial(
-        plot_single_pdate,
-        args=args,
-        style=style,
-        map_config=map_config,
-    )
-
-    with ProcessPoolExecutor(max_workers=args.nproc) as exe:
-        list(exe.map(worker, pdates))
+    plot_single_pdate(args.pdate, args, style=style, map_config=map_config)
 
 
 if __name__ == "__main__":

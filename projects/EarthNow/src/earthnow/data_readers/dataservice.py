@@ -17,7 +17,7 @@ class SimpleNetCDFDataService(object):
 
     def open(self, collection, pdate, fdate=None):
 
-        time_dt = dt.datetime.strptime(pdate, "%Y%m%d_%Hz")
+        time_dt = dt.datetime.strptime(pdate, "%Y%m%d_%H%Mz")
         fname = time_dt.strftime(self.stream.uri)
 
         if fdate:
