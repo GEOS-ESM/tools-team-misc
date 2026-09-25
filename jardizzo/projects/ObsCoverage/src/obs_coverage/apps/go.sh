@@ -1,1 +1,2 @@
-python test.py /discover/nobackup/jardizzo/aerosols/SNPP/AERDB_L2_VIIRS_SNPP/2025/093/AERDB_L2_VIIRS_SNPP.A2025093.2200.002.2025094122038.nc
+#python test.py /discover/nobackup/jardizzo/aerosols/SNPP/AERDB_L2_VIIRS_SNPP/2025/093/AERDB_L2_VIIRS_SNPP.A2025093.2200.002.2025094122038.nc
+python test.py /discover/nobackup/jardizzo/aerosols/SNPP/AERDB_L2_VIIRS_SNPP/2025/093/AERDB_L2_VIIRS_SNPP.*
