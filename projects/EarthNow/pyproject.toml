@@ -56,5 +56,6 @@ exclude = [
 wxvis = { git = "https://github.com/GEOS-ESM/tools-team-misc.git", branch = "main", subdirectory = "projects/WxVis" }
 
 [tool.taskipy.tasks]
-mytest = "./bin/scratch/plot_one_single_wrapper.sh"
+plot-one = "./bin/scratch/plot_one_single_wrapper.sh"
+run-enow ="./bin/scratch/run_enow.sh"
 
