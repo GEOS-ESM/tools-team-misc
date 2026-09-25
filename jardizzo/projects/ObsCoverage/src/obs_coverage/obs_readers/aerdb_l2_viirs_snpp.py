@@ -37,4 +37,5 @@ class AERDB_L2_VIIRS_SNPP(ObsReader):
 
         n = self._lons.size
 
-        print(f'{nobs} observations thinned down to {n}')
+        if not self.quiet:
+            print(f'{nobs} observations thinned down to {n}')
