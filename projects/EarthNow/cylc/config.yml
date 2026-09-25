@@ -21,14 +21,12 @@ driver: enow_plot.py
 plot_all: [plot_global, plot_conus]
 
 plot_global:
-  products: [t2m, vort500, winds, wind250, cape, carbon]
-# products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
+  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon, geocolor, band16, band09, band14]
   streams: [conus2km]
   regions: [global]
 
 plot_conus:
-  products: [t2m, vort500, winds, wind250, cape, carbon]
-# products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon]
+  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon, geocolor, band16, band09, band14]
   streams: [conus2km_lcc]
   regions: [conus]
 
@@ -58,7 +56,7 @@ products:
     style: empty
   vort500:
     product: vorticity_heights_500mb_EarthNow
-    style: grey_topo
+    style: greytopo
   winds:
     product: winds_10m_EarthNow
     style: light # Create "Blank" style?
@@ -77,25 +75,18 @@ products:
   carbon:
     product: carbon_EarthNow
     style: greyblue
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  Geocolor:
+  geocolor:
     product: geocolor_rgb_EarthNow
     style: satellite
-    driver: "plotall.py"
-    base-path: $BASE_PATH
-  CO2 Longwave IR:
+  band16:
     product: co2_longwave_ir_EarthNow
     style: white_state_coast
-    driver: "plotall.py"
-  Mid Level Water Vapor IR:
+  band09:
     product: mid_level_water_vapor_EarthNow
     style: red_state_coast
-    driver: "plotall.py"
-  Longwave Window IR:
+  band14:
     product: longwave_window_ir_EarthNow
     style:   greytopo_state_coast
-    driver: "plotall.py"
 
 # Stream Definitions
 # ==================
@@ -109,7 +100,7 @@ streams:
     tinc: PT30M
   conus2kmrp:
     model: conus2km
-    stime: -P1D
+    stime: -P5D
     etime: -PT30M
     tinc: PT30M
   conus2kmfc_lcc:
@@ -120,7 +111,7 @@ streams:
     tinc: PT30M
   conus2kmrp_lcc:
     model: conus2km
-    stime: -P1D
+    stime: -P5D
     etime: -PT30M
     tinc: PT30M
   conus2km:
