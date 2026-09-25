@@ -2,6 +2,8 @@ name: "Enforce Changelog"
 on:
   pull_request:
       types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+      paths-ignore:
+      - 'projects/EarthNow/**'
 
 jobs:
   # Enforces the update of a changelog file on every pull request
@@ -19,4 +21,5 @@ jobs:
             used. If your change is very trivial not applicable for a
             changelog entry, add a 'Skip Changelog' label to the pull
             request to skip the changelog enforcer.
+
 
