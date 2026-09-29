@@ -57,7 +57,7 @@ def plot_blended_LWIR_veg(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
-    ax.pcolormesh(
+    plot = ax.pcolormesh(
         lons,
         lats,
         data,
