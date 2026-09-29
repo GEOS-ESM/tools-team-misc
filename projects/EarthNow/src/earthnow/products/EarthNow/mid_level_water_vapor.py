@@ -11,7 +11,7 @@ from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 
 variable = "mid_level_water_vapor_EarthNow"
-create_colorbar = True
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # Colormap + levels

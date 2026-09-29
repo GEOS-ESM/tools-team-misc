@@ -16,7 +16,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import logging
 
 variable = "winds_10m_EarthNow"
-create_colorbar = True
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)

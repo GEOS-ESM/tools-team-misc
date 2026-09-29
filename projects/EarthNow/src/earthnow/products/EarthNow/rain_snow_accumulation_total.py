@@ -12,7 +12,7 @@ import logging
 import sys
 
 variable = "rain_snow_accumulation_total_EarthNow"
-create_colorbar = True
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)

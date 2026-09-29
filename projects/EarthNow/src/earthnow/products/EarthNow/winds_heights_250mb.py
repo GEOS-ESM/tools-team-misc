@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # logger.info('====> Starting plotting script')
 
 variable = "winds_heights_250mb_EarthNow"
-create_colorbar = True
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # Windspeed colormap + levels (wxmaps-style)
