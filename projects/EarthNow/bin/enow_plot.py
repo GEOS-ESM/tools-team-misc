@@ -334,6 +334,7 @@ def plot_single_pdate(pdate, args, style, map_config):
     plotter = WxMapPlotter(map_config, resolution=local_args.resolution, style=style)
 
     fig, ax = plotter.create_basemap(
+        pdate=local_args.pdate,
         feature_resolution=local_args.feature_resolution,
     )
 
