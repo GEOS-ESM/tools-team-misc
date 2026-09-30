@@ -33,6 +33,7 @@ from earthnow.paths import (
     STATE_BORDERS_5M,
     COUNTY_BORDERS_5M,
     ROADS_10M,
+    ROADS_MAJOR_10M,
     city_file,
 )
 
@@ -337,7 +338,7 @@ class WxMapPlotter:
             import traceback
 
             traceback.print_exc()
-            print(f"  Falling back to solid color background")
+            print("  Falling back to solid color background")
             # Fallback to solid colors
             self.ax.add_feature(
                 cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
@@ -441,7 +442,7 @@ class WxMapPlotter:
             reader = GSHHSReader(gshhs_file)
 
             # First, try reading WITHOUT extent filter to see if file works
-            print(f"  Testing: reading first 10 polygons from file (no filters)...")
+            print("  Testing: reading first 10 polygons from file (no filters)...")
             test_polygons = reader.read_polygons(min_area=0.0, max_level=4, extent=None)
 
             if len(test_polygons) == 0:
@@ -462,7 +463,7 @@ class WxMapPlotter:
                 extent[3] + 10,
             )
 
-            print(f"  Reading polygons for map extent (expanded by 10°)...")
+            print("  Reading polygons for map extent (expanded by 10°)...")
             polygons = reader.read_polygons(
                 min_area=self.style.gshhs_min_area,
                 max_level=self.style.gshhs_max_level,
@@ -496,7 +497,7 @@ class WxMapPlotter:
                 level_counts[level] = level_counts.get(level, 0) + 1
             print(f"  Polygon levels: {level_counts}")
             print(
-                f"    Level 1 = land, Level 2 = lakes, Level 3 = islands in lakes, Level 4 = ponds"
+                "    Level 1 = land, Level 2 = lakes, Level 3 = islands in lakes, Level 4 = ponds"
             )
 
             # Fill entire background with ocean color
@@ -519,7 +520,7 @@ class WxMapPlotter:
             )
             self.ax.add_patch(background)
 
-            print(f"  Plotting GSHHS polygons:")
+            print("  Plotting GSHHS polygons:")
             print(f"    Land (levels 1,3) = {self.style.land_color}")
             print(f"    Water (levels 2,4) = {self.style.ocean_color}")
 
@@ -534,14 +535,14 @@ class WxMapPlotter:
                 transform=ccrs.PlateCarree(),
             )
 
-            print(f"  GSHHS background complete")
+            print("  GSHHS background complete")
 
         except Exception as e:
             print(f"ERROR: Could not load GSHHS data: {e}")
             import traceback
 
             traceback.print_exc()
-            print(f"  Falling back to standard Cartopy features")
+            print("  Falling back to standard Cartopy features")
             # Fallback to cartopy features
             self.ax.add_feature(
                 cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
@@ -841,7 +842,6 @@ class WxMapPlotter:
                     extent[0] <= city["lon"] <= extent[1]
                     and extent[2] <= city["lat"] <= extent[3]
                 ):
-
                     self.ax.plot(
                         city["lon"],
                         city["lat"],
@@ -883,23 +883,42 @@ class WxMapPlotter:
             If True, only show major highways/interstates
             If False, show all roads
         """
-        try:
-            import geopandas as gpd
 
-            # Import roads shapefile and filter to US only
-            roads_shp = gpd.read_file(ROADS_10M)
+        def load_roads_shapefile(shapefile_path):
+            try:
+                roads_shp = gpd.read_file(shapefile_path)
+                return roads_shp
+            except Exception as e:
+                print(f"Could not read shapefile: {shapefile_path}. Error: {e}")
+                return None
+
+        def load_us_roads(shapefile_path):
+            roads_shp = load_roads_shapefile(shapefile_path)
             roads_shp = roads_shp[roads_shp["sov_a3"] == "USA"]
+            return roads_shp
 
-            if self.style.major_only:
+        import geopandas as gpd
+
+        if self.style.major_only:
+            roads_shp = load_roads_shapefile(
+                ROADS_MAJOR_10M
+            )  # try to load major roads shapefile
+            if roads_shp is None:
+                print(
+                    "Major road shapefile doesn't exist, creating a subset from all roads"
+                )
+                roads_shp = load_us_roads(ROADS_10M)
                 # Filter to Major Highways and Beltways
                 roads_shp = roads_shp[
                     (roads_shp["type"] == "Major Highway")
                     | (roads_shp["type"] == "Beltway")
                 ]
-                print(f"Adding {len(roads_shp)} US major roads")
-            else:
-                print("Added All US Roads from Natural Earth")
+            print(f"Adding {len(roads_shp)} major roads")
+        else:
+            roads_shp = load_us_roads(ROADS_10M)
+            print(f"Adding all US roads ({len(roads_shp)} total roads)")
 
+        if roads_shp is not None:
             self.ax.add_geometries(
                 roads_shp.geometry,
                 crs=ccrs.PlateCarree(),
@@ -909,9 +928,8 @@ class WxMapPlotter:
                 alpha=self.style.road_alpha,
                 zorder=4,
             )
-
-        except Exception as e:
-            print(f"Warning: Could not load roads feature from {ROADS_10M}: {e}")
+        else:
+            print(f"Warning: Could not load roads feature from {ROADS_10M}")
 
     def add_nws_warnings(self, valid_time: datetime):
         """
@@ -1252,14 +1270,14 @@ class WxMapPlotter:
             ]
 
         def get_temp_color(temp):
-                for t_min, t_max, color, _ in temp_colors:
-                    if t_min <= temp < t_max:
-                        return color
+            for t_min, t_max, color, _ in temp_colors:
+                if t_min <= temp < t_max:
+                    return color
 
         def get_temp_size(temp):
-                for t_min, t_max, _, size in temp_colors:
-                    if t_min <= temp < t_max:
-                        return size
+            for t_min, t_max, _, size in temp_colors:
+                if t_min <= temp < t_max:
+                    return size
 
         # Determine city file based on map domain
         map_name = self.config.name.lower()
@@ -1376,7 +1394,9 @@ class WxMapPlotter:
 
             # I already subset the data to the Earthnow cities selection
             if "conus" not in map_name:
-                print("DEBUG: Non-conus map, cities not filtered to a subset. PLOTTING ALL CITIES")
+                print(
+                    "DEBUG: Non-conus map, cities not filtered to a subset. PLOTTING ALL CITIES"
+                )
                 """
                 coords = list(zip(cities["lat"], cities["lon"]))
                 threshold = (
@@ -1411,7 +1431,7 @@ class WxMapPlotter:
                     )
                     if too_close:
                         continue
-                """ 
+                """
 
             # cities["color"]
 
@@ -1424,7 +1444,7 @@ class WxMapPlotter:
             # Fast KDTree lookup
             # dist, idx = tree.query([lon_data, lat])
             # temp_val = data_flat[idx]
- 
+
         # Determine color and size based on temperature
         # cities["color"] = "#FFFFFF"  # default
         size_factor = 1.0
@@ -1439,7 +1459,7 @@ class WxMapPlotter:
             cities["lat"],
             cities["temp"],
             transform=ccrs.PlateCarree(),
-            fontsize=base_fontsize*cities["size_factor"],
+            fontsize=base_fontsize * cities["size_factor"],
             color=cities["color"],
             ha="center",
             va="center",
@@ -1574,7 +1594,6 @@ class WxMapPlotter:
             Apply optimization for file size
         """
         import os
-        import gc
 
         # Save at native DPI
         save_kwargs = {

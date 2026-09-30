@@ -123,9 +123,9 @@ class StyleConfig:
 
     show_roads: bool = False
     major_only: bool = True
-    road_color: str = "#A4A4A4"
-    road_width: float = 0.3
-    road_alpha: float = 0.9
+    road_color: str = "#333333"
+    road_width: float = 0.2
+    road_alpha: float = 0.6
 
     # Frame
     show_frame: bool = False
@@ -348,8 +348,9 @@ class StyleConfig:
         return StyleConfig(
             boundaries=["coastlines", "countries", "states", "counties"],
             ocean_color="#c8c8c8",
-            coastline_width=0.4,
-            country_color="#333333",
+            coastline_width=0.2,
+            state_width=0.2,
+            state_alpha=0.8,
             show_roads=True,
             show_nws_warnings=True,
             nws_severe_only=True,
