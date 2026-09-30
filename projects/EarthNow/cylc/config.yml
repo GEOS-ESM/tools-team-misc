@@ -67,10 +67,10 @@ products:
     style: greyblue
   aerosols:
     product: aerosol_EarthNow
-    style: greyblue
+    style: greyblue_plain
   carbon:
     product: carbon_EarthNow
-    style: greyblue
+    style: greyblue_plain
   geocolor:
     product: geocolor_rgb_EarthNow
     style: satellite
