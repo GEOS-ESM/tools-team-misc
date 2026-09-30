@@ -51,7 +51,7 @@ class StyleConfig:
 
     # Surface colors
     ocean_color: str = "#D0E8F2"  # Light blue
-    land_color: str = "#F5F5DC"  # Beige
+    land_color: str = "white"
 
     # Base image options (ADD THESE)
     # Base image options
@@ -106,7 +106,7 @@ class StyleConfig:
     country_width: float = 0.3
     country_alpha: float = 0.6
 
-    state_color: str = "#999999"
+    state_color: str = "#333333"
     state_width: float = 0.4
     state_alpha: float = 0.6
 
@@ -160,7 +160,6 @@ class StyleConfig:
             text_color="black",
             use_gshhs=True,
             ocean_color="#EEEEEE",
-            land_color="#FFFFFF",
             coastline_color="black",
             coastline_width=0.5,
             coastline_alpha=0.6,
@@ -178,10 +177,7 @@ class StyleConfig:
     def light() -> "StyleConfig":
         """Light theme style"""
         return StyleConfig(
-            background_color="white",
-            text_color="black",
             ocean_color="#EEEEEE",
-            land_color="#FFFFFF",
             coastline_color="black",
             coastline_width=0.5,
             coastline_alpha=0.8,
@@ -198,10 +194,7 @@ class StyleConfig:
     def light_states() -> "StyleConfig":
         """Light theme style"""
         return StyleConfig(
-            background_color="white",
-            text_color="black",
             ocean_color="#EEEEEE",
-            land_color="#FFFFFF",
             boundaries=["coastlines", "states"],
             coastline_color="white",
             coastline_width=0.5,
@@ -262,13 +255,13 @@ class StyleConfig:
             background_color="black",
             text_color="white",
             use_base_image=False,
-            coastline_color="#FFFFFF",
+            coastline_color="white",
             coastline_width=0.4,
             coastline_alpha=0.8,
-            country_color="#FFFFFF",
+            country_color="white",
             country_width=0.4,
             country_alpha=0.6,
-            state_color="#FFFFFF",
+            state_color="white",
             state_width=0.3,
             state_alpha=0.4,
         )
@@ -281,7 +274,6 @@ class StyleConfig:
             background_color="white",
             text_color="black",
             ocean_color="white",
-            land_color="white",
             coastline_color="black",
             coastline_width=1.2,
             coastline_alpha=1.0,
@@ -336,7 +328,6 @@ class StyleConfig:
             boundaries=["coastlines", "countries", "states"],
             coastline_width=0.3,
             state_width=0.2,
-            state_color="#333333",
         )
 
     @staticmethod
@@ -355,10 +346,8 @@ class StyleConfig:
         return StyleConfig(
             boundaries=["coastlines", "countries", "states", "counties"],
             ocean_color="#c8c8c8",
-            land_color="#FFFFFF",
             coastline_width=0.4,
             country_color="#333333",
-            state_color="#333333",
             show_roads=True,
             show_nws_warnings=True,
             nws_severe_only=True,
