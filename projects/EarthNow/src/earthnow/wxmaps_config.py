@@ -151,6 +151,8 @@ class StyleConfig:
         """Convert to dictionary for easy parameter passing"""
         return {k: v for k, v in self.__dict__.items()}
 
+    # NOTE: A lot of these styles are not used in EarthNow at all. Eventually clean this up
+    '''
     @staticmethod
     @register_style("wxmaps")
     def wxmaps() -> "StyleConfig":
@@ -171,6 +173,7 @@ class StyleConfig:
             state_alpha=0.6,
             show_timestamp=True,
         )
+    '''
 
     @staticmethod
     @register_style("light")
@@ -207,6 +210,7 @@ class StyleConfig:
             state_alpha=0.8,
         )
 
+    '''
     @staticmethod
     @register_style("dark")
     def dark() -> "StyleConfig":
@@ -226,7 +230,9 @@ class StyleConfig:
             state_width=0.5,
             state_alpha=0.8,
         )
+    '''
 
+    '''
     @staticmethod
     @register_style("nightlights")
     def nightlights() -> "StyleConfig":
@@ -246,6 +252,7 @@ class StyleConfig:
             state_width=0.5,
             state_alpha=0.8,
         )
+    '''
 
     @staticmethod
     @register_style("satellite")
@@ -266,6 +273,7 @@ class StyleConfig:
             state_alpha=0.4,
         )
 
+    '''
     @staticmethod
     @register_style("print_quality")
     def print_quality() -> "StyleConfig":
@@ -292,21 +300,12 @@ class StyleConfig:
             gridline_alpha=0.3,
             show_title=True,
         )
-
-    @staticmethod
-    @register_style("greytopo")
-    def greytopo() -> "StyleConfig":
-        """Testing to create grey topo style"""
-        return StyleConfig(
-            use_base_image=True,
-            base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
-            # ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
-        )
+    '''
 
     @staticmethod
     @register_style("greytopo_state_coast")
     def greytopo() -> "StyleConfig":
-        """Testing to create grey topo style"""
+        """Grey topo with coastlines and states for conus"""
         return StyleConfig(
             use_base_image=True,
             base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
@@ -355,14 +354,6 @@ class StyleConfig:
         )
 
     @staticmethod
-    @register_style("empty")
-    def empty() -> "StyleConfig":
-        return StyleConfig(
-            ocean_color="#808080",
-            land_color="#808080",
-        )
-
-    @staticmethod
     @register_style("red_state_coast")
     def red_state_coast() -> "StyleConfig":
         return StyleConfig(
@@ -386,6 +377,15 @@ class StyleConfig:
             coastline_color="white",
             coastline_width=0.25,
             state_width=1.0,
+        )
+
+    @staticmethod
+    @register_style("empty")
+    def empty() -> "StyleConfig":
+        """Grey land/ocean style for testing"""
+        return StyleConfig(
+            ocean_color="#808080",
+            land_color="#808080",
         )
 
 
