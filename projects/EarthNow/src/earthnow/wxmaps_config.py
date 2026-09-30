@@ -98,9 +98,13 @@ class StyleConfig:
     coastline_width: float = 1.0
     coastline_alpha: float = 1.0
 
-    country_color: str = "#666666"
-    country_width: float = 0.6
-    country_alpha: float = 0.8
+    lake_color: str = "#333333"
+    lake_width: float = 0.3
+    lake_alpha: float = 1.0
+
+    country_color: str = "#333333"
+    country_width: float = 0.3
+    country_alpha: float = 0.6
 
     state_color: str = "#999999"
     state_width: float = 0.4
@@ -325,19 +329,20 @@ class StyleConfig:
     @staticmethod
     @register_style("greyblue")
     def greyblue() -> "StyleConfig":
-        """Greyblue Topo Image with state/coastlines for conus"""
+        """Greyblue Topo Image with state/country/coastlines for conus"""
         return StyleConfig(
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
-            boundaries=["coastlines", "states"],
-            coastline_width=0.4,
+            boundaries=["coastlines", "countries", "states"],
+            coastline_width=0.3,
+            state_width=0.2,
             state_color="#333333",
         )
 
     @staticmethod
     @register_style("greyblue_plain")
     def greyblue_plain() -> "StyleConfig":
-        """Greyblue topo image with no state/coastlines"""
+        """Greyblue topo image with no borders"""
         return StyleConfig(
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
@@ -371,26 +376,29 @@ class StyleConfig:
     @register_style("red_state_coast")
     def red_state_coast() -> "StyleConfig":
         return StyleConfig(
-            ocean_color="#808080",
-            land_color="#808080",
-            boundaries=["coastlines", "states"],
+            use_base_shapefiles=False,
+            boundaries=["coastlines", "states", "rivers"],
             state_color="#FF0000",
             coastline_color="#FF0000",
+            lake_color="#FF0000",
+            river_color="#FF0000",
+            lake_width=0.5,
             coastline_width=0.6,
-            state_width=1.0,
+            state_width=0.6,
         )
 
     @staticmethod
     @register_style("white_state_coast")
     def white_state_coast() -> "StyleConfig":
         return StyleConfig(
-            ocean_color="#808080",
-            land_color="#808080",
+            use_base_shapefiles=False,
             boundaries=["coastlines", "states"],
             state_color="white",
             coastline_color="white",
+            lake_color="white",
             coastline_width=0.25,
-            state_width=1.0,
+            state_width=0.6,
+        )
         )
 
 

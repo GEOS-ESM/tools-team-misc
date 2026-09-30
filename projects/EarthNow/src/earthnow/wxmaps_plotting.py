@@ -183,10 +183,10 @@ class WxMapPlotter:
             # lakes included with coastlines
             self.ax.add_feature(
                 cfeature.LAKES.with_scale(feature_resolution),
-                linewidth=self.style.coastline_width,
-                edgecolor=self.style.coastline_color,
+                linewidth=self.style.lake_width,
+                edgecolor=self.style.lake_color,
                 facecolor="none",
-                alpha=self.style.coastline_alpha,
+                alpha=self.style.lake_alpha,
                 zorder=6,
             )
             print("  Added Cartopy coastline+lake borders")
