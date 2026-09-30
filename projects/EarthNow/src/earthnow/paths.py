@@ -121,6 +121,11 @@ ROADS_10M = env_path(
     SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads.shp",
 )
 
+ROADS_MAJOR_10M = env_path(
+    "ROADS_MAJOR_10M",
+    SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads_major.shp",
+)
+
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
