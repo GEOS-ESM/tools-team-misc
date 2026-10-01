@@ -32,6 +32,7 @@ from earthnow.paths import (
     STATE_BORDERS_5M,
     COUNTY_BORDERS_5M,
     ROADS_10M,
+    city_file,
 )
 
 import logging
@@ -153,7 +154,7 @@ class WxMapPlotter:
             # Use GSHHS for high-resolution land/water
             print("Using GSHHS for land/water boundaries...")
             self._add_gshhs_background()
-        else:
+        elif self.style.use_base_shapefiles:
             # Use default Cartopy features
             self.ax.add_feature(
                 cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
@@ -167,6 +168,7 @@ class WxMapPlotter:
                 facecolor=self.style.ocean_color,
                 zorder=0,
             )
+            print("Added base cartopy shapes")
 
         # ===================================================================
         # Add boundary features (countries, states, etc.)
@@ -1017,6 +1019,7 @@ class WxMapPlotter:
 
             traceback.print_exc()
 
+    '''
     def add_city_data_values(self, data, lons, lats, text_color="white"):
         """
         Add data labels at city locations
@@ -1039,15 +1042,15 @@ class WxMapPlotter:
 
         if "maryland" in map_name or "midatlantic" in map_name:
             if "maryland" in map_name:
-                cityfile = paths.city_file("all_cities_md.txt")
+                cityfile = city_file("all_cities_md.txt")
                 size_multiplier = 1.5
                 spacing_multiplier = 0.75
             else:
-                cityfile = paths.city_file("all_cities.txt")
+                cityfile = city_file("all_cities.txt")
                 size_multiplier = 1.0
                 spacing_multiplier = 1.0
         else:
-            cityfile = paths.city_file("world_cities.csv")
+            cityfile = city_file("world_cities.csv")
             size_multiplier = 1.0
             spacing_multiplier = 1.0
 
@@ -1200,6 +1203,7 @@ class WxMapPlotter:
 
         print(f"Plotted {len(plotted_locations)} cities")
         print("------------------------------------------")
+    '''
 
     def add_city_temperatures(self, data, lons, lats, temperature_unit="F"):
         """
@@ -1259,9 +1263,10 @@ class WxMapPlotter:
                 size_multiplier = 1.0
                 spacing_multiplier = 1.0
         else:
-            cityfile = paths.city_file("world_cities.csv")
+            cityfile = city_file("world_cities.csv")
             size_multiplier = 1.0
-            spacing_multiplier = 1.0
+            spacing_multiplier = 3.0
+            print("   Plotting world cities")
 
         if not os.path.exists(cityfile):
             print(f"Warning: City file not found: {cityfile}")
@@ -1320,20 +1325,20 @@ class WxMapPlotter:
         # Grid uses 0-360 if maximum is significantly > 180
         use_360_convention = lon_max > 180
 
-        print(f"DEBUG: Grid lons range: [{lon_min:.2f}, {lon_max:.2f}]")
-        print(f"DEBUG: Grid lats range: [{np.min(lats):.2f}, {np.max(lats):.2f}]")
-        print(f"DEBUG: Using 0-360 convention: {use_360_convention}")
-        print(f"DEBUG: Data shape: {data.shape}")
-        print(f"DEBUG: Lats shape: {lats.shape}, Lons shape: {lons.shape}")
-        print(f"DEBUG: First 5 lats: {lats[:5]}")
-        print(f"DEBUG: Last 5 lats: {lats[-5:]}")
-        print(f"DEBUG: First 5 lons: {lons[:5]}")
-        print(f"DEBUG: Last 5 lons: {lons[-5:]}")
+        logger.debug(f"Grid lons range: [{lon_min:.2f}, {lon_max:.2f}]")
+        logger.debug(f"Grid lats range: [{np.min(lats):.2f}, {np.max(lats):.2f}]")
+        logger.debug(f"Using 0-360 convention: {use_360_convention}")
+        logger.debug(f"Data shape: {data.shape}")
+        logger.debug(f"Lats shape: {lats.shape}, Lons shape: {lons.shape}")
+        logger.debug(f"First 5 lats: {lats[:5]}")
+        logger.debug(f"Last 5 lats: {lats[-5:]}")
+        logger.debug(f"First 5 lons: {lons[:5]}")
+        logger.debug(f"Last 5 lons: {lons[-5:]}")
 
         # Get map bounds once
         extent = self.ax.get_extent(crs=ccrs.PlateCarree())
 
-        # Read all cities first, filter by bounds
+        # print( f"DEBUG: Extent in -180/180: [{extent[0]:.2f}, {extent[1]:.2f}], [{extent[2]:.2f}, {extent[3]:.2f}]")
         cities_to_plot = []
 
         print("------------------CITIES------------------")
@@ -1364,11 +1369,6 @@ class WxMapPlotter:
 
                 if not name:
                     continue
-
-                print(f"DEBUG: Map extent: {extent}")
-                print(
-                    f"DEBUG: Extent in -180/180: [{extent[0]:.2f}, {extent[1]:.2f}], [{extent[2]:.2f}, {extent[3]:.2f}]"
-                )
 
                 # Quick bounds check
                 if not (

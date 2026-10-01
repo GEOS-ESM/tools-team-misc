@@ -78,6 +78,9 @@ class StyleConfig:
     gshhs_outline_color: str = "#FFFFFF"
     gshhs_outline_width: float = 0.3
 
+    # Default basemap shapefiles (only if no basemap or GSHHS)
+    use_base_shapefiles: bool = True
+
     # NWS Warnings options
     show_nws_warnings: bool = False
     nws_shapefile_base: str = str(paths.NWS_SHAPEFILE_DIR)
@@ -377,6 +380,17 @@ class StyleConfig:
             coastline_color="white",
             coastline_width=0.25,
             state_width=1.0,
+        )
+
+    @staticmethod
+    @register_style("t2m")
+    def t2m() -> "StyleConfig":
+        """Style for 2 Meter Temperature product plots"""
+        return StyleConfig(
+            use_base_shapefiles=False,
+            boundaries=["coastlines", "countries", "states"],
+            coastline_width=0.1,
+            state_width=0.2,
         )
 
     @staticmethod
