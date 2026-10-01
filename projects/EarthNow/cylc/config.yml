@@ -46,7 +46,7 @@ plot_conus:
 products:
   t2m:
     product: temperature_2m_EarthNow
-    style: empty
+    style: t2m
   rainsnow:
     product: rain_snow_accumulation_total_EarthNow
     style: light

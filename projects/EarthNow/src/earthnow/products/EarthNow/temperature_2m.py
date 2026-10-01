@@ -135,9 +135,9 @@ def plot_temperature_2m(fig, ax, plotter, reader, args):
         shading="nearest",
         zorder=4,
     )
-    if args.station_values:
+    if plotter.config.name == "conus":
         # Add city temperature labels
-        plotter.add_city_temperatures(data, lons, lats, temperature_unit="F")
+        plotter.add_city_temperatures(data, lons, lats)
 
     if create_colorbar == True:
         """Generate colorbar for 2m temperature"""
