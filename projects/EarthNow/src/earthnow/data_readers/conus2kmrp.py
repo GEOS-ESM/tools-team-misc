@@ -9,6 +9,7 @@ CONUS2KMRP_VARS = VARIABLE_REGISTRY.resolve_many(
     {
         "VORT500": "inst1_2d_asm_Nx",
         "H500": "inst1_2d_asm_Nx",
+        "H1000": "inst1_2d_asm_Nx",
         "T2M": "inst1_2d_asm_Nx",
         "DBZ_MAX": "inst1_2d_asm_Nx",
         "UH25": "inst1_2d_asm_Nx",
