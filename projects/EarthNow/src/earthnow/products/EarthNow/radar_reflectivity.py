@@ -137,45 +137,57 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     i700 = 3
     i500 = 4
 
-    hgt, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["HGT"]
-    )
+    # Use layer heights to determine type of precipitation
+    if args.map_type == "conus":
+        hgt, lats, lons, meta = reader.read_variable(
+            args.fdate, args.pdate, variables=["HGT"]
+        )
+        # Replace missing heights (belowground) with surface pressure
+        phis_3d = phis[:, :, np.newaxis]  # dims X,Y,1
+        hgt = np.where(hgt == 1.0e15, phis_3d, hgt)
+        # Syntax here: where hgt is missing (= 1e15), insert phis value.
+        # Where hgt is valid, keep it.
+        # This works bc of "broadcasting" - numpy automatically
+        # copies phis_3d to match every Z level of the full 3D hgt array.
+        # And can compare it to every Z level
+        # for replacing where hgt = 1e15.
 
-    # Replace missing heights (belowground) with surface pressure
-    phis_3d = phis[:, :, np.newaxis]  # dims X,Y,1
-    hgt = np.where(hgt == 1.0e15, phis, hgt)
-    # Syntax here: where hgt is missing (= 1e15), insert phis value.
-    # Where hgt is valid, keep it.
-    # This works bc of "broadcasting" - numpy automatically
-    # copies phis_3d to match every Z level of the full 3D hgt array.
-    # And can compare it to every Z level
-    # for replacing where hgt = 1e15.
+        # 500 - 925 mb thickness
+        thck = np.squeeze(hgt[i500, :, :] - hgt[i925, :, :])
 
-    # 500 - 925 mb thickness
-    thck = np.squeeze(hgt[i500, :, :] - hgt[i925, :, :])
-    elevFactor = (phis - 305.0) / 915.0
-    # apply 0 and 1 caps to elevFactor
-    elevFactor[elevFactor < 0] = 0.0
-    elevFactor[elevFactor > 1] = 1.0
-    # print("phis.shape: ",phis.shape)
-    # print("elevFactor.shape: ",elevFactor.shape)
-    # print("thck.shape: ", thck.shape)
-    # print("hgt.shape: ",hgt.shape)
+        elevFactor = (phis - 305.0) / 915.0
+        # apply 0 and 1 caps to elevFactor
+        elevFactor[elevFactor < 0] = 0.0
+        elevFactor[elevFactor > 1] = 1.0
+        # print("phis.shape: ",phis.shape)
+        # print("elevFactor.shape: ",elevFactor.shape)
+        # print("thck.shape: ", thck.shape)
+        # print("hgt.shape: ",hgt.shape)
 
-    elevFactor = elevFactor * 50.0
-    thLow = 5425.0 - 625 + elevFactor  # warm edge
-    thHigh = 5475.0 - 625 + elevFactor  # cold edge
-    # Explanation:
-    # between these edges you get sleet, freezing rain, or rain/snow mix.
-    # The 625 adjustment accounts for 1000-925 mb thickness:
-    # 5425 and 5475 are typicaly thresholds for 1000-500 mb thickness
-    # but we're using 925-500 so need to tweak.
-    # Add the elevation factor of up to 50 m depending on elevation
-    # (warmer/lower elevations snow melts further from the ground)
+        elevFactor = elevFactor * 50.0
+        thLow = 5425.0 - 625 + elevFactor  # warm edge
+        thHigh = 5475.0 - 625 + elevFactor  # cold edge
+        # Explanation:
+        # between these edges you get sleet, freezing rain, or rain/snow mix.
+        # The 625 adjustment accounts for 1000-925 mb thickness:
+        # 5425 and 5475 are typicaly thresholds for 1000-500 mb thickness
+        # but we're using 925-500 so need to tweak.
+        # Add the elevation factor of up to 50 m depending on elevation
+        # (warmer/lower elevations snow melts further from the ground)
 
-    # print("thLow.shape: ", thLow.shape)
-    # print("thHigh.shape: ", thHigh.shape)
-    # sys.exit()
+        # print("thLow.shape: ", thLow.shape)
+        # print("thHigh.shape: ", thHigh.shape)
+        # sys.exit()
+    elif args.map_type == "global":
+        h1000, lats, lons, meta = reader.read_variable(
+            args.fdate, args.pdate, variables=["H1000"]
+        )
+        h500, lats, lons, meta = reader.read_variable(
+            args.fdate, args.pdate, variables=["H500"]
+        )
+        thck = h500 - h1000
+        thLow = 5425.0
+        thHigh = 5475.0
 
     # Precip in this chunk of atmosphere is defined here as icefall (sleet)
     ifind = (
