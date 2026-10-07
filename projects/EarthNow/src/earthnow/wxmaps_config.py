@@ -519,7 +519,7 @@ class WxMapsConfig:
             center_lat=37,
             standard_parallels=(33, 45),
             contour_lineweight=1.25,
-            contour_label_size=12,
+            contour_label_size=16,
         )
 
     @staticmethod
