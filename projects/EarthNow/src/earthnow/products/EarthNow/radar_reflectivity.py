@@ -11,8 +11,9 @@ from earthnow.products.registry import register
 import logging
 import sys
 
-variable = "rdara_reflectivity_EarthNow"
-colorbar_only = True
+variable = "radar_reflectivity_EarthNow"
+colorbar_only = False
+create_colorbar = True
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -51,6 +52,19 @@ SNOW_COLORS = (
     / 255.0
 )
 
+ICE_COLORS = (
+    np.array(
+        [
+            [252, 236, 254],
+            [214, 205, 215],
+            [203, 138, 210],
+            [185, 72, 194],
+            [125, 59, 131],
+        ]
+    )
+    / 255.0
+)
+
 MIX_COLORS = (
     np.array(
         [[255, 235, 235], [255, 51, 153], [255, 0, 127], [204, 0, 102], [153, 0, 76]]
@@ -77,6 +91,8 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         levels = []
         labels = []
 
+    noise_floor = 1e-6
+
     # ========
     # Read all variables
     # ========
@@ -88,12 +104,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     )
     refl = refl.astype(np.float32)
 
-    phis, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["HGT_SFC"],
-    )
-    phis = phis / 9.81
     snow, lats, lons, meta = reader.read_variable(
         args.fdate,
         args.pdate,
@@ -114,8 +124,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         args.pdate,
         variables=["T2M"],
     )
-
-    refl = refl.astype(np.float32)
 
     # Only keep nonzero snow values where there's snow
     # and t2m is below freezing
@@ -139,6 +147,12 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
 
     # Use layer heights to determine type of precipitation
     if args.map_type == "conus":
+        phis, lats, lons, meta = reader.read_variable(
+            args.fdate,
+            args.pdate,
+            variables=["HGT_SFC"],
+        )
+        phis = phis / 9.81
         hgt, lats, lons, meta = reader.read_variable(
             args.fdate, args.pdate, variables=["HGT"]
         )
@@ -189,11 +203,11 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         thLow = 5425.0
         thHigh = 5475.0
 
-    # Precip in this chunk of atmosphere is defined here as icefall (sleet)
+    # Precip in this chunk of atmosphere is defined here as icefall
     ifind = (
         (thck > thLow)
         & (thck < thHigh)
-        & ((snow * 3600.0 / 25.4 > 1.0e-6) | (ice * 3600.0 / 25.4 > 1.0e-6))
+        & ((snow * 3600.0 / 25.4 > noise_floor) | (ice * 3600.0 / 25.4 > noise_floor))
     )
     # recall this *3600./25.4 converts to inches per hour
     # so that line is checking for EITHER nonzero snowfall OR nonzero icefall
@@ -206,7 +220,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # Snow does not fall below thHigh
     snow[thck >= thHigh] = 0.0
     # Rain reflectivity
-    rain[rain > 0.0] = refl[rain > 0.0]
+    rain = np.where(rain > noise_floor, refl, 0.0)
     # Snow reflectivity
     snow[snow > 0.0] = refl[snow > 0.0]
     # Freezing rain reflectivity
@@ -220,35 +234,40 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # pcolormesh does not, so we do that here.
     refl_min = min(REFL_LEVELS)
     refl_max = max(REFL_LEVELS)
-    refl = np.ma.masked_where(refl <= refl_min, refl)
+    refl = np.ma.masked_where(refl < refl_min, refl)
     refl = np.ma.masked_where(refl > refl_max, refl)
-    snow = np.ma.masked_where(snow <= refl_min, snow)
+    snow = np.ma.masked_where(snow < refl_min, snow)
     snow = np.ma.masked_where(snow > refl_max, snow)
-    frzr = np.ma.masked_where(frzr <= refl_min, frzr)
+    frzr = np.ma.masked_where(frzr < refl_min, frzr)
     frzr = np.ma.masked_where(frzr > refl_max, frzr)
+    ice = np.ma.masked_where(ice < refl_min, ice)
+    ice = np.ma.masked_where(ice > refl_max, ice)
 
     logger.debug("refl min: ", refl.min())
     logger.debug("refl max: ", refl.max())
     logger.debug("refl mean: ", refl.mean())
 
-    # ========
-    # Reflectivity
-    # ========
-    # Read from reader (reader decides the collection)
-    data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["DBZ_MAX"]
-    )
-
-    data = data.astype(np.float32)
-
-    # Mask invalid reflectivity
-    data = np.ma.masked_where(data < 0.0, data)
-    data = np.ma.masked_where(data > 80.0, data)
-    print("rain refl min: ", data.min())
-    print("rain refl max: ", data.max())
-    print("rain refl mean: ", data.mean())
-    print("meta :", meta)
-    # sys.exit()
+    #    !!!!!~~~~~~****
+    #    I DO NOT KNOW WHAT THE SECTION COMMENTED OUT BELOW WAS SUPPOSED TO DO
+    #    !!!!!~~~~~~****
+    #    # ========
+    #    # Reflectivity
+    #    # ========
+    #    # Read from reader (reader decides the collection)
+    #    data, lats, lons, meta = reader.read_variable(
+    #        args.fdate, args.pdate, variables=["DBZ_MAX"]
+    #
+    #
+    #    data = data.astype(np.float32)
+    #
+    #    # Mask invalid reflectivity
+    #    data = np.ma.masked_where(data < 0.0, data)
+    #    data = np.ma.masked_where(data > 80.0, data)
+    ##    print("rain refl min: ", data.min())
+    ##    print("rain refl max: ", data.max())
+    ##    print("rain refl mean: ", data.mean())
+    ##    print("meta :", meta)
+    #    # sys.exit()
 
     # Plot rain reflectivity
     # ------------------------------------------------------------
@@ -259,7 +278,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         levels.append(REFL_LEVELS)
         labels.append("Rain")
     else:
-        ax.pcolormesh(
+        rain_plot = ax.pcolormesh(
             lons,
             lats,
             refl,
@@ -281,7 +300,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         levels.append(REFL_LEVELS)
         labels.append("Snow")
     else:
-        ax.pcolormesh(
+        snow_plot = ax.pcolormesh(
             lons,
             lats,
             snow,
@@ -292,9 +311,30 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             zorder=5,
         )
 
-    # Ice/mix reflectivity
+    # Ice reflectivity
     cmap = LinearSegmentedColormap.from_list(
-        "mix_cmap", MIX_COLORS, N=len(REFL_LEVELS) - 1
+        "ice_cmap", ICE_COLORS, N=len(REFL_LEVELS) - 1
+    )
+    norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+    if colorbar_only:
+        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+        levels.append(REFL_LEVELS)
+        labels.append("Ice")
+    else:
+        ice_plot = ax.pcolormesh(
+            lons,
+            lats,
+            ice,
+            cmap=cmap,
+            norm=norm,
+            transform=ccrs.PlateCarree(),
+            shading="nearest",
+            zorder=6,
+        )
+
+    # Frzr reflectivity
+    cmap = LinearSegmentedColormap.from_list(
+        "frzr_cmap", MIX_COLORS, N=len(REFL_LEVELS) - 1
     )
     norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
     if colorbar_only:
@@ -302,7 +342,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         levels.append(REFL_LEVELS)
         labels.append("Mix")
     else:
-        ax.pcolormesh(
+        mix_plot = ax.pcolormesh(
             lons,
             lats,
             frzr,
@@ -314,7 +354,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         )
 
     if colorbar_only:
-        from earthnow.wxmaps.utils import build_and_save_colorbars
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
         colorbar_output = (
             f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
@@ -345,16 +385,17 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     #        f"  Pixel ratio (image/data): {(img_height_px * img_width_px) / (data_shape[0] * data_shape[1]):.2f}x"
     #    )
 
+    if create_colorbar:
+        """Generate colorbar for composite reflectivity"""
+        from earthnow.wxmaps_utils import save_colorbar_single
 
-def generate_colorbar():
-    """Generate colorbar for max reflectivity"""
-    from earthnow.wxmaps_utils import save_colorbar_single
+        colorbar_output = (
+            f"/discover/nobackup/eibell/EarthNow/colorbars/{variable}_colorbar.png"
+        )
 
-    output = "/discover/nobackup/projects/gmao/g6dev/pub/WxMaps/ColorBars/max_reflectivity.png"
-    save_colorbar_single(
-        REFL_COLORS,
-        REFL_LEVELS,
-        output,
-        label="Composite Reflectivity (dBZ)",
-        extend="max",
-    )
+        save_colorbar_single(
+            mix_plot,
+            colorbar_output,
+            label="Mix Composite Reflectivity (dBZ)",
+            ticks=REFL_LEVELS,
+        )
