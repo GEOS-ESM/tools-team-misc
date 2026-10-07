@@ -191,24 +191,6 @@ class StyleConfig:
         )
 
     @staticmethod
-    @register_style("light_states")
-    def light_states() -> "StyleConfig":
-        """Light theme style"""
-        return StyleConfig(
-            ocean_color="#EEEEEE",
-            boundaries=["coastlines", "states"],
-            coastline_color="white",
-            coastline_width=0.5,
-            coastline_alpha=0.8,
-            country_color="black",
-            country_width=0.5,
-            country_alpha=0.8,
-            state_color="white",
-            state_width=0.5,
-            state_alpha=0.8,
-        )
-
-    @staticmethod
     @register_style("dark")
     def dark() -> "StyleConfig":
         """Dark theme style"""
@@ -226,6 +208,23 @@ class StyleConfig:
             state_color="#FFFFFF",
             state_width=0.5,
             state_alpha=0.8,
+        )
+
+    @staticmethod
+    @register_style("white_states")
+    def white_states() -> "StyleConfig":
+        """White state and coastlines style"""
+        return StyleConfig(
+            use_base_shapefiles=False,
+            boundaries=["coastlines", "states"],
+            coastline_color="white",
+            coastline_width=0.5,
+            coastline_alpha=0.8,
+            lake_color="white",
+            state_color="white",
+            # river_color="white",
+            # state_width=0.5,
+            # state_alpha=0.8,
         )
 
     @staticmethod
