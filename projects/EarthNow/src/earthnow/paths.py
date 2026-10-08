@@ -7,6 +7,7 @@ environment variables to adapt to a different HPC cluster or local install:
     EARTHNOW_G6DEV_PUB   — shared g6dev published data root
     EARTHNOW_OSSE2_ROOT  — OSSE2 project data root
     EARTHNOW_GMAO_OPS    — GMAO ops published data root
+    EARTHNOW_BASE_IMAGE_CACHE_DIR — shared cache for processed base imagery
     EARTHNOW_CITIES_DIR  — city data files directory
 """
 
@@ -81,6 +82,14 @@ COLORBAR_OUT_DIR = env_path(
     "EARTHNOW_COLORBAR_OUT_DIR", _G6DEV_PUB / "WxMaps" / "ColorBars"
 )
 BASE_IMAGE_DIR = env_path("EARTHNOW_BASE_IMAGE_DIR", _G6DEV_PUB / "BMNG")
+_DEFAULT_BASE_IMAGE_CACHE_DIR = (
+    Path("/discover/nobackup") / Path.home().name / "EarthNow" / "cache" / "base_images"
+    if Path("/discover/nobackup").is_dir()
+    else Path.home() / ".cache" / "earthnow" / "base_images"
+)
+BASE_IMAGE_CACHE_DIR = env_path(
+    "EARTHNOW_BASE_IMAGE_CACHE_DIR", _DEFAULT_BASE_IMAGE_CACHE_DIR
+)
 GSHHS_DIR = env_path("EARTHNOW_GSHHS_DIR", _OSSE2_ROOT / "GSHHG" / "v2.3.7")
 NWS_SHAPEFILE_DIR = env_path(
     "EARTHNOW_NWS_SHAPEFILE_DIR", _OSSE2_ROOT / "TSE_staging" / "SHAPE_FILES" / "ALL"

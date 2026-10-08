@@ -3,3 +3,4 @@ notebooks/
 output/
 links/
 **/*.code-workspace
+**/AGENTS.md
