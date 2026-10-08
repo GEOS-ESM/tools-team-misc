@@ -17,6 +17,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.ticker as mticker
 from typing import Optional, List, Tuple
 import numpy as np
+import pandas as pd
 import warnings
 from datetime import datetime
 import pytz
@@ -32,6 +33,8 @@ from earthnow.paths import (
     STATE_BORDERS_5M,
     COUNTY_BORDERS_5M,
     ROADS_10M,
+    ROADS_MAJOR_10M,
+    city_file,
 )
 
 import logging
@@ -153,7 +156,7 @@ class WxMapPlotter:
             # Use GSHHS for high-resolution land/water
             print("Using GSHHS for land/water boundaries...")
             self._add_gshhs_background()
-        else:
+        elif self.style.use_base_shapefiles:
             # Use default Cartopy features
             self.ax.add_feature(
                 cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
@@ -167,6 +170,7 @@ class WxMapPlotter:
                 facecolor=self.style.ocean_color,
                 zorder=0,
             )
+            print("Added base cartopy shapes")
 
         # ===================================================================
         # Add boundary features (countries, states, etc.)
@@ -183,10 +187,10 @@ class WxMapPlotter:
             # lakes included with coastlines
             self.ax.add_feature(
                 cfeature.LAKES.with_scale(feature_resolution),
-                linewidth=self.style.coastline_width,
-                edgecolor=self.style.coastline_color,
+                linewidth=self.style.lake_width,
+                edgecolor=self.style.lake_color,
                 facecolor="none",
-                alpha=self.style.coastline_alpha,
+                alpha=self.style.lake_alpha,
                 zorder=6,
             )
             print("  Added Cartopy coastline+lake borders")
@@ -334,7 +338,7 @@ class WxMapPlotter:
             import traceback
 
             traceback.print_exc()
-            print(f"  Falling back to solid color background")
+            print("  Falling back to solid color background")
             # Fallback to solid colors
             self.ax.add_feature(
                 cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
@@ -438,7 +442,7 @@ class WxMapPlotter:
             reader = GSHHSReader(gshhs_file)
 
             # First, try reading WITHOUT extent filter to see if file works
-            print(f"  Testing: reading first 10 polygons from file (no filters)...")
+            print("  Testing: reading first 10 polygons from file (no filters)...")
             test_polygons = reader.read_polygons(min_area=0.0, max_level=4, extent=None)
 
             if len(test_polygons) == 0:
@@ -459,7 +463,7 @@ class WxMapPlotter:
                 extent[3] + 10,
             )
 
-            print(f"  Reading polygons for map extent (expanded by 10°)...")
+            print("  Reading polygons for map extent (expanded by 10°)...")
             polygons = reader.read_polygons(
                 min_area=self.style.gshhs_min_area,
                 max_level=self.style.gshhs_max_level,
@@ -493,7 +497,7 @@ class WxMapPlotter:
                 level_counts[level] = level_counts.get(level, 0) + 1
             print(f"  Polygon levels: {level_counts}")
             print(
-                f"    Level 1 = land, Level 2 = lakes, Level 3 = islands in lakes, Level 4 = ponds"
+                "    Level 1 = land, Level 2 = lakes, Level 3 = islands in lakes, Level 4 = ponds"
             )
 
             # Fill entire background with ocean color
@@ -516,7 +520,7 @@ class WxMapPlotter:
             )
             self.ax.add_patch(background)
 
-            print(f"  Plotting GSHHS polygons:")
+            print("  Plotting GSHHS polygons:")
             print(f"    Land (levels 1,3) = {self.style.land_color}")
             print(f"    Water (levels 2,4) = {self.style.ocean_color}")
 
@@ -531,14 +535,14 @@ class WxMapPlotter:
                 transform=ccrs.PlateCarree(),
             )
 
-            print(f"  GSHHS background complete")
+            print("  GSHHS background complete")
 
         except Exception as e:
             print(f"ERROR: Could not load GSHHS data: {e}")
             import traceback
 
             traceback.print_exc()
-            print(f"  Falling back to standard Cartopy features")
+            print("  Falling back to standard Cartopy features")
             # Fallback to cartopy features
             self.ax.add_feature(
                 cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
@@ -838,7 +842,6 @@ class WxMapPlotter:
                     extent[0] <= city["lon"] <= extent[1]
                     and extent[2] <= city["lat"] <= extent[3]
                 ):
-
                     self.ax.plot(
                         city["lon"],
                         city["lat"],
@@ -880,23 +883,42 @@ class WxMapPlotter:
             If True, only show major highways/interstates
             If False, show all roads
         """
-        try:
-            import geopandas as gpd
 
-            # Import roads shapefile and filter to US only
-            roads_shp = gpd.read_file(ROADS_10M)
+        def load_roads_shapefile(shapefile_path):
+            try:
+                roads_shp = gpd.read_file(shapefile_path)
+                return roads_shp
+            except Exception as e:
+                print(f"Could not read shapefile: {shapefile_path}. Error: {e}")
+                return None
+
+        def load_us_roads(shapefile_path):
+            roads_shp = load_roads_shapefile(shapefile_path)
             roads_shp = roads_shp[roads_shp["sov_a3"] == "USA"]
+            return roads_shp
 
-            if self.style.major_only:
+        import geopandas as gpd
+
+        if self.style.major_only:
+            roads_shp = load_roads_shapefile(
+                ROADS_MAJOR_10M
+            )  # try to load major roads shapefile
+            if roads_shp is None:
+                print(
+                    "Major road shapefile doesn't exist, creating a subset from all roads"
+                )
+                roads_shp = load_us_roads(ROADS_10M)
                 # Filter to Major Highways and Beltways
                 roads_shp = roads_shp[
                     (roads_shp["type"] == "Major Highway")
                     | (roads_shp["type"] == "Beltway")
                 ]
-                print(f"Adding {len(roads_shp)} US major roads")
-            else:
-                print("Added All US Roads from Natural Earth")
+            print(f"Adding {len(roads_shp)} major roads")
+        else:
+            roads_shp = load_us_roads(ROADS_10M)
+            print(f"Adding all US roads ({len(roads_shp)} total roads)")
 
+        if roads_shp is not None:
             self.ax.add_geometries(
                 roads_shp.geometry,
                 crs=ccrs.PlateCarree(),
@@ -906,9 +928,8 @@ class WxMapPlotter:
                 alpha=self.style.road_alpha,
                 zorder=4,
             )
-
-        except Exception as e:
-            print(f"Warning: Could not load roads feature from {ROADS_10M}: {e}")
+        else:
+            print(f"Warning: Could not load roads feature from {ROADS_10M}")
 
     def add_nws_warnings(self, valid_time: datetime):
         """
@@ -1017,6 +1038,7 @@ class WxMapPlotter:
 
             traceback.print_exc()
 
+    '''
     def add_city_data_values(self, data, lons, lats, text_color="white"):
         """
         Add data labels at city locations
@@ -1039,15 +1061,15 @@ class WxMapPlotter:
 
         if "maryland" in map_name or "midatlantic" in map_name:
             if "maryland" in map_name:
-                cityfile = paths.city_file("all_cities_md.txt")
+                cityfile = city_file("all_cities_md.txt")
                 size_multiplier = 1.5
                 spacing_multiplier = 0.75
             else:
-                cityfile = paths.city_file("all_cities.txt")
+                cityfile = city_file("all_cities.txt")
                 size_multiplier = 1.0
                 spacing_multiplier = 1.0
         else:
-            cityfile = paths.city_file("world_cities.csv")
+            cityfile = city_file("world_cities.csv")
             size_multiplier = 1.0
             spacing_multiplier = 1.0
 
@@ -1200,6 +1222,7 @@ class WxMapPlotter:
 
         print(f"Plotted {len(plotted_locations)} cities")
         print("------------------------------------------")
+    '''
 
     def add_city_temperatures(self, data, lons, lats, temperature_unit="F"):
         """
@@ -1246,25 +1269,41 @@ class WxMapPlotter:
                 (43, np.inf, "#E100E1", 1.15),  # > 43°C
             ]
 
+        def get_temp_color(temp):
+            for t_min, t_max, color, _ in temp_colors:
+                if t_min <= temp < t_max:
+                    return color
+
+        def get_temp_size(temp):
+            for t_min, t_max, _, size in temp_colors:
+                if t_min <= temp < t_max:
+                    return size
+
         # Determine city file based on map domain
         map_name = self.config.name.lower()
 
-        if "maryland" in map_name or "midatlantic" in map_name:
-            if "maryland" in map_name:
-                cityfile = paths.city_file("all_cities_md.txt")
-                size_multiplier = 1.5
-                spacing_multiplier = 0.75
-            else:
-                cityfile = paths.city_file("all_cities.txt")
-                size_multiplier = 1.0
-                spacing_multiplier = 1.0
-        else:
-            cityfile = paths.city_file("world_cities.csv")
+        print("\n")
+        if "maryland" in map_name:
+            cityfile = city_file("Maryland_cities")
+            size_multiplier = 1.5
+            spacing_multiplier = 0.75
+            print("   Plotting MD cities")
+
+        if "conus" in map_name:
+            cityfile = city_file("earthnow_conus_cities.csv")
             size_multiplier = 1.0
-            spacing_multiplier = 1.0
+            spacing_multiplier = 3.0
+            print("   Plotting North American cities")
+        else:
+            cityfile = city_file("world_cities.csv")
+            size_multiplier = 1.0
+            spacing_multiplier = 3.0
+            print("   Plotting world cities")
 
         if not os.path.exists(cityfile):
-            print(f"Warning: City file not found: {cityfile}")
+            print(
+                f"WARNING: City temps not plotted. City file not found at: {cityfile}"
+            )
             return
 
         # Calculate size parameters based on image resolution
@@ -1274,7 +1313,7 @@ class WxMapPlotter:
         scale_factor = img_width / 3840.0
 
         # Base font size scales with image, with reasonable limits
-        base_fontsize = np.clip(10 * scale_factor, 8, 24) * size_multiplier
+        base_fontsize = np.clip(6 * scale_factor, 8, 24) * size_multiplier
 
         # City spacing to avoid overlap (in degrees)
         city_spacing_degrees = (
@@ -1293,25 +1332,29 @@ class WxMapPlotter:
                 )
 
             print(
-                f"Using 1D grid lookup: data shape {data.shape}, lats {len(lats)}, lons {len(lons)}"
+                f"   Using 1D grid lookup: data shape {data.shape}, lats {len(lats)}, lons {len(lons)}"
             )
         else:
+            print(
+                "WARNING: 2D coordinate arrays - see notes. Skipping city temperature plotting"
+            )
+            # This doesn't work but we don't need it so I commented it out for now
             # 2D coordinate arrays - use KDTree for fast lookup
-            lons_flat = lons.ravel()
-            lats_flat = lats.ravel()
-
-            # Fill masked values with nan
-            if np.ma.is_masked(data):
-                data_flat = data.filled(np.nan).ravel()
-            else:
-                data_flat = data.ravel()
-
-            # Build KDTree for fast nearest neighbor lookup
-            points = np.column_stack([lons_flat, lats_flat])
-            tree = cKDTree(points)
-            use_1d = False
-
-            print(f"Using 2D KDTree lookup: {len(lons_flat)} points")
+            # lons_flat = lons.ravel()
+            # lats_flat = lats.ravel()
+            #
+            # # Fill masked values with nan
+            # if np.ma.is_masked(data):
+            #     data_flat = data.filled(np.nan).ravel()
+            # else:
+            #     data_flat = data.ravel()
+            #
+            # # Build KDTree for fast nearest neighbor lookup
+            # points = np.column_stack([lons_flat, lats_flat])
+            # tree = cKDTree(points)
+            # use_1d = False
+            #
+            # print(f"Using 2D KDTree lookup: {len(lons_flat)} points")
 
         # Determine if we need to convert longitude convention
         lon_min = np.nanmin(lons)
@@ -1320,132 +1363,110 @@ class WxMapPlotter:
         # Grid uses 0-360 if maximum is significantly > 180
         use_360_convention = lon_max > 180
 
-        print(f"DEBUG: Grid lons range: [{lon_min:.2f}, {lon_max:.2f}]")
-        print(f"DEBUG: Grid lats range: [{np.min(lats):.2f}, {np.max(lats):.2f}]")
-        print(f"DEBUG: Using 0-360 convention: {use_360_convention}")
-        print(f"DEBUG: Data shape: {data.shape}")
-        print(f"DEBUG: Lats shape: {lats.shape}, Lons shape: {lons.shape}")
-        print(f"DEBUG: First 5 lats: {lats[:5]}")
-        print(f"DEBUG: Last 5 lats: {lats[-5:]}")
-        print(f"DEBUG: First 5 lons: {lons[:5]}")
-        print(f"DEBUG: Last 5 lons: {lons[-5:]}")
+        logger.debug(f"Grid lons range: [{lon_min:.2f}, {lon_max:.2f}]")
+        logger.debug(f"Grid lats range: [{np.min(lats):.2f}, {np.max(lats):.2f}]")
+        logger.debug(f"Using 0-360 convention: {use_360_convention}")
+        logger.debug(f"Data shape: {data.shape}")
+        logger.debug(f"Lats shape: {lats.shape}, Lons shape: {lons.shape}")
+        logger.debug(f"First 5 lats: {lats[:5]}")
+        logger.debug(f"Last 5 lats: {lats[-5:]}")
+        logger.debug(f"First 5 lons: {lons[:5]}")
+        logger.debug(f"Last 5 lons: {lons[-5:]}")
 
         # Get map bounds once
         extent = self.ax.get_extent(crs=ccrs.PlateCarree())
+        print(f"Map extent: {extent}")
+        # print( f"DEBUG: Extent in -180/180: [{extent[0]:.2f}, {extent[1]:.2f}], [{extent[2]:.2f}, {extent[3]:.2f}]")
 
-        # Read all cities first, filter by bounds
-        cities_to_plot = []
+        cities = pd.read_csv(cityfile)
+        cities["lat"] = cities["lat"].astype("float32")
+        cities["lon"] = cities["lon"].astype("float32")
 
-        print("------------------CITIES------------------")
+        if use_1d:
+            cities["lat_idx"] = cities["lat"].apply(
+                lambda x: np.argmin(np.abs(lats - x))
+            )
+            cities["lon_idx"] = cities["lon"].apply(
+                lambda x: np.argmin(np.abs(lons - x))
+            )
+            cities["temp"] = data[cities["lat_idx"], cities["lon_idx"]]
+            cities["temp"] = cities["temp"].dropna()
 
-        with open(cityfile, "r") as f:
-            for line in f:
-                parts = line.strip().split(",")
-
-                # Handle different file formats
-                if len(parts) >= 6:
-                    try:
-                        lat = float(parts[2])
-                        lon = float(parts[3])
-                        name = parts[0].strip()
-                    except (ValueError, IndexError):
-                        try:
-                            name = (
-                                parts[1].strip()
-                                if parts[1].strip()
-                                else parts[0].strip()
-                            )
-                            lat = float(parts[-2].strip().lstrip("+"))
-                            lon = float(parts[-1].strip().lstrip("+"))
-                        except (ValueError, IndexError):
-                            continue
-                else:
-                    continue
-
-                if not name:
-                    continue
-
-                print(f"DEBUG: Map extent: {extent}")
+            # I already subset the data to the Earthnow cities selection
+            if "conus" not in map_name:
                 print(
-                    f"DEBUG: Extent in -180/180: [{extent[0]:.2f}, {extent[1]:.2f}], [{extent[2]:.2f}, {extent[3]:.2f}]"
+                    "DEBUG: Non-conus map, cities not filtered to a subset. PLOTTING ALL CITIES"
                 )
+                """
+                coords = list(zip(cities["lat"], cities["lon"]))
+                threshold = (
+                    0.001  # Approximately 111 meters if using rough decimal degree math
+                )
+                accepted_indices = []
+                kept_coords = []
+                for idx, (lat, lon) in enumerate(coords):
 
-                # Quick bounds check
-                if not (
-                    extent[0] <= lon <= extent[1] and extent[2] <= lat <= extent[3]
-                ):
-                    continue
+                    # If this point is too close to ANY previously kept point, skip it
+                    if any(
+                        (abs(lat - k_lat) < threshold and abs(lon - k_lon) < threshold)
+                        for k_lat, k_lon in kept_coords
+                    ):
+                        continue
+                    accepted_indices.append(idx)
+                kept_coords.append((lat, lon))
+                
+                    temp_val = round(temp_val)
+                    cities_to_plot.append((lon, lat, name, temp_val))
+                # Sort cities by temperature descending (hottest plotted first)
+                cities_to_plot.sort(key=lambda x: x[3], reverse=True)
+                print(f"   Found {len(cities_to_plot)} cities in bounds...")
+                # Plot cities with overlap checking
+                plotted_locations = []
+                for lon, lat, name, temp_val in cities_to_plot:
+                    # Fast overlap check
+                    too_close = any(
+                        abs(lon - prev_lon) < city_spacing_degrees
+                        and abs(lat - prev_lat) < city_spacing_degrees
+                        for prev_lon, prev_lat in plotted_locations
+                    )
+                    if too_close:
+                        continue
+                """
 
-                # Convert for data lookup if needed
-                lon_data = lon + 360.0 if (use_360_convention and lon < 0) else lon
+            # cities["color"]
 
-                # Get temperature value at this location
-                if use_1d:
-                    # Find nearest grid indices
-                    lat_idx = np.argmin(np.abs(lats - lat))
-                    lon_idx = np.argmin(np.abs(lons - lon_data))
-                    temp_val = data[lat_idx, lon_idx]
-                else:
-                    # Fast KDTree lookup
-                    dist, idx = tree.query([lon_data, lat])
-                    temp_val = data_flat[idx]
+            # print(cities)
+            # breakpoint()
 
-                if np.isnan(temp_val):
-                    continue
+        else:
+            print("2D arrays not yet supported. Skipping plotting cities")
+            return
+            # Fast KDTree lookup
+            # dist, idx = tree.query([lon_data, lat])
+            # temp_val = data_flat[idx]
 
-                temp_val = round(temp_val)
-                cities_to_plot.append((lon, lat, name, temp_val))
+        # Determine color and size based on temperature
+        # cities["color"] = "#FFFFFF"  # default
+        size_factor = 1.0
+        cities["color"] = cities["temp"].apply(get_temp_color)
+        cities["size_factor"] = cities["temp"].apply(get_temp_size)
+        cities["temp"] = cities["temp"].astype(int).astype(str)
 
-        # Sort cities by temperature descending (hottest plotted first)
-        # cities_to_plot.sort(key=lambda x: x[3], reverse=True)
+        # Plot temperature label
+        vectorized_text = np.vectorize(self.ax.text)
+        vectorized_text(
+            cities["lon"],
+            cities["lat"],
+            cities["temp"],
+            transform=ccrs.PlateCarree(),
+            fontsize=base_fontsize * cities["size_factor"],
+            color=cities["color"],
+            ha="center",
+            va="center",
+            zorder=15,
+        )
 
-        print(f"Found {len(cities_to_plot)} cities in bounds...")
-
-        # Plot cities with overlap checking
-        plotted_locations = []
-
-        for lon, lat, name, temp_val in cities_to_plot:
-            # Fast overlap check
-            too_close = any(
-                abs(lon - prev_lon) < city_spacing_degrees
-                and abs(lat - prev_lat) < city_spacing_degrees
-                for prev_lon, prev_lat in plotted_locations
-            )
-
-            if too_close:
-                continue
-
-            # Determine color and size based on temperature
-            color = "#FFFFFF"  # default
-            size_factor = 1.0
-
-            for t_min, t_max, t_color, t_size in temp_colors:
-                if t_min <= temp_val < t_max:
-                    color = t_color
-                    size_factor = t_size
-                    break
-
-            fontsize = base_fontsize * size_factor
-
-            # Plot temperature label
-            self.ax.text(
-                lon,
-                lat,
-                str(int(temp_val)),
-                transform=ccrs.PlateCarree(),
-                fontsize=fontsize,
-                color=color,
-                weight="bold",
-                ha="center",
-                va="center",
-                zorder=15,
-            )
-
-            plotted_locations.append((lon, lat))
-            print(f"{name}: {temp_val}°{temperature_unit} ({color})")
-
-        print(f"Plotted {len(plotted_locations)} cities")
-        print("------------------------------------------")
+        print(f"   Plotted {len(cities)} cities")
 
     def _is_within_bounds(self, lon, lat):
         """Check if lon/lat is within current map bounds"""
@@ -1573,7 +1594,6 @@ class WxMapPlotter:
             Apply optimization for file size
         """
         import os
-        import gc
 
         # Save at native DPI
         save_kwargs = {

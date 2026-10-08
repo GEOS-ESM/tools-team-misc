@@ -51,7 +51,7 @@ class StyleConfig:
 
     # Surface colors
     ocean_color: str = "#D0E8F2"  # Light blue
-    land_color: str = "#F5F5DC"  # Beige
+    land_color: str = "white"
 
     # Base image options (ADD THESE)
     # Base image options
@@ -78,6 +78,9 @@ class StyleConfig:
     gshhs_outline_color: str = "#FFFFFF"
     gshhs_outline_width: float = 0.3
 
+    # Default basemap shapefiles (only if no basemap or GSHHS)
+    use_base_shapefiles: bool = True
+
     # NWS Warnings options
     show_nws_warnings: bool = False
     nws_shapefile_base: str = str(paths.NWS_SHAPEFILE_DIR)
@@ -98,11 +101,15 @@ class StyleConfig:
     coastline_width: float = 1.0
     coastline_alpha: float = 1.0
 
-    country_color: str = "#666666"
-    country_width: float = 0.6
-    country_alpha: float = 0.8
+    lake_color: str = "#333333"
+    lake_width: float = 0.3
+    lake_alpha: float = 1.0
 
-    state_color: str = "#999999"
+    country_color: str = "#333333"
+    country_width: float = 0.3
+    country_alpha: float = 0.6
+
+    state_color: str = "#333333"
     state_width: float = 0.4
     state_alpha: float = 0.6
 
@@ -116,9 +123,9 @@ class StyleConfig:
 
     show_roads: bool = False
     major_only: bool = True
-    road_color: str = "#A4A4A4"
-    road_width: float = 0.3
-    road_alpha: float = 0.9
+    road_color: str = "#333333"
+    road_width: float = 0.2
+    road_alpha: float = 0.6
 
     # Frame
     show_frame: bool = False
@@ -147,6 +154,7 @@ class StyleConfig:
         """Convert to dictionary for easy parameter passing"""
         return {k: v for k, v in self.__dict__.items()}
 
+    # NOTE: A lot of these styles are not used in EarthNow at all. Eventually clean this up
     @staticmethod
     @register_style("wxmaps")
     def wxmaps() -> "StyleConfig":
@@ -156,7 +164,6 @@ class StyleConfig:
             text_color="black",
             use_gshhs=True,
             ocean_color="#EEEEEE",
-            land_color="#FFFFFF",
             coastline_color="black",
             coastline_width=0.5,
             coastline_alpha=0.6,
@@ -174,10 +181,7 @@ class StyleConfig:
     def light() -> "StyleConfig":
         """Light theme style"""
         return StyleConfig(
-            background_color="white",
-            text_color="black",
             ocean_color="#EEEEEE",
-            land_color="#FFFFFF",
             coastline_color="black",
             coastline_width=0.5,
             coastline_alpha=0.8,
@@ -185,27 +189,6 @@ class StyleConfig:
             country_width=0.5,
             country_alpha=0.8,
             state_color="black",
-            state_width=0.5,
-            state_alpha=0.8,
-        )
-
-    @staticmethod
-    @register_style("light_states")
-    def light_states() -> "StyleConfig":
-        """Light theme style"""
-        return StyleConfig(
-            background_color="white",
-            text_color="black",
-            ocean_color="#EEEEEE",
-            land_color="#FFFFFF",
-            boundaries=["coastlines", "states"],
-            coastline_color="white",
-            coastline_width=0.5,
-            coastline_alpha=0.8,
-            country_color="black",
-            country_width=0.5,
-            country_alpha=0.8,
-            state_color="white",
             state_width=0.5,
             state_alpha=0.8,
         )
@@ -228,6 +211,23 @@ class StyleConfig:
             state_color="#FFFFFF",
             state_width=0.5,
             state_alpha=0.8,
+        )
+
+    @staticmethod
+    @register_style("white_states")
+    def white_states() -> "StyleConfig":
+        """White state and coastlines style"""
+        return StyleConfig(
+            use_base_shapefiles=False,
+            boundaries=["coastlines", "states"],
+            coastline_color="white",
+            coastline_width=0.5,
+            coastline_alpha=0.8,
+            lake_color="white",
+            state_color="white",
+            # river_color="white",
+            # state_width=0.5,
+            # state_alpha=0.8,
         )
 
     @staticmethod
@@ -258,13 +258,13 @@ class StyleConfig:
             background_color="black",
             text_color="white",
             use_base_image=False,
-            coastline_color="#FFFFFF",
+            coastline_color="white",
             coastline_width=0.4,
             coastline_alpha=0.8,
-            country_color="#FFFFFF",
+            country_color="white",
             country_width=0.4,
             country_alpha=0.6,
-            state_color="#FFFFFF",
+            state_color="white",
             state_width=0.3,
             state_alpha=0.4,
         )
@@ -277,7 +277,6 @@ class StyleConfig:
             background_color="white",
             text_color="black",
             ocean_color="white",
-            land_color="white",
             coastline_color="black",
             coastline_width=1.2,
             coastline_alpha=1.0,
@@ -303,14 +302,13 @@ class StyleConfig:
         """Testing to create grey topo style"""
         return StyleConfig(
             use_base_image=True,
-            base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
-            # ocean_color="#E6E6E6",  # Ok actually the config of the basemap is just that if the image is called, then none of the cartopy or other shapefile features plot
+            base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # custom imagery
         )
 
     @staticmethod
     @register_style("greytopo_state_coast")
-    def greytopo() -> "StyleConfig":
-        """Testing to create grey topo style"""
+    def greytopo_state_coast() -> "StyleConfig":
+        """Grey topo with coastlines and states for conus"""
         return StyleConfig(
             use_base_image=True,
             base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # Specify this line for custom imagery
@@ -325,19 +323,19 @@ class StyleConfig:
     @staticmethod
     @register_style("greyblue")
     def greyblue() -> "StyleConfig":
-        """Greyblue Topo Image with state/coastlines for conus"""
+        """Greyblue Topo Image with state/country/coastlines for conus"""
         return StyleConfig(
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
-            boundaries=["coastlines", "states"],
-            coastline_width=0.4,
-            state_color="#333333",
+            boundaries=["coastlines", "countries", "states"],
+            coastline_width=0.3,
+            state_width=0.2,
         )
 
     @staticmethod
     @register_style("greyblue_plain")
     def greyblue_plain() -> "StyleConfig":
-        """Greyblue topo image with no state/coastlines"""
+        """Greyblue topo image with no borders"""
         return StyleConfig(
             use_base_image=True,
             base_image_type="natural_earth_greyblue",
@@ -350,47 +348,60 @@ class StyleConfig:
         return StyleConfig(
             boundaries=["coastlines", "countries", "states", "counties"],
             ocean_color="#c8c8c8",
-            land_color="#FFFFFF",
-            coastline_width=0.4,
-            country_color="#333333",
-            state_color="#333333",
+            coastline_width=0.2,
+            state_width=0.2,
+            state_alpha=0.8,
             show_roads=True,
             show_nws_warnings=True,
             nws_severe_only=True,
         )
 
     @staticmethod
-    @register_style("empty")
-    def empty() -> "StyleConfig":
-        return StyleConfig(
-            ocean_color="#808080",
-            land_color="#808080",
-        )
-
-    @staticmethod
     @register_style("red_state_coast")
     def red_state_coast() -> "StyleConfig":
         return StyleConfig(
-            ocean_color="#808080",
-            land_color="#808080",
-            boundaries=["coastlines", "states"],
+            use_base_shapefiles=False,
+            boundaries=["coastlines", "states", "rivers"],
             state_color="#FF0000",
             coastline_color="#FF0000",
+            lake_color="#FF0000",
+            river_color="#FF0000",
+            lake_width=0.5,
             coastline_width=0.6,
-            state_width=1.0,
+            state_width=0.6,
         )
 
     @staticmethod
     @register_style("white_state_coast")
     def white_state_coast() -> "StyleConfig":
         return StyleConfig(
-            ocean_color="#808080",
-            land_color="#808080",
+            use_base_shapefiles=False,
             boundaries=["coastlines", "states"],
             state_color="white",
             coastline_color="white",
+            lake_color="white",
             coastline_width=0.25,
             state_width=1.0,
+        )
+
+    @staticmethod
+    @register_style("t2m")
+    def t2m() -> "StyleConfig":
+        """Style for 2 Meter Temperature product plots"""
+        return StyleConfig(
+            use_base_shapefiles=False,
+            boundaries=["coastlines", "countries", "states"],
+            coastline_width=0.1,
+            state_width=0.2,
+        )
+
+    @staticmethod
+    @register_style("empty")
+    def empty() -> "StyleConfig":
+        """Grey land/ocean style for testing"""
+        return StyleConfig(
+            ocean_color="#808080",
+            land_color="#808080",
         )
 
 
@@ -508,7 +519,7 @@ class WxMapsConfig:
             center_lat=37,
             standard_parallels=(33, 45),
             contour_lineweight=1.25,
-            contour_label_size=12,
+            contour_label_size=16,
         )
 
     @staticmethod

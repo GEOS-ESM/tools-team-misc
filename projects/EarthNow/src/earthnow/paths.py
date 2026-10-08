@@ -7,6 +7,7 @@ environment variables to adapt to a different HPC cluster or local install:
     EARTHNOW_G6DEV_PUB   — shared g6dev published data root
     EARTHNOW_OSSE2_ROOT  — OSSE2 project data root
     EARTHNOW_GMAO_OPS    — GMAO ops published data root
+    EARTHNOW_BASE_IMAGE_CACHE_DIR — shared cache for processed base imagery
     EARTHNOW_CITIES_DIR  — city data files directory
 """
 
@@ -16,8 +17,10 @@ from pathlib import Path
 try:
     from dotenv import load_dotenv
 except ImportError:
+
     def load_dotenv(*args, **kwargs):
         return False
+
 
 CONFIG_DIR = Path(__file__).resolve().parent
 load_dotenv(CONFIG_DIR / ".env")
@@ -67,13 +70,8 @@ _OSSE2_ROOT = env_path("EARTHNOW_OSSE2_ROOT", "/discover/nobackup/projects/gmao/
 _GMAO_OPS = env_path(
     "EARTHNOW_GMAO_OPS", "/discover/nobackup/projects/gmao/gmao_ops/pub"
 )
-_CITIES_DIR = env_path("EARTHNOW_CITIES_DIR", "/home/wputman/IDL_BASE/CITIES")
 
-SHAPEFILES_PATH = env_path(
-    "SHAPEFILES_PATH", "/discover/swdev/gmao-tools/Visualization/shapefiles"
-)
-
-CARTOPY_CONFIG = env_path("CARTOPY_CONFIG", "/discover/swdev/gmao-tools/Visualization")
+_CARTOPY_CONFIG = env_path("CARTOPY_CONFIG", "/discover/swdev/gmao-tools/Visualization")
 # Set cartopy.config['data_dir'] = CARTOPY_CONFIG to use existing natural earth
 
 # ---------------------------------------------------------------------------
@@ -84,6 +82,14 @@ COLORBAR_OUT_DIR = env_path(
     "EARTHNOW_COLORBAR_OUT_DIR", _G6DEV_PUB / "WxMaps" / "ColorBars"
 )
 BASE_IMAGE_DIR = env_path("EARTHNOW_BASE_IMAGE_DIR", _G6DEV_PUB / "BMNG")
+_DEFAULT_BASE_IMAGE_CACHE_DIR = (
+    Path("/discover/nobackup") / Path.home().name / "EarthNow" / "cache" / "base_images"
+    if Path("/discover/nobackup").is_dir()
+    else Path.home() / ".cache" / "earthnow" / "base_images"
+)
+BASE_IMAGE_CACHE_DIR = env_path(
+    "EARTHNOW_BASE_IMAGE_CACHE_DIR", _DEFAULT_BASE_IMAGE_CACHE_DIR
+)
 GSHHS_DIR = env_path("EARTHNOW_GSHHS_DIR", _OSSE2_ROOT / "GSHHG" / "v2.3.7")
 NWS_SHAPEFILE_DIR = env_path(
     "EARTHNOW_NWS_SHAPEFILE_DIR", _OSSE2_ROOT / "TSE_staging" / "SHAPE_FILES" / "ALL"
@@ -98,6 +104,11 @@ DEFAULT_GENCAST_EXP_PATH = env_path(
     "EARTHNOW_DEFAULT_GENCAST_EXP_PATH", _OSSE2_ROOT / "GenCast_FP"
 )
 DEFAULT_GEOS_FP_BASE = env_path("EARTHNOW_DEFAULT_GEOS_FP_BASE", _GMAO_OPS)
+
+# Mapping objects
+CITIES_DIR = env_path("EARTHNOW_CITIES_DIR", _CARTOPY_CONFIG / "cities")
+
+SHAPEFILES_PATH = env_path("SHAPEFILES_PATH", _CARTOPY_CONFIG / "shapefiles")
 
 COUNTRY_BORDERS = env_path(
     "COUNTRY_BORDERS",
@@ -119,6 +130,11 @@ ROADS_10M = env_path(
     SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads.shp",
 )
 
+ROADS_MAJOR_10M = env_path(
+    "ROADS_MAJOR_10M",
+    SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads_major.shp",
+)
+
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
@@ -133,4 +149,4 @@ def colorbar_output(filename: str) -> Path:
 
 
 def city_file(filename: str) -> Path:
-    return _CITIES_DIR / filename
+    return CITIES_DIR / filename

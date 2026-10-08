@@ -20,6 +20,10 @@ BASIC EARTHNOW INFORMATION (EXISTING IDL WORKFLOW)
 
 **Web Scripts**: `/discover/nobackup/projects/gmao/g6dev/pub/WebGL`
 
+## Processed base-image cache
+
+EarthNow caches decoded and downsampled base imagery separately from the source basemap files and published plots. On Discover, the default is `/discover/nobackup/$USER/EarthNow/cache/base_images`; elsewhere it defaults to `~/.cache/earthnow/base_images`. Set `EARTHNOW_BASE_IMAGE_CACHE_DIR` to override the cache root. For reuse across jobs or nodes, configure a writable filesystem visible to all those jobs. If the cache cannot be read or written, plotting falls back to loading the source image. Cache entries are derived and can be deleted when not in use; they are recreated on demand and are not automatically evicted.
+
 ## Resolutions: 8k, 4k, HD
         "hd": ResolutionConfig(
             name="HD (1080p)", width=1920, height=1080, dpi=100, figsize=(19.2, 10.8)
