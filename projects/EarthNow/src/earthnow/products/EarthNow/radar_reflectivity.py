@@ -13,7 +13,7 @@ import sys
 
 variable = "radar_reflectivity_EarthNow"
 colorbar_only = False
-create_colorbar = True
+create_colorbar = False
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -91,7 +91,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         levels = []
         labels = []
 
-    noise_floor = 1e-6
+    noise_floor = 1e-7
 
     # ========
     # Read all variables
@@ -125,6 +125,14 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         variables=["T2M"],
     )
 
+    # Fill precip rates with 0 instead of missing value
+    fillValue = 1e15
+    rain = np.where(rain == fillValue, np.nan, rain)
+    snow = np.where(snow == fillValue, np.nan, snow)
+    ice = np.where(ice == fillValue, np.nan, ice)
+    # Fill temp missing value with NaN
+    t2m = np.where(t2m == fillValue, np.nan, t2m)
+
     # Only keep nonzero snow values where there's snow
     # and t2m is below freezing
     # Convert snow kg m-2 s-1 to inches hr-1
@@ -145,7 +153,8 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     i700 = 3
     i500 = 4
 
-    # Use layer heights to determine type of precipitation
+    # Calculate/read in layer heights
+    # -------------------
     if args.map_type == "conus":
         phis, lats, lons, meta = reader.read_variable(
             args.fdate,
@@ -157,8 +166,8 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             args.fdate, args.pdate, variables=["HGT"]
         )
         # Replace missing heights (belowground) with surface pressure
-        phis_3d = phis[:, :, np.newaxis]  # dims X,Y,1
-        hgt = np.where(hgt == 1.0e15, phis_3d, hgt)
+        phis_3d = phis[np.newaxis, :, :]  # dims X,Y,1
+        hgt = np.where(hgt == fillValue, phis_3d, hgt)
         # Syntax here: where hgt is missing (= 1e15), insert phis value.
         # Where hgt is valid, keep it.
         # This works bc of "broadcasting" - numpy automatically
@@ -192,6 +201,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         # print("thLow.shape: ", thLow.shape)
         # print("thHigh.shape: ", thHigh.shape)
         # sys.exit()
+
     elif args.map_type == "global":
         h1000, lats, lons, meta = reader.read_variable(
             args.fdate, args.pdate, variables=["H1000"]
@@ -199,15 +209,22 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         h500, lats, lons, meta = reader.read_variable(
             args.fdate, args.pdate, variables=["H500"]
         )
+        h1000 = np.where(np.isnan(h1000) | (h1000 == 1e15), 0.0, h1000)
+        h500 = np.where(np.isnan(h500) | (h500 == 1e15), 0.0, h500)
         thck = h500 - h1000
         thLow = 5425.0
         thHigh = 5475.0
 
+    # -- end if/else block
+
+    # Precip manipulation
+    # -------------------
+    precip_floor = 1e-6
     # Precip in this chunk of atmosphere is defined here as icefall
     ifind = (
         (thck > thLow)
         & (thck < thHigh)
-        & ((snow * 3600.0 / 25.4 > noise_floor) | (ice * 3600.0 / 25.4 > noise_floor))
+        & ((snow * 3600.0 / 25.4 > precip_floor) | (ice * 3600.0 / 25.4 > precip_floor))
     )
     # recall this *3600./25.4 converts to inches per hour
     # so that line is checking for EITHER nonzero snowfall OR nonzero icefall
@@ -219,13 +236,20 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
 
     # Snow does not fall below thHigh
     snow[thck >= thHigh] = 0.0
+    ## Rain does not fall above thLow
+    rain[thck <= thLow] = 0.0
+
+    # Fill in reflectivity
+    # --------------------
     # Rain reflectivity
-    rain = np.where(rain > noise_floor, refl, 0.0)
+    rain = np.where((rain * 3600.0 / 25.4) > noise_floor, refl, 0.0)
     # Snow reflectivity
-    snow[snow > 0.0] = refl[snow > 0.0]
+    snow = np.where((snow * 3600.0 / 25.4) > noise_floor, refl, 0.0)
+
     # Freezing rain reflectivity
-    frzr = rain
-    frzr[t2m > 273.15] = 0.0
+    frzr = np.copy(rain)
+    # frzr is zero if it's too warm OR if temp data missing
+    frzr = np.where((t2m > 273.15) | np.isnan(t2m), 0.0, frzr)
 
     # Mask invalid reflectivity
     # Note: This was not explicit in the IDL code,
@@ -247,28 +271,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     logger.debug("refl max: ", refl.max())
     logger.debug("refl mean: ", refl.mean())
 
-    #    !!!!!~~~~~~****
-    #    I DO NOT KNOW WHAT THE SECTION COMMENTED OUT BELOW WAS SUPPOSED TO DO
-    #    !!!!!~~~~~~****
-    #    # ========
-    #    # Reflectivity
-    #    # ========
-    #    # Read from reader (reader decides the collection)
-    #    data, lats, lons, meta = reader.read_variable(
-    #        args.fdate, args.pdate, variables=["DBZ_MAX"]
-    #
-    #
-    #    data = data.astype(np.float32)
-    #
-    #    # Mask invalid reflectivity
-    #    data = np.ma.masked_where(data < 0.0, data)
-    #    data = np.ma.masked_where(data > 80.0, data)
-    ##    print("rain refl min: ", data.min())
-    ##    print("rain refl max: ", data.max())
-    ##    print("rain refl mean: ", data.mean())
-    ##    print("meta :", meta)
-    #    # sys.exit()
-
     # Plot rain reflectivity
     # ------------------------------------------------------------
     cmap = ListedColormap(REFL_COLORS)
@@ -287,7 +289,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             transform=ccrs.PlateCarree(),
             shading="nearest",
             zorder=4,
-            #        rasterized=True,
         )
 
     # Snow reflectivity
