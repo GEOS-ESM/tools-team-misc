@@ -2,3 +2,5 @@ notebooks/
 */scratch/
 output/
 links/
+**/*.code-workspace
+**/AGENTS.md
