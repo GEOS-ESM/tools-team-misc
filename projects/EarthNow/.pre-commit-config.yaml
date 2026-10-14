@@ -1,0 +1,13 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 26.10.1
+    hooks:
+      - id: black
+        types: [python]
+        files: ^projects/EarthNow/.*\.pyi?$
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        types: [yaml]
+        files: ^projects/EarthNow/.*\.ya?ml$
