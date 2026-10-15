@@ -1317,41 +1317,7 @@ class WxMapPlotter:
         base_fontsize = np.clip(6 * scale_factor, 10, 24) * size_multiplier
         logger.debug(f"   Base font size: {base_fontsize}")
 
-        # Create interpolator for data
-        if lons.ndim == 1 and lats.ndim == 1:
-            # 1D coordinate arrays - use argmin for nearest neighbor
-            use_1d = True
-
-            # Pre-check data shape
-            if data.shape[0] != len(lats) or data.shape[1] != len(lons):
-                raise ValueError(
-                    f"Data shape {data.shape} doesn't match lat/lon arrays ({len(lats)}, {len(lons)})"
-                )
-
-            print(
-                f"   Using 1D grid lookup: data shape {data.shape}, lats {len(lats)}, lons {len(lons)}"
-            )
-        else:
-            print(
-                "WARNING: 2D coordinate arrays - see notes. Skipping city temperature plotting"
-            )
-            # This doesn't work but we don't need it so I commented it out for now
-            # 2D coordinate arrays - use KDTree for fast lookup
-            # lons_flat = lons.ravel()
-            # lats_flat = lats.ravel()
-            #
-            # # Fill masked values with nan
-            # if np.ma.is_masked(data):
-            #     data_flat = data.filled(np.nan).ravel()
-            # else:
-            #     data_flat = data.ravel()
-            #
-            # # Build KDTree for fast nearest neighbor lookup
-            # points = np.column_stack([lons_flat, lats_flat])
-            # tree = cKDTree(points)
-            # use_1d = False
-            #
-            # print(f"Using 2D KDTree lookup: {len(lons_flat)} points")
+        print(f"lons.ndim: {lons.ndim}, lats.ndim: {lats.ndim}")
 
         # Determine if we need to convert longitude convention
         lon_min = np.nanmin(lons)
@@ -1380,7 +1346,21 @@ class WxMapPlotter:
         cities["lat"] = cities["lat"].astype("float32")
         cities["lon"] = cities["lon"].astype("float32")
 
-        if use_1d:
+        # Create interpolator for data
+        if lons.ndim == 1 and lats.ndim == 1:
+            # 1D coordinate arrays - use argmin for nearest neighbor
+            # use_1d = True
+
+            # Pre-check data shape
+            if data.shape[0] != len(lats) or data.shape[1] != len(lons):
+                raise ValueError(
+                    f"Data shape {data.shape} doesn't match lat/lon arrays ({len(lats)}, {len(lons)})"
+                )
+
+            print(
+                f"   Using 1D grid lookup: data shape {data.shape}, lats {len(lats)}, lons {len(lons)}"
+            )
+
             cities["lat_idx"] = cities["lat"].apply(
                 lambda x: np.argmin(np.abs(lats - x))
             )
@@ -1434,11 +1414,39 @@ class WxMapPlotter:
                 """
 
         else:
-            print("2D arrays not yet supported. Skipping plotting cities")
-            return
-            # Fast KDTree lookup
-            # dist, idx = tree.query([lon_data, lat])
-            # temp_val = data_flat[idx]
+            # This doesn't work but we don't need it so I commented it out for now - actually I guess the LCC data is 2d?? I'm so confused
+            # print("2D arrays not yet supported. Skipping plotting cities")
+            # return
+
+            # 2D coordinate arrays - use KDTree for fast lookup
+            lons_flat = lons.ravel()
+            lats_flat = lats.ravel()
+
+            # Fill masked values with nan
+            if np.ma.is_masked(data):
+                data_flat = data.filled(np.nan).ravel()
+            else:
+                data_flat = data.ravel()
+
+            # Build KDTree for fast nearest neighbor lookup
+            points = np.column_stack([lons_flat, lats_flat])
+            from scipy.spatial import KDTree
+
+            tree = KDTree(points)
+
+            print(
+                f"2D coordinate arrays: Using 2D KDTree lookup: {len(lons_flat)} points"
+            )
+
+            dist, idx = tree.query(
+                np.column_stack(
+                    (
+                        np.asarray(cities["lon"], dtype=float),
+                        np.asarray(cities["lat"], dtype=float),
+                    )
+                )
+            )
+            cities["temp"] = data_flat[idx]
 
         # Determine color and size based on temperature
         # cities["color"] = "#FFFFFF"  # default
