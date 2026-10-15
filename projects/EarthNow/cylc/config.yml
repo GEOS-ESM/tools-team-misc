@@ -46,7 +46,7 @@ plot_conus:
 products:
   t2m:
     product: temperature_2m_EarthNow
-    style: empty
+    style: t2m
   rainsnow:
     product: rain_snow_accumulation_total_EarthNow
     style: light
@@ -55,10 +55,10 @@ products:
     style: greytopo
   winds:
     product: winds_10m_EarthNow
-    style: light_states
+    style: white_states
   wind250:
     product: winds_heights_250mb_EarthNow
-    style: light_states
+    style: greyblue
   helicity:
     product: max_reflectivity_EarthNow
     style: helicity
@@ -67,10 +67,10 @@ products:
     style: greyblue
   aerosols:
     product: aerosol_EarthNow
-    style: greyblue
+    style: greyblue_plain
   carbon:
     product: carbon_EarthNow
-    style: greyblue
+    style: greyblue_plain
   geocolor:
     product: geocolor_rgb_EarthNow
     style: satellite

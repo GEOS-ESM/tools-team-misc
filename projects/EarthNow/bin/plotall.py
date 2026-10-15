@@ -294,6 +294,7 @@ def return_valid_directory(reader, args):
 def build_style(args):
     style = STYLES[args.style]()
 
+    # This is all done in the style now, I think we should remove this option to override with cmdline args
     if args.ocean_color:
         style.ocean_color = args.ocean_color
     if args.land_color:

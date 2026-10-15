@@ -16,8 +16,10 @@ from pathlib import Path
 try:
     from dotenv import load_dotenv
 except ImportError:
+
     def load_dotenv(*args, **kwargs):
         return False
+
 
 CONFIG_DIR = Path(__file__).resolve().parent
 load_dotenv(CONFIG_DIR / ".env")
@@ -67,13 +69,8 @@ _OSSE2_ROOT = env_path("EARTHNOW_OSSE2_ROOT", "/discover/nobackup/projects/gmao/
 _GMAO_OPS = env_path(
     "EARTHNOW_GMAO_OPS", "/discover/nobackup/projects/gmao/gmao_ops/pub"
 )
-_CITIES_DIR = env_path("EARTHNOW_CITIES_DIR", "/home/wputman/IDL_BASE/CITIES")
 
-SHAPEFILES_PATH = env_path(
-    "SHAPEFILES_PATH", "/discover/swdev/gmao-tools/Visualization/shapefiles"
-)
-
-CARTOPY_CONFIG = env_path("CARTOPY_CONFIG", "/discover/swdev/gmao-tools/Visualization")
+_CARTOPY_CONFIG = env_path("CARTOPY_CONFIG", "/discover/swdev/gmao-tools/Visualization")
 # Set cartopy.config['data_dir'] = CARTOPY_CONFIG to use existing natural earth
 
 # ---------------------------------------------------------------------------
@@ -99,6 +96,11 @@ DEFAULT_GENCAST_EXP_PATH = env_path(
 )
 DEFAULT_GEOS_FP_BASE = env_path("EARTHNOW_DEFAULT_GEOS_FP_BASE", _GMAO_OPS)
 
+# Mapping objects
+CITIES_DIR = env_path("EARTHNOW_CITIES_DIR", _CARTOPY_CONFIG / "cities")
+
+SHAPEFILES_PATH = env_path("SHAPEFILES_PATH", _CARTOPY_CONFIG / "shapefiles")
+
 COUNTRY_BORDERS = env_path(
     "COUNTRY_BORDERS",
     SHAPEFILES_PATH / "state_dep_files" / "data" / "DoS_LSIB_v11_4_24Feb2025.shp",
@@ -119,6 +121,11 @@ ROADS_10M = env_path(
     SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads.shp",
 )
 
+ROADS_MAJOR_10M = env_path(
+    "ROADS_MAJOR_10M",
+    SHAPEFILES_PATH / "natural_earth" / "cultural" / "ne_10m_roads_major.shp",
+)
+
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
@@ -133,4 +140,4 @@ def colorbar_output(filename: str) -> Path:
 
 
 def city_file(filename: str) -> Path:
-    return _CITIES_DIR / filename
+    return CITIES_DIR / filename
