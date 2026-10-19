@@ -385,7 +385,8 @@ def plot_single_pdate(pdate, args, style, map_config):
     plotter.save(output, optimize=True)
     plotter.close()
 
-    print(f"✓ Created {local_args.product}: {output}")
+    print(f"✓ Created {local_args.product}: {local_args.pdate}")
+    print("\n" + "-" * 120 + "\n")
 
 
 # -----------------------------------------------------------------------------

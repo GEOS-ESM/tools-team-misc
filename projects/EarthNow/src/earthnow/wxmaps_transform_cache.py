@@ -369,6 +369,7 @@ class TransformCache:
         tuple : (transformed_data, target_extent)
             The output array has origin='lower' convention (row 0 = bottom)
         """
+        print("       Applying transform... ")
         # Flip source data if needed (for images with origin='upper')
         if flip_source_y:
             source_data = np.flipud(source_data)
@@ -520,10 +521,10 @@ def get_transform_cache(cache_dir: Optional[Path] = None) -> TransformCache:
     """
     global _global_cache
     if _global_cache is None:
-        print("DEBUG: Creating NEW transform cache instance")  # ADD THIS
-        _global_cache = TransformCache(cache_dir=cache_dir, clear_on_init=True)
+        print("      Creating NEW transform cache instance")
+        _global_cache = TransformCache(cache_dir=cache_dir)
     else:
-        print("DEBUG: Reusing existing transform cache instance")  # ADD THIS
+        print("      Reusing existing transform cache instance")
     return _global_cache
 
 
