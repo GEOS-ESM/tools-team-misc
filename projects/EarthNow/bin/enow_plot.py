@@ -328,7 +328,7 @@ def plot_single_pdate(pdate, args, style, map_config):
     local_args = copy.copy(args)
     local_args.pdate = pdate
 
-    print(f"Working on {local_args.product}: {local_args.pdate}")
+    print(f"Working on {local_args.product} {local_args.pdate} {local_args.map_type}")
 
     # Plotter (fresh per pdate)
     plotter = WxMapPlotter(map_config, resolution=local_args.resolution, style=style)
@@ -339,7 +339,7 @@ def plot_single_pdate(pdate, args, style, map_config):
 
     # Create reader for this worker
     reader = create_data_reader(local_args)
-    logger.info(f"Reader returned: {reader=}")  # This returns GEOS replay reader always
+    logger.info(f"Reader returned: {reader=}")
 
     # Test reader returns a valid directory
     logger.info(return_valid_directory(reader, local_args))
@@ -359,8 +359,6 @@ def plot_single_pdate(pdate, args, style, map_config):
 
         # Add NWS warnings if requested (BEFORE timestamp so warnings are below text)
         if style.show_nws_warnings:
-            from earthnow.wxmaps_utils import parse_date_string
-
             pdate_dt = parse_date_string(local_args.pdate)
             plotter.add_nws_warnings(pdate_dt)
 
@@ -385,7 +383,8 @@ def plot_single_pdate(pdate, args, style, map_config):
     plotter.save(output, optimize=True)
     plotter.close()
 
-    print(f"✓ Created {local_args.product}: {output}")
+    print(f"Created {Path(output).name}")
+    print("\n" + "-" * 120 + "\n")
 
 
 # -----------------------------------------------------------------------------
