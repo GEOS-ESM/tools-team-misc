@@ -9,11 +9,9 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.colors import LinearSegmentedColormap
 from earthnow.products.registry import register
 import logging
-import sys
 
 variable = "radar_reflectivity_EarthNow"
-colorbar_only = False
-create_colorbar = False
+colorbar_only = True
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -71,6 +69,75 @@ MIX_COLORS = (
     )
     / 255.0
 )
+
+if colorbar_only:
+    import matplotlib.cm as cm
+
+    mappables = []
+    ticks = []
+    labels = []
+
+# Generate colormaps
+# Rain reflectivity
+cmap = ListedColormap(REFL_COLORS)
+norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+if colorbar_only:
+    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    ticks.append(
+        [
+            (REFL_LEVELS.min(), "Light"),
+            (np.median(REFL_LEVELS), "Moderate"),
+            (REFL_LEVELS.max(), "Heavy"),
+        ]
+    )
+    labels.append("Rain")
+
+# Snow Reflectivity
+cmap = LinearSegmentedColormap.from_list(
+    "snow_cmap", SNOW_COLORS, N=len(REFL_LEVELS) - 1
+)
+norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+if colorbar_only:
+    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    ticks.append(
+        [
+            (REFL_LEVELS.min(), "Light"),
+            (np.median(REFL_LEVELS), "Moderate"),
+            (REFL_LEVELS.max(), "Heavy"),
+        ]
+    )
+    labels.append("Snow")
+
+# Ice reflectivity
+cmap = LinearSegmentedColormap.from_list("ice_cmap", ICE_COLORS, N=len(REFL_LEVELS) - 1)
+norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+if colorbar_only:
+    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    ticks.append(
+        [
+            (REFL_LEVELS.min(), "Light"),
+            (np.median(REFL_LEVELS), "Moderate"),
+            (REFL_LEVELS.max(), "Heavy"),
+        ]
+    )
+    labels.append("Ice")
+
+# Frzr reflectivity
+cmap = LinearSegmentedColormap.from_list(
+    "frzr_cmap", MIX_COLORS, N=len(REFL_LEVELS) - 1
+)
+norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+if colorbar_only:
+    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    ticks.append(
+        [
+            (REFL_LEVELS.min(), "Light"),
+            (np.median(REFL_LEVELS), "Moderate"),
+            (REFL_LEVELS.max(), "Heavy"),
+        ]
+    )
+    labels.append("Mix")
+
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
@@ -85,201 +152,193 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     logger = logging.getLogger(__name__)
 
     if colorbar_only:
-        import matplotlib.cm as cm
+        colorbar_creation()
+    else:
+        noise_floor = 1e-7
 
-        mappables = []
-        levels = []
-        labels = []
-
-    noise_floor = 1e-7
-
-    # ========
-    # Read all variables
-    # ========
-    # Read from reader (reader decides the collection)
-    refl, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["DBZ_MAX"],
-    )
-    refl = refl.astype(np.float32)
-
-    snow, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["SNOW"],
-    )
-    rain, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["RAIN"],
-    )
-    ice, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["ICE"],
-    )
-    t2m, lats, lons, meta = reader.read_variable(
-        args.fdate,
-        args.pdate,
-        variables=["T2M"],
-    )
-
-    # Fill precip rates with 0 instead of missing value
-    fillValue = 1e15
-    rain = np.where(rain == fillValue, np.nan, rain)
-    snow = np.where(snow == fillValue, np.nan, snow)
-    ice = np.where(ice == fillValue, np.nan, ice)
-    # Fill temp missing value with NaN
-    t2m = np.where(t2m == fillValue, np.nan, t2m)
-
-    # Only keep nonzero snow values where there's snow
-    # and t2m is below freezing
-    # Convert snow kg m-2 s-1 to inches hr-1
-    condition = ((snow * 3600.0 / 25.4) > 0) & (t2m <= 276.483)
-    snow[~condition] = 0.0
-
-    # Only keep nonzero ice values where there's ice
-    # and t2m is below freezing
-    condition = (ice * 3600.0 / 25.4 > 0) & (t2m <= 276.483)
-    ice[~condition] = 0.0
-
-    # Elevation correction
-    # Use geopotential height to determine precip type
-    # -------------------------------------------------
-    i1000 = 0
-    i925 = 1
-    i850 = 2
-    i700 = 3
-    i500 = 4
-
-    # Calculate/read in layer heights
-    # -------------------
-    if args.map_type == "conus":
-        phis, lats, lons, meta = reader.read_variable(
+        # ========
+        # Read all variables
+        # ========
+        # Read from reader (reader decides the collection)
+        refl, lats, lons, meta = reader.read_variable(
             args.fdate,
             args.pdate,
-            variables=["HGT_SFC"],
+            variables=["DBZ_MAX"],
         )
-        phis = phis / 9.81
-        hgt, lats, lons, meta = reader.read_variable(
-            args.fdate, args.pdate, variables=["HGT"]
+        refl = refl.astype(np.float32)
+
+        snow, lats, lons, meta = reader.read_variable(
+            args.fdate,
+            args.pdate,
+            variables=["SNOW"],
         )
-        # Replace missing heights (belowground) with surface pressure
-        phis_3d = phis[np.newaxis, :, :]  # dims X,Y,1
-        hgt = np.where(hgt == fillValue, phis_3d, hgt)
-        # Syntax here: where hgt is missing (= 1e15), insert phis value.
-        # Where hgt is valid, keep it.
-        # This works bc of "broadcasting" - numpy automatically
-        # copies phis_3d to match every Z level of the full 3D hgt array.
-        # And can compare it to every Z level
-        # for replacing where hgt = 1e15.
-
-        # 500 - 925 mb thickness
-        thck = np.squeeze(hgt[i500, :, :] - hgt[i925, :, :])
-
-        elevFactor = (phis - 305.0) / 915.0
-        # apply 0 and 1 caps to elevFactor
-        elevFactor[elevFactor < 0] = 0.0
-        elevFactor[elevFactor > 1] = 1.0
-        # print("phis.shape: ",phis.shape)
-        # print("elevFactor.shape: ",elevFactor.shape)
-        # print("thck.shape: ", thck.shape)
-        # print("hgt.shape: ",hgt.shape)
-
-        elevFactor = elevFactor * 50.0
-        thLow = 5425.0 - 625 + elevFactor  # warm edge
-        thHigh = 5475.0 - 625 + elevFactor  # cold edge
-        # Explanation:
-        # between these edges you get sleet, freezing rain, or rain/snow mix.
-        # The 625 adjustment accounts for 1000-925 mb thickness:
-        # 5425 and 5475 are typicaly thresholds for 1000-500 mb thickness
-        # but we're using 925-500 so need to tweak.
-        # Add the elevation factor of up to 50 m depending on elevation
-        # (warmer/lower elevations snow melts further from the ground)
-
-        # print("thLow.shape: ", thLow.shape)
-        # print("thHigh.shape: ", thHigh.shape)
-        # sys.exit()
-
-    elif args.map_type == "global":
-        h1000, lats, lons, meta = reader.read_variable(
-            args.fdate, args.pdate, variables=["H1000"]
+        rain, lats, lons, meta = reader.read_variable(
+            args.fdate,
+            args.pdate,
+            variables=["RAIN"],
         )
-        h500, lats, lons, meta = reader.read_variable(
-            args.fdate, args.pdate, variables=["H500"]
+        ice, lats, lons, meta = reader.read_variable(
+            args.fdate,
+            args.pdate,
+            variables=["ICE"],
         )
-        h1000 = np.where(np.isnan(h1000) | (h1000 == 1e15), 0.0, h1000)
-        h500 = np.where(np.isnan(h500) | (h500 == 1e15), 0.0, h500)
-        thck = h500 - h1000
-        thLow = 5425.0
-        thHigh = 5475.0
+        t2m, lats, lons, meta = reader.read_variable(
+            args.fdate,
+            args.pdate,
+            variables=["T2M"],
+        )
 
-    # -- end if/else block
+        # Fill precip rates with 0 instead of missing value
+        fillValue = 1e15
+        rain = np.where(rain == fillValue, np.nan, rain)
+        snow = np.where(snow == fillValue, np.nan, snow)
+        ice = np.where(ice == fillValue, np.nan, ice)
+        # Fill temp missing value with NaN
+        t2m = np.where(t2m == fillValue, np.nan, t2m)
 
-    # Precip manipulation
-    # -------------------
-    precip_floor = 1e-6
-    # Precip in this chunk of atmosphere is defined here as icefall
-    ifind = (
-        (thck > thLow)
-        & (thck < thHigh)
-        & ((snow * 3600.0 / 25.4 > precip_floor) | (ice * 3600.0 / 25.4 > precip_floor))
-    )
-    # recall this *3600./25.4 converts to inches per hour
-    # so that line is checking for EITHER nonzero snowfall OR nonzero icefall
+        # Only keep nonzero snow values where there's snow
+        # and t2m is below freezing
+        # Convert snow kg m-2 s-1 to inches hr-1
+        condition = ((snow * 3600.0 / 25.4) > 0) & (t2m <= 276.483)
+        snow[~condition] = 0.0
 
-    ice[ifind] = refl[ifind]  # fill reflectivity for ifind
-    snow[ifind] = 0.0
-    rain[ifind] = 0.0
-    ice[~ifind] = 0.0
+        # Only keep nonzero ice values where there's ice
+        # and t2m is below freezing
+        condition = (ice * 3600.0 / 25.4 > 0) & (t2m <= 276.483)
+        ice[~condition] = 0.0
 
-    # Snow does not fall below thHigh
-    snow[thck >= thHigh] = 0.0
-    ## Rain does not fall above thLow
-    rain[thck <= thLow] = 0.0
+        # Elevation correction
+        # Use geopotential height to determine precip type
+        # -------------------------------------------------
+        i1000 = 0
+        i925 = 1
+        i850 = 2
+        i700 = 3
+        i500 = 4
 
-    # Fill in reflectivity
-    # --------------------
-    # Rain reflectivity
-    rain = np.where((rain * 3600.0 / 25.4) > noise_floor, refl, 0.0)
-    # Snow reflectivity
-    snow = np.where((snow * 3600.0 / 25.4) > noise_floor, refl, 0.0)
+        # Calculate/read in layer heights
+        # -------------------
+        if args.map_type == "conus":
+            phis, lats, lons, meta = reader.read_variable(
+                args.fdate,
+                args.pdate,
+                variables=["HGT_SFC"],
+            )
+            phis = phis / 9.81
+            hgt, lats, lons, meta = reader.read_variable(
+                args.fdate, args.pdate, variables=["HGT"]
+            )
+            # Replace missing heights (belowground) with surface pressure
+            phis_3d = phis[np.newaxis, :, :]  # dims X,Y,1
+            hgt = np.where(hgt == fillValue, phis_3d, hgt)
+            # Syntax here: where hgt is missing (= 1e15), insert phis value.
+            # Where hgt is valid, keep it.
+            # This works bc of "broadcasting" - numpy automatically
+            # copies phis_3d to match every Z level of the full 3D hgt array.
+            # And can compare it to every Z level
+            # for replacing where hgt = 1e15.
 
-    # Freezing rain reflectivity
-    frzr = np.copy(rain)
-    # frzr is zero if it's too warm OR if temp data missing
-    frzr = np.where((t2m > 273.15) | np.isnan(t2m), 0.0, frzr)
+            # 500 - 925 mb thickness
+            thck = np.squeeze(hgt[i500, :, :] - hgt[i925, :, :])
 
-    # Mask invalid reflectivity
-    # Note: This was not explicit in the IDL code,
-    # but IDL's plotting automatically masks out values
-    # beyond the colorbar limits.
-    # pcolormesh does not, so we do that here.
-    refl_min = min(REFL_LEVELS)
-    refl_max = max(REFL_LEVELS)
-    refl = np.ma.masked_where(refl < refl_min, refl)
-    refl = np.ma.masked_where(refl > refl_max, refl)
-    snow = np.ma.masked_where(snow < refl_min, snow)
-    snow = np.ma.masked_where(snow > refl_max, snow)
-    frzr = np.ma.masked_where(frzr < refl_min, frzr)
-    frzr = np.ma.masked_where(frzr > refl_max, frzr)
-    ice = np.ma.masked_where(ice < refl_min, ice)
-    ice = np.ma.masked_where(ice > refl_max, ice)
+            elevFactor = (phis - 305.0) / 915.0
+            # apply 0 and 1 caps to elevFactor
+            elevFactor[elevFactor < 0] = 0.0
+            elevFactor[elevFactor > 1] = 1.0
+            # print("phis.shape: ",phis.shape)
+            # print("elevFactor.shape: ",elevFactor.shape)
+            # print("thck.shape: ", thck.shape)
+            # print("hgt.shape: ",hgt.shape)
 
-    logger.debug("refl min: ", refl.min())
-    logger.debug("refl max: ", refl.max())
-    logger.debug("refl mean: ", refl.mean())
+            elevFactor = elevFactor * 50.0
+            thLow = 5425.0 - 625 + elevFactor  # warm edge
+            thHigh = 5475.0 - 625 + elevFactor  # cold edge
+            # Explanation:
+            # between these edges you get sleet, freezing rain, or rain/snow mix.
+            # The 625 adjustment accounts for 1000-925 mb thickness:
+            # 5425 and 5475 are typicaly thresholds for 1000-500 mb thickness
+            # but we're using 925-500 so need to tweak.
+            # Add the elevation factor of up to 50 m depending on elevation
+            # (warmer/lower elevations snow melts further from the ground)
 
-    # Plot rain reflectivity
-    # ------------------------------------------------------------
-    cmap = ListedColormap(REFL_COLORS)
-    norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
-    if colorbar_only:
-        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
-        levels.append(REFL_LEVELS)
-        labels.append("Rain")
-    else:
+            # print("thLow.shape: ", thLow.shape)
+            # print("thHigh.shape: ", thHigh.shape)
+            # sys.exit()
+
+        elif args.map_type == "global":
+            h1000, lats, lons, meta = reader.read_variable(
+                args.fdate, args.pdate, variables=["H1000"]
+            )
+            h500, lats, lons, meta = reader.read_variable(
+                args.fdate, args.pdate, variables=["H500"]
+            )
+            h1000 = np.where(np.isnan(h1000) | (h1000 == 1e15), 0.0, h1000)
+            h500 = np.where(np.isnan(h500) | (h500 == 1e15), 0.0, h500)
+            thck = h500 - h1000
+            thLow = 5425.0
+            thHigh = 5475.0
+
+        # -- end if/else block
+
+        # Precip manipulation
+        # -------------------
+        precip_floor = 1e-6
+        # Precip in this chunk of atmosphere is defined here as icefall
+        ifind = (
+            (thck > thLow)
+            & (thck < thHigh)
+            & (
+                (snow * 3600.0 / 25.4 > precip_floor)
+                | (ice * 3600.0 / 25.4 > precip_floor)
+            )
+        )
+        # recall this *3600./25.4 converts to inches per hour
+        # so that line is checking for EITHER nonzero snowfall OR nonzero icefall
+
+        ice[ifind] = refl[ifind]  # fill reflectivity for ifind
+        snow[ifind] = 0.0
+        rain[ifind] = 0.0
+        ice[~ifind] = 0.0
+
+        # Snow does not fall below thHigh
+        snow[thck >= thHigh] = 0.0
+        ## Rain does not fall above thLow
+        rain[thck <= thLow] = 0.0
+
+        # Fill in reflectivity
+        # --------------------
+        # Rain reflectivity
+        rain = np.where((rain * 3600.0 / 25.4) > noise_floor, refl, 0.0)
+        # Snow reflectivity
+        snow = np.where((snow * 3600.0 / 25.4) > noise_floor, refl, 0.0)
+
+        # Freezing rain reflectivity
+        frzr = np.copy(rain)
+        # frzr is zero if it's too warm OR if temp data missing
+        frzr = np.where((t2m > 273.15) | np.isnan(t2m), 0.0, frzr)
+
+        # Mask invalid reflectivity
+        # Note: This was not explicit in the IDL code,
+        # but IDL's plotting automatically masks out values
+        # beyond the colorbar limits.
+        # pcolormesh does not, so we do that here.
+        refl_min = min(REFL_LEVELS)
+        refl_max = max(REFL_LEVELS)
+        refl = np.ma.masked_where(refl < refl_min, refl)
+        refl = np.ma.masked_where(refl > refl_max, refl)
+        snow = np.ma.masked_where(snow < refl_min, snow)
+        snow = np.ma.masked_where(snow > refl_max, snow)
+        frzr = np.ma.masked_where(frzr < refl_min, frzr)
+        frzr = np.ma.masked_where(frzr > refl_max, frzr)
+        ice = np.ma.masked_where(ice < refl_min, ice)
+        ice = np.ma.masked_where(ice > refl_max, ice)
+
+        logger.debug("refl min: %s", refl.min())
+        logger.debug("refl max: %s", refl.max())
+        logger.debug("refl mean: %s", refl.mean())
+
+        # Plot rain reflectivity
+        # ------------------------------------------------------------
         rain_plot = ax.pcolormesh(
             lons,
             lats,
@@ -291,16 +350,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             zorder=4,
         )
 
-    # Snow reflectivity
-    cmap = LinearSegmentedColormap.from_list(
-        "snow_cmap", SNOW_COLORS, N=len(REFL_LEVELS) - 1
-    )
-    norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
-    if colorbar_only:
-        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
-        levels.append(REFL_LEVELS)
-        labels.append("Snow")
-    else:
         snow_plot = ax.pcolormesh(
             lons,
             lats,
@@ -312,16 +361,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             zorder=5,
         )
 
-    # Ice reflectivity
-    cmap = LinearSegmentedColormap.from_list(
-        "ice_cmap", ICE_COLORS, N=len(REFL_LEVELS) - 1
-    )
-    norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
-    if colorbar_only:
-        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
-        levels.append(REFL_LEVELS)
-        labels.append("Ice")
-    else:
         ice_plot = ax.pcolormesh(
             lons,
             lats,
@@ -333,16 +372,6 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             zorder=6,
         )
 
-    # Frzr reflectivity
-    cmap = LinearSegmentedColormap.from_list(
-        "frzr_cmap", MIX_COLORS, N=len(REFL_LEVELS) - 1
-    )
-    norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
-    if colorbar_only:
-        mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
-        levels.append(REFL_LEVELS)
-        labels.append("Mix")
-    else:
         mix_plot = ax.pcolormesh(
             lons,
             lats,
@@ -354,49 +383,20 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             zorder=6,
         )
 
-    if colorbar_only:
-        from earthnow.wxmaps_utils import build_and_save_colorbars
 
-        colorbar_output = (
-            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
-        )
+def colorbar_creation():
+    from earthnow.wxmaps_utils import build_and_save_colorbars
 
-        build_and_save_colorbars(
-            mappables,
-            levels,
-            colorbar_output,
-            labels,
-        )
+    colorbar_output = (
+        f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
+    )
 
-    # ------------------------------------------------------------
-    # Report image resolution
-    # ------------------------------------------------------------
-    #    bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-    #    width_inches, height_inches = bbox.width, bbox.height
-    #    dpi = fig.dpi
-    #
-    #    img_width_px = int(width_inches * dpi)
-    #    img_height_px = int(height_inches * dpi)
-    #
-    #    print(f"Image resolution: {img_height_px} x {img_width_px} pixels (height x width)")
-    #    print(f"  Figure size: {width_inches:.2f} x {height_inches:.2f} inches")
-    #    print(f"  DPI: {dpi}")
-    #    print(f"  Total image pixels: {img_height_px * img_width_px:,}")
-    #    print(
-    #        f"  Pixel ratio (image/data): {(img_height_px * img_width_px) / (data_shape[0] * data_shape[1]):.2f}x"
-    #    )
-
-    if create_colorbar:
-        """Generate colorbar for composite reflectivity"""
-        from earthnow.wxmaps_utils import save_colorbar_single
-
-        colorbar_output = (
-            f"/discover/nobackup/eibell/EarthNow/colorbars/{variable}_colorbar.png"
-        )
-
-        save_colorbar_single(
-            mix_plot,
-            colorbar_output,
-            label="Mix Composite Reflectivity (dBZ)",
-            ticks=REFL_LEVELS,
-        )
+    build_and_save_colorbars(
+        mappables,
+        ticks,
+        colorbar_output,
+        labels,
+        subtitles=True,
+        title="Radar Reflectivity [dBZ]",
+        share_xaxis=True,
+    )
