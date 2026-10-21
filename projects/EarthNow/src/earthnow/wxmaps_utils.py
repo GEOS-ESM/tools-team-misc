@@ -549,8 +549,15 @@ def build_and_save_colorbars(
 
     #  Validate lenghts
     if not (n_bars == len(mappables) == len(ticks) == len(labels) == len(formats)):
+        logger.debug(
+            f"Axes len: {n_bars}\n"
+            f"Mappables len: {len(mappables)}\n"
+            f"Ticks len: {len(ticks)}\n"
+            f"Labels len: {len(labels)}\n"
+            f"Formats len: {len(formats)}\n"
+        )
         raise ValueError(
-            "axes, mappables, ticks, labels, and formats must have the same length."
+            f"axes, mappables, ticks, labels, and formats must have the same length."
         )
 
     # If an overall title is also being drawn, shrink the default label size
@@ -638,13 +645,15 @@ def build_and_save_colorbars(
 
         # Format and set ticks
         tick_fontsize = tick_labelsize
+        tickpad = 25 * 72 / dpi
         if subtitles and len(tick_arr) <= 3:
             tick_fontsize = label_fontsize
+            tickpad = 50 * 72 / dpi
         cb.ax.tick_params(
             labelsize=tick_fontsize,
             width=tick_width,
             length=tick_length,
-            pad=50 * 72 / dpi,
+            pad=tickpad,
             colors=text_color,
         )
         cb.ax.minorticks_off()
