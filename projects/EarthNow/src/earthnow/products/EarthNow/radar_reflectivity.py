@@ -11,7 +11,7 @@ from earthnow.products.registry import register
 import logging
 
 variable = "radar_reflectivity_EarthNow"
-colorbar_only = True
+colorbar_only = False
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -79,10 +79,10 @@ if colorbar_only:
 
 # Generate colormaps
 # Rain reflectivity
-cmap = ListedColormap(REFL_COLORS)
-norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+rain_cmap = ListedColormap(REFL_COLORS)
+rain_norm = BoundaryNorm(REFL_LEVELS, ncolors=rain_cmap.N, clip=True)
 if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    mappables.append(cm.ScalarMappable(norm=rain_norm, cmap=rain_cmap))
     ticks.append(
         [
             (REFL_LEVELS.min(), "Light"),
@@ -93,12 +93,12 @@ if colorbar_only:
     labels.append("Rain")
 
 # Snow Reflectivity
-cmap = LinearSegmentedColormap.from_list(
+snow_cmap = LinearSegmentedColormap.from_list(
     "snow_cmap", SNOW_COLORS, N=len(REFL_LEVELS) - 1
 )
-norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+snow_norm = BoundaryNorm(REFL_LEVELS, ncolors=snow_cmap.N, clip=True)
 if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    mappables.append(cm.ScalarMappable(norm=snow_norm, cmap=snow_cmap))
     ticks.append(
         [
             (REFL_LEVELS.min(), "Light"),
@@ -109,10 +109,12 @@ if colorbar_only:
     labels.append("Snow")
 
 # Ice reflectivity
-cmap = LinearSegmentedColormap.from_list("ice_cmap", ICE_COLORS, N=len(REFL_LEVELS) - 1)
-norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+ice_cmap = LinearSegmentedColormap.from_list(
+    "ice_cmap", ICE_COLORS, N=len(REFL_LEVELS) - 1
+)
+ice_norm = BoundaryNorm(REFL_LEVELS, ncolors=ice_cmap.N, clip=True)
 if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    mappables.append(cm.ScalarMappable(norm=ice_norm, cmap=ice_cmap))
     ticks.append(
         [
             (REFL_LEVELS.min(), "Light"),
@@ -123,12 +125,12 @@ if colorbar_only:
     labels.append("Ice")
 
 # Frzr reflectivity
-cmap = LinearSegmentedColormap.from_list(
+frzr_cmap = LinearSegmentedColormap.from_list(
     "frzr_cmap", MIX_COLORS, N=len(REFL_LEVELS) - 1
 )
-norm = BoundaryNorm(REFL_LEVELS, ncolors=cmap.N, clip=True)
+frzr_norm = BoundaryNorm(REFL_LEVELS, ncolors=frzr_cmap.N, clip=True)
 if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=norm, cmap=cmap))
+    mappables.append(cm.ScalarMappable(norm=frzr_norm, cmap=frzr_cmap))
     ticks.append(
         [
             (REFL_LEVELS.min(), "Light"),
@@ -188,12 +190,12 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             variables=["T2M"],
         )
 
-        # Fill precip rates with 0 instead of missing value
+        # Fill values -> NaN
         fillValue = 1e15
+        refl = np.where(refl == fillValue, np.nan, refl)
         rain = np.where(rain == fillValue, np.nan, rain)
         snow = np.where(snow == fillValue, np.nan, snow)
         ice = np.where(ice == fillValue, np.nan, ice)
-        # Fill temp missing value with NaN
         t2m = np.where(t2m == fillValue, np.nan, t2m)
 
         # Only keep nonzero snow values where there's snow
@@ -272,8 +274,8 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             h500, lats, lons, meta = reader.read_variable(
                 args.fdate, args.pdate, variables=["H500"]
             )
-            h1000 = np.where(np.isnan(h1000) | (h1000 == 1e15), 0.0, h1000)
-            h500 = np.where(np.isnan(h500) | (h500 == 1e15), 0.0, h500)
+            # h1000 = np.where(np.isnan(h1000) | (h1000 == 1e15), 0.0, h1000)
+            # h500 = np.where(np.isnan(h500) | (h500 == 1e15), 0.0, h500)
             thck = h500 - h1000
             thLow = 5425.0
             thHigh = 5475.0
@@ -303,7 +305,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         # Snow does not fall below thHigh
         snow[thck >= thHigh] = 0.0
         ## Rain does not fall above thLow
-        rain[thck <= thLow] = 0.0
+        # rain[thck <= thLow] = 0.0
 
         # Fill in reflectivity
         # --------------------
@@ -324,14 +326,10 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         # pcolormesh does not, so we do that here.
         refl_min = min(REFL_LEVELS)
         refl_max = max(REFL_LEVELS)
-        refl = np.ma.masked_where(refl < refl_min, refl)
-        refl = np.ma.masked_where(refl > refl_max, refl)
-        snow = np.ma.masked_where(snow < refl_min, snow)
-        snow = np.ma.masked_where(snow > refl_max, snow)
-        frzr = np.ma.masked_where(frzr < refl_min, frzr)
-        frzr = np.ma.masked_where(frzr > refl_max, frzr)
-        ice = np.ma.masked_where(ice < refl_min, ice)
-        ice = np.ma.masked_where(ice > refl_max, ice)
+        rain = np.ma.masked_where(rain < 10.0, rain)
+        snow = np.ma.masked_where(snow < 10.0, snow)
+        frzr = np.ma.masked_where(frzr < 10.0, frzr)
+        ice = np.ma.masked_where(ice < 10.0, ice)
 
         logger.debug("refl min: %s", refl.min())
         logger.debug("refl max: %s", refl.max())
@@ -342,20 +340,20 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
         rain_plot = ax.pcolormesh(
             lons,
             lats,
-            refl,
-            cmap=cmap,
-            norm=norm,
+            rain,
+            cmap=rain_cmap,
+            norm=rain_norm,
             transform=ccrs.PlateCarree(),
             shading="nearest",
             zorder=4,
         )
 
-        snow_plot = ax.pcolormesh(
+        mix_plot = ax.pcolormesh(
             lons,
             lats,
-            snow,
-            cmap=cmap,
-            norm=norm,
+            frzr,
+            cmap=frzr_cmap,
+            norm=frzr_norm,
             transform=ccrs.PlateCarree(),
             shading="nearest",
             zorder=5,
@@ -365,22 +363,22 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
             lons,
             lats,
             ice,
-            cmap=cmap,
-            norm=norm,
+            cmap=ice_cmap,
+            norm=ice_norm,
             transform=ccrs.PlateCarree(),
             shading="nearest",
             zorder=6,
         )
 
-        mix_plot = ax.pcolormesh(
+        snow_plot = ax.pcolormesh(
             lons,
             lats,
-            frzr,
-            cmap=cmap,
-            norm=norm,
+            snow,
+            cmap=snow_cmap,
+            norm=snow_norm,
             transform=ccrs.PlateCarree(),
             shading="nearest",
-            zorder=6,
+            zorder=7,
         )
 
 
