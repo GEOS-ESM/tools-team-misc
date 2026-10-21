@@ -493,7 +493,9 @@ def build_and_save_colorbars(
     cbar_bottom=0.2,  # Distance from bottom (figure fraction)
     cbar_width=0.7,  # Colorbar width (figure fraction)
     cbar_height=0.25,  # Colorbar height (figure fraction)
-    **kwargs,
+    subtitles=False,  # If true print labels to the side of bars
+    title=None,  # This would add an *additional* title on top of all colorbars
+    share_xaxis=False,  # If true only the bottommost colorbar shows ticks; bars are packed closer
 ):
     """
     Dynamically generates a colorbar figure with single or multiple rows of colorbars and saves it. This function completely replaces the build_colorbar + save_colorbar_single.
@@ -503,7 +505,10 @@ def build_and_save_colorbars(
     mappables : object or list
         Single mappable object or list of mappable objects.
     ticks : array-like or list of array-like
-        Single tickmark array or list of arrays.
+        Tick positions for each colorbar. Each entry is either a number (labeled
+        with the default numeric format) or a ``(position, text)`` pair, where
+        ``text`` is a string shown at that position. Use this to choose which
+        ticks to show, e.g. ``[min, median, max]`` or ``[(min, "Low"), (max, "High")]``.
     labels : str or list of str, optional
         Label or list of labels. Defaults to empty strings.
     formats : str or list of str, optional
@@ -513,7 +518,19 @@ def build_and_save_colorbars(
     figsize : tuple, optional
         Figure size. If None, it dynamically scales based on the number of rows.
     label_fontsize : int, optional
-        Font size for the label (default: 96)
+        Font size for the label and title. Defaults to 96, unless both
+        ``labels`` and ``title`` are provided, in which case it defaults to 85
+        so both fit on the figure.
+    subtitles : bool, optional
+        If True, print `labels` to the left of each colorbar (as a y-axis
+        label) instead of above it (default: False).
+    title : str, optional
+        If provided, draws an additional title above all colorbars and their
+        individual `labels`.
+    share_xaxis : bool, optional
+        If True, tick marks and tick labels are drawn only under the bottommost
+        colorbar, and the vertical spacing between colorbars is reduced
+        (default: False).
     """
 
     # 1. Standardize inputs to lists if single objects are provided
@@ -532,12 +549,49 @@ def build_and_save_colorbars(
 
     #  Validate lenghts
     if not (n_bars == len(mappables) == len(ticks) == len(labels) == len(formats)):
+        logger.debug(
+            f"Axes len: {n_bars}\n"
+            f"Mappables len: {len(mappables)}\n"
+            f"Ticks len: {len(ticks)}\n"
+            f"Labels len: {len(labels)}\n"
+            f"Formats len: {len(formats)}\n"
+        )
         raise ValueError(
-            "axes, mappables, ticks, labels, and formats must have the same length."
+            f"axes, mappables, ticks, labels, and formats must have the same length."
         )
 
+    # If an overall title is also being drawn, shrink the default label size
+    # so both fit comfortably. A user-supplied label_fontsize is respected.
+    if title is not None and label_fontsize == 96:
+        label_fontsize = 85
+
     # 3. Generate Figure and Axes dynamically
-    height = 600 * n_bars
+    px_per_bar = 600
+    bar_px = cbar_height * px_per_bar
+    if share_xaxis:
+        if subtitles is False:
+            # Room above each bar for its label (labelpad is in points)
+            gap_px = (label_fontsize * 1.2 + 30) * dpi / 72
+        else:
+            # Labels sit to the side and are centered on each bar, so adjacent
+            # label centers must be at least one text line apart
+            text_px = label_fontsize * 1.2 * dpi / 72
+            gap_px = max(0.1 * bar_px, text_px - bar_px) + 20
+        pitch_px = bar_px + gap_px
+        top_px = (1 - cbar_bottom - cbar_height) * px_per_bar
+        if title is not None and subtitles:
+            # Title sits at the top of the figure, so only keep room for it
+            top_px = label_fontsize * 1.2 * dpi / 72 + 40
+        needed_px = (
+            cbar_bottom * px_per_bar + n_bars * bar_px + (n_bars - 1) * gap_px + top_px
+        )
+        if title is not None and subtitles:
+            height = needed_px
+        else:
+            height = max(px_per_bar * n_bars, needed_px)
+    else:
+        pitch_px = px_per_bar
+        height = px_per_bar * n_bars
     figsize = (width / dpi, height / dpi)
 
     fig, axes = plt.subplots(nrows=n_bars, ncols=1, figsize=figsize)
@@ -551,13 +605,15 @@ def build_and_save_colorbars(
 
     colorbars = []
 
+    bar_frac = bar_px / height
+
     for i, (ax, mappable, tick_arr, label, fmt) in enumerate(
         zip(axes, mappables, ticks, labels, formats)
     ):
-        # Set strict axis positioning
+        # Set strict axis positioning (bottom-up, in figure fractions)
         row_idx_from_bottom = n_bars - 1 - i
-        bottom = (row_idx_from_bottom + cbar_bottom) / n_bars
-        ax.set_position([cbar_left, bottom, cbar_width, cbar_height / n_bars])
+        bottom = (cbar_bottom * px_per_bar + row_idx_from_bottom * pitch_px) / height
+        ax.set_position([cbar_left, bottom, cbar_width, bar_frac])
         # ax.set_position([0.15, 0.2 * (i + 1) * n_bars, 0.70, 0.25 / n_bars])
         cbar_kwargs = kwargs.copy()
         if fmt is not None:
@@ -567,22 +623,75 @@ def build_and_save_colorbars(
         cb = fig.colorbar(mappable, cax=ax, orientation="horizontal", **cbar_kwargs)
 
         # Set label with configurable properties
-        cb.set_label(
-            label, fontsize=label_fontsize, loc="left", labelpad=30, color=text_color
-        )
-        cb.ax.xaxis.set_label_position("top")
+        if subtitles is False:
+            cb.set_label(
+                label,
+                fontsize=label_fontsize,
+                loc="left",
+                labelpad=30,
+                color=text_color,
+            )
+            cb.ax.xaxis.set_label_position("top")
+        else:
+            cb.ax.set_ylabel(
+                label,
+                fontsize=label_fontsize,
+                va="center",
+                ha="right",
+                labelpad=15,
+                rotation=0,
+                color=text_color,
+            )
 
         # Format and set ticks
+        tick_fontsize = tick_labelsize
+        tickpad = 25 * 72 / dpi
+        if subtitles and len(tick_arr) <= 3:
+            tick_fontsize = label_fontsize
+            tickpad = 50 * 72 / dpi
         cb.ax.tick_params(
-            labelsize=tick_labelsize,
+            labelsize=tick_fontsize,
             width=tick_width,
             length=tick_length,
+            pad=tickpad,
             colors=text_color,
         )
         cb.ax.minorticks_off()
-        cb.set_ticks(tick_arr)
+
+        # Each entry is either a position (auto-formatted) or a (position, text) pair
+        # Assign tick labels
+        # Either matching the position values or the text in the (position, text) pair
+        positions = []
+        texts = []
+        for t in tick_arr:
+            if isinstance(t, (tuple, list)):
+                positions.append(t[0])
+                texts.append(str(t[1]))
+            else:
+                positions.append(t)
+                texts.append(None)
+        cb.set_ticks(positions)
+        if any(txt is not None for txt in texts):
+            default_text = cb.ax.xaxis.get_major_formatter().format_ticks(positions)
+            final_text = [
+                txt if txt is not None else dflt
+                for txt, dflt in zip(texts, default_text)
+            ]
+            cb.set_ticks(positions, labels=final_text)
+
+        if share_xaxis and row_idx_from_bottom != 0:
+            cb.ax.tick_params(bottom=False, labelbottom=False)
 
         colorbars.append(cb)
+
+    if title is not None:
+        fig.suptitle(
+            title,
+            fontsize=label_fontsize,
+            color=text_color,
+            x=cbar_left,
+            ha="left",
+        )
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     fig.savefig(
