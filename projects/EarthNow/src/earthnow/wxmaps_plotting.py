@@ -1241,7 +1241,6 @@ class WxMapPlotter:
         """
         import os
         from scipy.interpolate import RegularGridInterpolator
-        from scipy.spatial import cKDTree
 
         # Temperature-based color scheme (Fahrenheit thresholds)
         if temperature_unit == "F":
@@ -1282,23 +1281,22 @@ class WxMapPlotter:
         # Determine city file based on map domain
         map_name = self.config.name.lower()
 
-        print("\n")
         if "maryland" in map_name:
             cityfile = city_file("Maryland_cities")
             size_multiplier = 1.5
             spacing_multiplier = 0.75
-            print("   Plotting MD cities")
+            print("   Plotting MD temperatures")
 
         if "conus" in map_name:
             cityfile = city_file("earthnow_conus_cities.csv")
             size_multiplier = 1.0
             spacing_multiplier = 3.0
-            print("   Plotting North American cities")
+            print("   Plotting North American temperatures")
         else:
-            cityfile = city_file("world_cities.csv")
+            cityfile = city_file("world-cities/world_cities.csv")
             size_multiplier = 1.0
             spacing_multiplier = 3.0
-            print("   Plotting world cities")
+            print("   Plotting world temperatures")
 
         if not os.path.exists(cityfile):
             print(
@@ -1317,10 +1315,35 @@ class WxMapPlotter:
         base_fontsize = np.clip(6 * scale_factor, 10, 24) * size_multiplier
         logger.debug(f"   Base font size: {base_fontsize}")
 
+        # print(f"     Grid type: {reader.stream.grid}")
+
+        # Run preprocessing for longitude values to ensure they are within -180 to 180 range
+        lons = ((lons + 180) % 360) - 180
+        lon_min, lon_max = lons.min(), lons.max()
+
+        logger.debug(f"     projection: {self.config.projection}")
+        logger.debug(f"     Grid lons range: [{lon_min:.2f}, {lon_max:.2f}]")
+        logger.debug(f"     Grid lats range: [{np.min(lats):.2f}, {np.max(lats):.2f}]")
+        logger.debug(f"     Data shape: {data.shape}")
+        logger.debug(f"     Lats shape: {lats.shape}, Lons shape: {lons.shape}")
+        logger.debug(f"First 5 lats: {lats[:5]}")
+        logger.debug(f"Last 5 lats: {lats[-5:]}")
+        logger.debug(f"First 5 lons: {lons[:5]}")
+        logger.debug(f"Last 5 lons: {lons[-5:]}")
+
+        # Get map bounds once
+        extent = self.ax.get_extent(crs=ccrs.PlateCarree())
+        logger.debug(
+            f"      Extent in -180/180: [{extent[0]:.2f}, {extent[1]:.2f}], [{extent[2]:.2f}, {extent[3]:.2f}]"
+        )
+
+        cities = pd.read_csv(cityfile)
+        cities["lat"] = cities["lat"].astype("float32")
+        cities["lon"] = cities["lon"].astype("float32")
+
         # Create interpolator for data
         if lons.ndim == 1 and lats.ndim == 1:
             # 1D coordinate arrays - use argmin for nearest neighbor
-            use_1d = True
 
             # Pre-check data shape
             if data.shape[0] != len(lats) or data.shape[1] != len(lons):
@@ -1331,56 +1354,7 @@ class WxMapPlotter:
             print(
                 f"   Using 1D grid lookup: data shape {data.shape}, lats {len(lats)}, lons {len(lons)}"
             )
-        else:
-            print(
-                "WARNING: 2D coordinate arrays - see notes. Skipping city temperature plotting"
-            )
-            # This doesn't work but we don't need it so I commented it out for now
-            # 2D coordinate arrays - use KDTree for fast lookup
-            # lons_flat = lons.ravel()
-            # lats_flat = lats.ravel()
-            #
-            # # Fill masked values with nan
-            # if np.ma.is_masked(data):
-            #     data_flat = data.filled(np.nan).ravel()
-            # else:
-            #     data_flat = data.ravel()
-            #
-            # # Build KDTree for fast nearest neighbor lookup
-            # points = np.column_stack([lons_flat, lats_flat])
-            # tree = cKDTree(points)
-            # use_1d = False
-            #
-            # print(f"Using 2D KDTree lookup: {len(lons_flat)} points")
 
-        # Determine if we need to convert longitude convention
-        lon_min = np.nanmin(lons)
-        lon_max = np.nanmax(lons)
-
-        # Grid uses 0-360 if maximum is significantly > 180
-        use_360_convention = lon_max > 180
-
-        logger.debug(f"Grid lons range: [{lon_min:.2f}, {lon_max:.2f}]")
-        logger.debug(f"Grid lats range: [{np.min(lats):.2f}, {np.max(lats):.2f}]")
-        logger.debug(f"Using 0-360 convention: {use_360_convention}")
-        logger.debug(f"Data shape: {data.shape}")
-        logger.debug(f"Lats shape: {lats.shape}, Lons shape: {lons.shape}")
-        logger.debug(f"First 5 lats: {lats[:5]}")
-        logger.debug(f"Last 5 lats: {lats[-5:]}")
-        logger.debug(f"First 5 lons: {lons[:5]}")
-        logger.debug(f"Last 5 lons: {lons[-5:]}")
-
-        # Get map bounds once
-        extent = self.ax.get_extent(crs=ccrs.PlateCarree())
-        logger.debug(
-            f"    Extent in -180/180: [{extent[0]:.2f}, {extent[1]:.2f}], [{extent[2]:.2f}, {extent[3]:.2f}]"
-        )
-
-        cities = pd.read_csv(cityfile)
-        cities["lat"] = cities["lat"].astype("float32")
-        cities["lon"] = cities["lon"].astype("float32")
-
-        if use_1d:
             cities["lat_idx"] = cities["lat"].apply(
                 lambda x: np.argmin(np.abs(lats - x))
             )
@@ -1393,56 +1367,42 @@ class WxMapPlotter:
             # I already subset the data to the Earthnow cities selection
             if "conus" not in map_name:
                 print(
-                    "DEBUG: Non-conus map, cities not filtered to a subset. PLOTTING ALL CITIES"
+                    "WARNING: Non-conus map, cities not filtered to a subset. PLOTTING ALL CITIES"
                 )
-                """
-                # City spacing to avoid overlap (in degrees)
-                city_spacing_degrees = (np.clip(0.5 / scale_factor, 0.2, 2.0) * spacing_multiplier)
-                coords = list(zip(cities["lat"], cities["lon"]))
-                threshold = (
-                    0.001  # Approximately 111 meters if using rough decimal degree math
-                )
-                accepted_indices = []
-                kept_coords = []
-                for idx, (lat, lon) in enumerate(coords):
 
-                    # If this point is too close to ANY previously kept point, skip it
-                    if any(
-                        (abs(lat - k_lat) < threshold and abs(lon - k_lon) < threshold)
-                        for k_lat, k_lon in kept_coords
-                    ):
-                        continue
-                    accepted_indices.append(idx)
-                kept_coords.append((lat, lon))
-                
-                    temp_val = round(temp_val)
-                    cities_to_plot.append((lon, lat, name, temp_val))
-                # Sort cities by temperature descending (hottest plotted first)
-                cities_to_plot.sort(key=lambda x: x[3], reverse=True)
-                print(f"   Found {len(cities_to_plot)} cities in bounds...")
-                # Plot cities with overlap checking
-                plotted_locations = []
-                for lon, lat, name, temp_val in cities_to_plot:
-                    # Fast overlap check
-                    too_close = any(
-                        abs(lon - prev_lon) < city_spacing_degrees
-                        and abs(lat - prev_lat) < city_spacing_degrees
-                        for prev_lon, prev_lat in plotted_locations
-                    )
-                    if too_close:
-                        continue
-                """
+        elif lons.ndim == 2 and lats.ndim == 2:
+            lats_flat = lats.ravel()
+            lons_flat = lons.ravel()
+            # Fill masked values with nan
+            if np.ma.is_masked(data):
+                data_flat = data.filled(np.nan).ravel()
+            else:
+                data_flat = data.ravel()
 
-        else:
-            print("2D arrays not yet supported. Skipping plotting cities")
-            return
-            # Fast KDTree lookup
-            # dist, idx = tree.query([lon_data, lat])
-            # temp_val = data_flat[idx]
+            # 2D coordinate arrays: Build KDTree for fast nearest neighbor lookup
+            def latlon_to_3d(lats, lons):
+                """Converts lat/lon arrays (in degrees) to 3D Cartesian coordinates on a unit sphere.."""
+                lat_rad = np.deg2rad(lats)
+                lon_rad = np.deg2rad(lons)
+
+                x = np.cos(lat_rad) * np.cos(lon_rad)
+                y = np.cos(lat_rad) * np.sin(lon_rad)
+                z = np.sin(lat_rad)
+                return np.column_stack((x, y, z))
+
+            points = latlon_to_3d(lats_flat, lons_flat)
+            queries = latlon_to_3d(cities["lat"], cities["lon"])
+
+            from scipy.spatial import KDTree
+
+            tree = KDTree(points)
+            print(
+                f"  2D coordinate arrays: Using 2D KDTree lookup: {len(points):,} points"
+            )
+            _, idx = tree.query(queries)
+            cities["temp"] = data_flat[idx]
 
         # Determine color and size based on temperature
-        # cities["color"] = "#FFFFFF"  # default
-        size_factor = 1.0
         cities["color"] = cities["temp"].apply(get_temp_color)
         cities["size_factor"] = cities["temp"].apply(get_temp_size)
         cities["temp"] = cities["temp"].astype(int).astype(str)
@@ -1461,7 +1421,7 @@ class WxMapPlotter:
             zorder=15,
         )
 
-        print(f"   Plotted {len(cities)} cities")
+        print(f"      Plotted {len(cities)} cities")
 
     def _is_within_bounds(self, lon, lat):
         """Check if lon/lat is within current map bounds"""
