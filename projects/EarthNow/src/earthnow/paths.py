@@ -7,6 +7,8 @@ environment variables to adapt to a different HPC cluster or local install:
     EARTHNOW_G6DEV_PUB   — shared g6dev published data root
     EARTHNOW_OSSE2_ROOT  — OSSE2 project data root
     EARTHNOW_GMAO_OPS    — GMAO ops published data root
+    EARTHNOW_BASE_IMAGE_CACHE_DIR — shared cache for processed base imagery
+    EARTHNOW_WARPED_IMAGE_CACHE_DIR — shared cache for warped base-map imagery
     EARTHNOW_CITIES_DIR  — city data files directory
 """
 
@@ -81,6 +83,31 @@ COLORBAR_OUT_DIR = env_path(
     "EARTHNOW_COLORBAR_OUT_DIR", _G6DEV_PUB / "WxMaps" / "ColorBars"
 )
 BASE_IMAGE_DIR = env_path("EARTHNOW_BASE_IMAGE_DIR", _G6DEV_PUB / "BMNG")
+
+_DEFAULT_BASE_IMAGE_CACHE_DIR = (
+    Path("/discover/nobackup") / Path.home().name / "EarthNow" / "cache" / "base_images"
+    if Path("/discover/nobackup").is_dir()
+    else Path.home() / ".cache" / "earthnow" / "base_images"
+)
+BASE_IMAGE_CACHE_DIR = env_path(
+    "EARTHNOW_BASE_IMAGE_CACHE_DIR", _DEFAULT_BASE_IMAGE_CACHE_DIR
+)
+WARPED_IMAGE_CACHE_DIR = env_path(
+    "EARTHNOW_WARPED_IMAGE_CACHE_DIR", BASE_IMAGE_CACHE_DIR / "warped"
+)
+TRANSFORM_CACHE_DIR = env_path(
+    "EARTHNOW_TRANSFORM_CACHE_DIR",
+    _DEFAULT_BASE_IMAGE_CACHE_DIR.parent / "transforms",
+)
+
+
+def configure_base_image_cache_directory(cache_directory: str | Path) -> None:
+    """Set the base-image cache root and derive its warped-image subdirectory."""
+    global BASE_IMAGE_CACHE_DIR, WARPED_IMAGE_CACHE_DIR
+    BASE_IMAGE_CACHE_DIR = Path(cache_directory).expanduser()
+    WARPED_IMAGE_CACHE_DIR = BASE_IMAGE_CACHE_DIR / "warped"
+
+
 GSHHS_DIR = env_path("EARTHNOW_GSHHS_DIR", _OSSE2_ROOT / "GSHHG" / "v2.3.7")
 NWS_SHAPEFILE_DIR = env_path(
     "EARTHNOW_NWS_SHAPEFILE_DIR", _OSSE2_ROOT / "TSE_staging" / "SHAPE_FILES" / "ALL"

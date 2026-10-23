@@ -62,7 +62,6 @@ def execute(**args):
     # ===============
 
     if args_plot or args["image"]:
-
         iterator = Player(config, task, time_dt, **args)
         pool = Pool(ntasks)
         pool.map(make_image, iterator)
@@ -71,7 +70,6 @@ def execute(**args):
     # ===============
 
     if args_plot or args["movie"]:
-
         iterator = Player(config, task, time_dt, tloop=False, seamless=True, **args)
         pool = Pool(ntasks)
         pool.map(make_movie, iterator)
@@ -82,7 +80,6 @@ def execute(**args):
     # =====================================
 
     if args["purge"]:
-
         clean = dict(config["clean"])
         options = {**clean, **args}
         iterator = Player(config, task, time_dt, tloop=False, seamless=True, **options)
@@ -145,6 +142,11 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--nproc", metavar="nproc", default=None, help="Number of processors", type=int
+    )
+    parser.add_argument(
+        "--cache-directory",
+        default=None,
+        help="Base-image cache root; warped images are stored in its warped/ subdirectory",
     )
     parser.add_argument(
         "--products",

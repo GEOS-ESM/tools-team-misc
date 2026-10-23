@@ -60,13 +60,8 @@ class StyleConfig:
     base_image_path: Optional[str] = None
     base_image_month: Optional[int] = None
     base_image_alpha: float = 1.0
-    base_image_interpolation: str = "nearest"
+    base_image_interpolation: str = "bilinear"
     base_image_target_resolution: int = 4000
-
-    # Transform cache fields (set by plotall.py before forking workers)
-    cached_target_extent: Optional[Tuple[float, float, float, float]] = None
-    cached_target_shape: Optional[Tuple[int, int]] = None
-    cached_transform_key: Optional[str] = None
 
     # GSHHS options
     use_gshhs: bool = False

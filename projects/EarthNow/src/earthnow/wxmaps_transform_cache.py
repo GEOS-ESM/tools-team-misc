@@ -8,10 +8,15 @@ import pickle
 import hashlib
 import json
 import os
+import logging
+import tempfile
 from pathlib import Path
 from typing import Tuple, Optional
-import cartopy.crs as ccrs
 from scipy.interpolate import RegularGridInterpolator
+
+from earthnow import paths
+
+logger = logging.getLogger(__name__)
 
 
 class TransformCache:
@@ -20,29 +25,10 @@ class TransformCache:
     Stores the mapping coordinates so workers can quickly apply transforms to their data.
     """
 
-    # Default cache directory - use TMPDIR if available, otherwise user's home
     @staticmethod
     def _get_default_cache_dir():
-        """Get default cache directory based on environment"""
-        # Try TMPDIR first (SLURM sets this)
-        tmpdir = os.environ.get("TMPDIR")
-        if tmpdir:
-            cache_dir = Path(tmpdir) / "wxmaps_transform_cache"
-        else:
-            # Try /discover/nobackup/username
-            username = os.environ.get("USER", "unknown")
-            discover_tmp = Path(
-                f"/discover/nobackup/{username}/tmp/wxmaps_transform_cache"
-            )
-
-            # Check if parent exists
-            if discover_tmp.parent.parent.exists():
-                cache_dir = discover_tmp
-            else:
-                # Fall back to home directory
-                cache_dir = Path.home() / ".wxmaps_cache" / "transforms"
-
-        return cache_dir
+        """Get a persistent cache root shared by independent plotting jobs."""
+        return paths.TRANSFORM_CACHE_DIR
 
     CACHE_DIR = _get_default_cache_dir()
 
@@ -53,9 +39,9 @@ class TransformCache:
         Parameters:
         -----------
         cache_dir : Path, optional
-            Directory to store cached transforms (default: auto-detect from TMPDIR or user home)
+            Directory to store cached transforms (default: earthnow.paths.TRANSFORM_CACHE_DIR)
         clear_on_init : bool
-            If True, clear all cached transforms on initialization (default: True for robustness)
+            If True, explicitly clear cached transforms (default: False).
         """
         if cache_dir is None:
             cache_dir = self.CACHE_DIR
@@ -76,9 +62,9 @@ class TransformCache:
         # In-memory cache for current process
         self._memory_cache = {}
 
-        print(f"Transform cache directory: {self.cache_dir}")
+        print(f"      Transform cache directory: {self.cache_dir}")
 
-        # Clear old cache on initialization for robustness
+        # Clear old cache on initialization for robustness - why?
         if clear_on_init:
             old_files = list(self.cache_dir.glob("*.pkl"))
             if old_files:
@@ -91,7 +77,7 @@ class TransformCache:
                 print("  ✓ Old cache cleared")
 
     @staticmethod
-    def _make_cache_key(
+    def make_cache_key(
         source_proj,
         target_proj,
         source_extent: Tuple[float, float, float, float],
@@ -119,14 +105,13 @@ class TransformCache:
         str : Cache key (hash)
         """
 
-        def to_py(vals, ndigits):
-            return tuple(float(round(float(v), ndigits)) for v in vals)
-
         key_data = {
+            "version": 2,
             "src": source_proj.proj4_init,
             "dst": target_proj.proj4_init,
-            "src_extent": to_py(source_extent, 6),
-            "dst_extent": to_py(target_extent, 2),
+            "src_extent": tuple(float(value) for value in source_extent),
+            "dst_extent": tuple(float(value) for value in target_extent),
+            "target_shape": tuple(int(value) for value in target_shape),
         }
 
         s = json.dumps(key_data, sort_keys=True)
@@ -140,8 +125,8 @@ class TransformCache:
         """Check if cached transform exists"""
         return self.get_cache_path(cache_key).exists()
 
-    def compute_transform(
-        self,
+    @staticmethod
+    def compute_transform_data(
         source_proj,
         target_proj,
         source_extent: Tuple[float, float, float, float],
@@ -228,6 +213,18 @@ class TransformCache:
             "source_extent": source_extent,
         }
 
+    def compute_transform(
+        self,
+        source_proj,
+        target_proj,
+        source_extent: Tuple[float, float, float, float],
+        target_extent: Tuple[float, float, float, float],
+        target_shape: Tuple[int, int],
+    ) -> dict:
+        return self.compute_transform_data(
+            source_proj, target_proj, source_extent, target_extent, target_shape
+        )
+
     def save(self, cache_key: str, transform_data: dict):
         """
         Save transform data to cache
@@ -241,15 +238,30 @@ class TransformCache:
         """
         cache_path = self.get_cache_path(cache_key)
 
-        # Save to disk
-        with open(cache_path, "wb") as f:
-            pickle.dump(transform_data, f, protocol=pickle.HIGHEST_PROTOCOL)
-
-        # Also cache in memory for this process
         self._memory_cache[cache_key] = transform_data
-
-        size_mb = cache_path.stat().st_size / (1024**2)
-        print(f"    Cached transform: {cache_path.name} ({size_mb:.2f} MB)")
+        temporary_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                dir=self.cache_dir, prefix=f".{cache_key}.", suffix=".tmp", delete=False
+            ) as cache_file:
+                temporary_path = Path(cache_file.name)
+                pickle.dump(
+                    transform_data, cache_file, protocol=pickle.HIGHEST_PROTOCOL
+                )
+                cache_file.flush()
+            os.replace(temporary_path, cache_path)
+        except OSError as error:
+            logger.warning("Unable to persist transform %s: %s", cache_path, error)
+        finally:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except OSError as error:
+                    logger.warning(
+                        "Unable to clean transform temporary file %s: %s",
+                        temporary_path,
+                        error,
+                    )
 
     def load(self, cache_key: str) -> dict:
         """
@@ -276,6 +288,18 @@ class TransformCache:
 
         with open(cache_path, "rb") as f:
             transform_data = pickle.load(f)
+
+        if not isinstance(transform_data, dict):
+            raise ValueError("Transform cache entry must be a mapping")
+        shape = tuple(transform_data["target_shape"])
+        for name in ("x_source_norm", "y_source_norm", "mask"):
+            if (
+                not isinstance(transform_data[name], np.ndarray)
+                or transform_data[name].shape != shape
+            ):
+                raise ValueError(f"Invalid transform array: {name}")
+        if transform_data["mask"].dtype != np.bool_:
+            raise ValueError("Invalid transform mask dtype")
 
         # Cache in memory
         self._memory_cache[cache_key] = transform_data
@@ -308,27 +332,40 @@ class TransformCache:
         tuple : (transform_data, cache_key)
         """
         # Generate cache key
-        cache_key = self._make_cache_key(
+        cache_key = self.make_cache_key(
             source_proj, target_proj, source_extent, target_extent, target_shape
         )
 
-        # Check if cached (only matters within same run, since cache cleared on init)
+        # Check memory, then persistent storage.
         if not force_recompute and cache_key in self._memory_cache:
-            print(f"    Using in-memory cached transform: {cache_key[:16]}...")
+            print(f"      Using in-memory cached transform: {cache_key[:16]}...")
             return self._memory_cache[cache_key], cache_key
 
         if not force_recompute and self.exists(cache_key):
-            print(f"    Using cached transform: {cache_key[:16]}...")
-            transform_data = self.load(cache_key)
-            return transform_data, cache_key
+            try:
+                transform_data = self.load(cache_key)
+                if tuple(transform_data["target_shape"]) != tuple(target_shape):
+                    raise ValueError("Cached transform has the wrong target shape")
+                print(f"      Using cached transform: {cache_key}")
+                return transform_data, cache_key
+            except (
+                OSError,
+                EOFError,
+                pickle.UnpicklingError,
+                ValueError,
+                KeyError,
+                TypeError,
+            ) as error:
+                self._memory_cache.pop(cache_key, None)
+                logger.warning("Rebuilding invalid transform %s: %s", cache_key, error)
 
         # Compute new transform
-        print(f"    Computing coordinate transformation: {force_recompute}")
+        print(f"      Computing coordinate transformation: {force_recompute}")
         print(
-            f"DEBUG: source_extent: [{source_extent[0]:.2f}, {source_extent[1]:.2f}], [{source_extent[2]:.2f}, {source_extent[3]:.2f}]"
+            f"      DEBUG: source_extent: [{source_extent[0]:.2f}, {source_extent[1]:.2f}], [{source_extent[2]:.2f}, {source_extent[3]:.2f}]"
         )
         print(
-            f"DEBUG: target_extent: [{target_extent[0]:.2f}, {target_extent[1]:.2f}], [{target_extent[2]:.2f}, {target_extent[3]:.2f}]"
+            f"      DEBUG: target_extent: [{target_extent[0]:.2f}, {target_extent[1]:.2f}], [{target_extent[2]:.2f}, {target_extent[3]:.2f}]"
         )
         transform_data = self.compute_transform(
             source_proj, target_proj, source_extent, target_extent, target_shape
@@ -339,8 +376,8 @@ class TransformCache:
 
         return transform_data, cache_key
 
+    @staticmethod
     def apply_transform(
-        self,
         source_data: np.ndarray,
         transform_data: dict,
         fill_value: float = 0.0,
@@ -515,15 +552,17 @@ def get_transform_cache(cache_dir: Optional[Path] = None) -> TransformCache:
 
     Note:
     -----
-    Cache is cleared on first initialization for robustness.
-    Within the same run, transforms are reused from memory.
+    Existing disk entries are retained so a warm-up job can serve later jobs.
     """
     global _global_cache
     if _global_cache is None:
-        print("DEBUG: Creating NEW transform cache instance")  # ADD THIS
-        _global_cache = TransformCache(cache_dir=cache_dir, clear_on_init=True)
+        print(
+            "      Creating process-local transform cache object; "
+            "persistent transforms load from disk on demand."
+        )
+        _global_cache = TransformCache(cache_dir=cache_dir)
     else:
-        print("DEBUG: Reusing existing transform cache instance")  # ADD THIS
+        print("      Reusing process-local transform cache object.")
     return _global_cache
 
 

@@ -9,7 +9,6 @@ from earthnow.workflow.utils import str_replace
 
 
 def make_image(request):
-
     defs = {k: v for k, v in request.items() if not isinstance(v, dict)}
 
     time_dt = request["time_dt"]
@@ -27,9 +26,11 @@ def make_image(request):
     options = request["options"]
     options["output"] = oname
     options["resolution"] = request["pngsize"]
+    if request.get("cache_directory") is not None:
+        options["cache-directory"] = request["cache_directory"]
 
     cmd = [
-        f"--{k} {v}"
+        f"--{k} {shlex.quote(str(v))}"
         for k, v in options.items()
         if v is not None and not isinstance(v, bool) and k[0] != "_"
     ]
@@ -44,7 +45,6 @@ def make_image(request):
 
 
 def make_movie(request):
-
     tmpdir = tempfile.TemporaryDirectory()
 
     defs = {k: v for k, v in request.items() if not isinstance(v, dict)}
@@ -66,11 +66,9 @@ def make_movie(request):
 
     os.makedirs(os.path.dirname(txtname), mode=0o755, exist_ok=True)
     with open(txtname, "w") as f:
-
         seq = 0
         t = start_dt
         while t <= end_dt:
-
             cdattim = t.strftime("%Y-%m-%d, %H%M UTC")
 
             dst = os.path.join(tmpdir.name, f"{seq:05d}.png")
@@ -92,7 +90,6 @@ def make_movie(request):
     resolutions = request["resolutions"]
 
     for resolution in request["mp4size"]:
-
         defs["resolution"] = resolution
         defs["frame_size"] = resolutions[resolution]
         oname = request["mp4name"]
@@ -115,7 +112,6 @@ def make_movie(request):
 
 
 def purge(request):
-
     defs = {k: v for k, v in request.items() if not isinstance(v, dict)}
 
     iname = request["pngname"]
@@ -129,7 +125,6 @@ def purge(request):
 
     t = start_dt
     while t <= end_dt:
-
         src = t.strftime(iname)
         if os.path.isfile(src):
             os.remove(src)
