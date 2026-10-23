@@ -11,12 +11,11 @@ from cartopy.img_transform import warp_array
 from pathlib import Path
 from typing import Optional, Tuple
 from enum import Enum
+from earthnow import paths
 
 import logging
 
 logger = logging.getLogger(__name__)
-
-from earthnow import paths
 
 
 class BaseImageType(Enum):
@@ -128,7 +127,7 @@ class BaseImageCache:
     _preloaded = {}  # Separate dict for images preloaded before forking
 
     @classmethod
-    def get_image(cls, image_path: str, target_width: int = 4000) -> np.ndarray:
+    def get_image(cls, image_path: str, target_resolution: str) -> np.ndarray:
         """
         Load and downsample base image with caching.
 
@@ -136,9 +135,8 @@ class BaseImageCache:
         -----------
         image_path : str
             Path to base image
-        target_width : int
-            Target width for downsampling (default: 4000)
-            Higher = better quality but slower (4000-8000 recommended)
+        target_resolution : str
+            Target resolution for downsampling ('hd', 'fhd', '2k', '4k', '8k')
 
         Returns:
         --------
@@ -146,12 +144,14 @@ class BaseImageCache:
         """
         cache_key = (image_path, target_width)
 
-        # Check preloaded cache first (set before forking)
+        # Check preloaded cache first
         if cache_key in cls._preloaded:
+            print("   Cache preloaded variable found")
             return cls._preloaded[cache_key]
 
         # Return cached version if available
         if cache_key in cls._cache:
+            print("   Basemap image found in memory cache")
             return cls._cache[cache_key]
 
         # Load image
@@ -160,6 +160,8 @@ class BaseImageCache:
 
         print(f"Loading base image: {image_path}")
 
+        resolution_config = WxMapsConfig.RESOLUTIONS[target_resolution]
+        target_width = resolution_config.width
         # Disable decompression bomb check for legitimate large images
         Image.MAX_IMAGE_PIXELS = None
 
@@ -189,7 +191,7 @@ class BaseImageCache:
                 img_array = np.array(img_resized)
             else:
                 # Use original size if already smaller than target
-                print(f"  Using original size (already smaller than target)")
+                print("  Using original size (already smaller than target)")
                 img_array = np.array(img)
 
             print(f"  Cached. Memory: {img_array.nbytes / (1024**2):.1f} MB")
@@ -201,7 +203,7 @@ class BaseImageCache:
         return img_array
 
     @classmethod
-    def mark_as_preloaded(cls, image_path: str, target_width: int):
+    def mark_as_preloaded(cls, image_path: str, target_resolution: str):
         """
         Mark an image as preloaded so workers know to use the forked copy.
         Call this BEFORE forking workers.
@@ -225,7 +227,7 @@ class BaseImagePlotter:
         self,
         image_path: str,
         extent: Tuple[float, float, float, float] = None,
-        target_resolution: int = 4000,
+        target_resolution: str = "4k",
     ):
         """
         Initialize base image plotter
@@ -289,7 +291,7 @@ class BaseImagePlotter:
         """
         if self.image_array is None:
             self.image_array = BaseImageCache.get_image(
-                self.image_path, target_width=self.target_resolution
+                self.image_path, target_resolution=self.target_resolution
             )
         return self.image_array
 
@@ -308,11 +310,12 @@ class BaseImagePlotter:
         if self.image_array is None:
             self.load_image()
 
-        print(f"  Plotting base image: {Path(self.image_path).name}")
+        print("   Adding base image to map...")
 
         # Use cached coordinate transformation
         from earthnow.wxmaps_transform_cache import get_transform_cache
 
+        print("   Looking for transform cache instance...")
         transform_cache = get_transform_cache()
 
         # Use pre-computed extent/shape if available (ensures cache hit)
@@ -337,14 +340,13 @@ class BaseImagePlotter:
         # CRITICAL: Base images (JPEG/PNG) have origin='upper' (row 0 = North)
         # But geographic data convention is origin='lower' (row 0 = South)
         # The transformation expects source data in origin='lower' format, so we must flip
-        print(f"    Applying cached transform to base image...")
         warped_img, warped_extent = transform_cache.apply_transform(
             source_data=self.image_array,
             transform_data=transform_data,
             fill_value=0,
             flip_source_y=True,  # Flip source from origin='upper' to origin='lower' before interpolation
         )
-        logger.info(f"Image dims: {warped_img.shape}")
+        print(f"      Warped image dims: {warped_img.shape}")
 
         # Automatic limb darkening for full disk GEO
         if isinstance(ax.projection, ccrs.Geostationary):
@@ -365,29 +367,26 @@ class BaseImagePlotter:
             rasterized=True,
         )
 
-        print(f"    Done (interpolation={interpolation}, alpha={alpha})")
+        print(
+            f"   Basemap plotting complete (interpolation={interpolation}, alpha={alpha})"
+        )
 
         return im
 
 
-def preload_base_images_from_style(style, target_resolution: int = 4000):
+def preload_base_images_from_style(style, target_resolution: str = "4k"):
     """
     Preload base images into cache based on StyleConfig.
-    Call this once in main process before forking workers.
 
     Parameters:
     -----------
     style : StyleConfig
         Style configuration that may request base images
-    target_resolution : int
-        Target width for downsampling (default: 4000)
+    target_resolution : str
+        Target resolution key for WxMapsConfig.RESOLUTIONS (default: "4k")
     """
     if not style.use_base_image:
-        return  # No base image requested
-
-    print("\n" + "=" * 70)
-    print("Preloading base images into cache...")
-    print("=" * 70)
+        return  # No base image requested - why not do this prior to the function invocation?
 
     # Determine which image to load
     if style.base_image_path:
@@ -397,11 +396,15 @@ def preload_base_images_from_style(style, target_resolution: int = 4000):
             style.base_image_type, month=style.base_image_month
         )
 
+    print(
+        f"Checking for cached base image: ({style.base_image_type}) at {target_resolution} resolution..."
+    )
+
     # Load into cache
-    BaseImageCache.get_image(image_path, target_width=target_resolution)
+    BaseImageCache.get_image(image_path, target_resolution=target_resolution)
 
-    # Mark as preloaded so workers use the forked copy
-    BaseImageCache.mark_as_preloaded(image_path, target_resolution)
+    # Mark as preloaded: I don't think this does anything for our workflow?
+    BaseImageCache.mark_as_preloaded(image_path, target_resolution=target_resolution)
 
-    print("Base images preloaded successfully.")
-    print("Workers will use the preloaded copy from forked memory.\n")
+    # print("Base images preloaded successfully.")
+    # print("Workers will use the preloaded copy from forked memory.\n")

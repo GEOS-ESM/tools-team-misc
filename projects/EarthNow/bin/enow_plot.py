@@ -480,17 +480,12 @@ def main():
     # =========================================================================
     # PRELOAD BASE IMAGES (after transform is computed)
     # =========================================================================
-    from earthnow.wxmaps_base_images import preload_base_images_from_style
-
-    # Determine target resolution based on output resolution
-    resolution_map = {"hd": 4000, "fhd": 4000, "2k": 6000, "4k": 4000, "8k": 8000}
-    target_resolution = resolution_map.get(args.resolution, 4000)
-
-    # Store in style so workers can use the same value
-    style.base_image_target_resolution = target_resolution
+    from earthnow.wxmaps_base_images import (
+        preload_base_images_from_style,
+    )
 
     # Preload base images (will use the same transform we just computed)
-    preload_base_images_from_style(style, target_resolution=target_resolution)
+    preload_base_images_from_style(style, target_resolution=args.resolution)
     # =========================================================================
 
     # -------------------------------------------------------------------------

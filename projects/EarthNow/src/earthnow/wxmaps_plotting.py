@@ -114,6 +114,8 @@ class WxMapPlotter:
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
+        self.feature_resolution = feature_resolution
+
         # Turn off boundaries for all global views
         if self.config.name == "global":
             boundaries = []
@@ -319,7 +321,7 @@ class WxMapPlotter:
 
             # Create plotter with matching resolution
             img_plotter = BaseImagePlotter(
-                image_path, target_resolution=target_resolution
+                image_path, target_resolution=self.resolution
             )
 
             # Load image (will use preloaded cache if available)
