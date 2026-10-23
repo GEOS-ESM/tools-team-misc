@@ -109,10 +109,10 @@ def parse_args():
         help="Workers for optimization phase (default: 1)",
     )
     parser.add_argument(
-        "--cache-dir",
+        "--cache-directory",
         type=str,
         default=None,
-        help="Persistent transform cache directory (default: EARTHNOW_TRANSFORM_CACHE_DIR or earthnow.paths default)",
+        help="Base-image cache root; warped images are stored in its warped/ subdirectory",
     )
 
     # -------------------------------------------------------------------------
@@ -396,6 +396,9 @@ def plot_single_pdate(pdate, args, style, map_config):
 def main():
     args = parse_args()
 
+    if args.cache_directory is not None:
+        paths.configure_base_image_cache_directory(args.cache_directory)
+
     if args.logger:
         setup_root_logger(args.logger)
 
@@ -408,21 +411,6 @@ def main():
 
     map_config = all_maps[args.map_type]
     style = build_style(args)
-
-    from earthnow.wxmaps_transform_cache import get_transform_cache
-
-    print("\nLooking for transform cache instance")
-    get_transform_cache(cache_dir=args.cache_dir)
-
-    # =========================================================================
-    # PRELOAD BASE IMAGES
-    # =========================================================================
-    from earthnow.wxmaps_base_images import (
-        preload_base_images_from_style,
-    )
-
-    preload_base_images_from_style(style, target_resolution=args.resolution)
-    # =========================================================================
 
     # -------------------------------------------------------------------------
     # Data reader

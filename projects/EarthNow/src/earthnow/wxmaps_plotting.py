@@ -322,11 +322,9 @@ class WxMapPlotter:
 
             # Create plotter with matching resolution
             img_plotter = BaseImagePlotter(
-                image_path, target_resolution=self.resolution
+                image_path,
+                target_resolution=self.resolution,
             )
-
-            # Load image (will use preloaded cache if available)
-            img_plotter.load_image()
 
             # Plot on map
             img_plotter.plot_on_map(

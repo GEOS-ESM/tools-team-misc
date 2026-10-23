@@ -12,7 +12,6 @@ import logging
 import tempfile
 from pathlib import Path
 from typing import Tuple, Optional
-import cartopy.crs as ccrs
 from scipy.interpolate import RegularGridInterpolator
 
 from earthnow import paths
@@ -78,7 +77,7 @@ class TransformCache:
                 print("  ✓ Old cache cleared")
 
     @staticmethod
-    def _make_cache_key(
+    def make_cache_key(
         source_proj,
         target_proj,
         source_extent: Tuple[float, float, float, float],
@@ -126,8 +125,8 @@ class TransformCache:
         """Check if cached transform exists"""
         return self.get_cache_path(cache_key).exists()
 
-    def compute_transform(
-        self,
+    @staticmethod
+    def compute_transform_data(
         source_proj,
         target_proj,
         source_extent: Tuple[float, float, float, float],
@@ -213,6 +212,18 @@ class TransformCache:
             "mask": mask,
             "source_extent": source_extent,
         }
+
+    def compute_transform(
+        self,
+        source_proj,
+        target_proj,
+        source_extent: Tuple[float, float, float, float],
+        target_extent: Tuple[float, float, float, float],
+        target_shape: Tuple[int, int],
+    ) -> dict:
+        return self.compute_transform_data(
+            source_proj, target_proj, source_extent, target_extent, target_shape
+        )
 
     def save(self, cache_key: str, transform_data: dict):
         """
@@ -321,7 +332,7 @@ class TransformCache:
         tuple : (transform_data, cache_key)
         """
         # Generate cache key
-        cache_key = self._make_cache_key(
+        cache_key = self.make_cache_key(
             source_proj, target_proj, source_extent, target_extent, target_shape
         )
 
@@ -365,8 +376,8 @@ class TransformCache:
 
         return transform_data, cache_key
 
+    @staticmethod
     def apply_transform(
-        self,
         source_data: np.ndarray,
         transform_data: dict,
         fill_value: float = 0.0,
