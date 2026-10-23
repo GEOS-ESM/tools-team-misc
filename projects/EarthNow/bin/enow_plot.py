@@ -9,7 +9,6 @@ Basemap is implemented as the first product.
 
 import argparse
 import sys
-import cartopy.crs as ccrs  # ADD THIS LINE
 import numpy as np
 
 from earthnow.wxmaps_config import WxMapsConfig, StyleConfig, STYLES
@@ -113,7 +112,7 @@ def parse_args():
         "--cache-dir",
         type=str,
         default=None,
-        help="Directory for caching transforms (default: $TMPDIR/wxmaps_transform_cache)",
+        help="Persistent transform cache directory (default: EARTHNOW_TRANSFORM_CACHE_DIR or earthnow.paths default)",
     )
 
     # -------------------------------------------------------------------------
@@ -335,7 +334,7 @@ def plot_single_pdate(pdate, args, style, map_config):
 
     fig, ax = plotter.create_basemap(
         feature_resolution=local_args.feature_resolution,
-    )
+    )  # Do we want to pass the basepath into this function to save the basemap cache at a location specified in the config?
 
     # Create reader for this worker
     reader = create_data_reader(local_args)
@@ -410,81 +409,18 @@ def main():
     map_config = all_maps[args.map_type]
     style = build_style(args)
 
-    # =========================================================================
-    # PRE-COMPUTE COORDINATE TRANSFORMS
-    # =========================================================================
-    if isinstance(map_config.projection, ccrs.Geostationary):
-        from earthnow.wxmaps_transform_cache import get_transform_cache
-        import matplotlib.pyplot as plt
+    from earthnow.wxmaps_transform_cache import get_transform_cache
 
-        print("\n" + "=" * 70)
-        print("Pre-computing coordinate transformations...")
-        print("=" * 70)
-
-        # Get cache with custom directory if specified
-        transform_cache = get_transform_cache(
-            cache_dir=getattr(args, "cache_dir", None)
-        )
-        transform_cache.clear_cache()  # clear once here only
-
-        # Create a minimal figure to get proper extent
-        # Use actual output size to ensure extent matches what workers will have
-        resolution_config = WxMapsConfig.RESOLUTIONS.get(args.resolution)
-        fig_temp = plt.figure(
-            figsize=resolution_config.figsize, dpi=resolution_config.dpi
-        )
-        ax_temp = fig_temp.add_subplot(1, 1, 1, projection=map_config.projection)
-
-        if map_config.extent is None:
-            ax_temp.set_global()
-        else:
-            ax_temp.set_extent(map_config.extent, crs=ccrs.PlateCarree())
-
-        xmin, xmax = ax_temp.get_xlim()
-        ymin, ymax = ax_temp.get_ylim()
-
-        target_extent = (xmin, xmax, ymin, ymax)
-        print(target_extent)
-
-        ax_temp.set_xlim(xmin, xmax)
-        ax_temp.set_ylim(ymin, ymax)
-
-        plt.close(fig_temp)
-
-        # Pre-compute the transform
-        target_shape = (
-            resolution_config.height,
-            resolution_config.width,
-        )  # height, width
-
-        transform_data, cache_key = transform_cache.get_or_compute_transform(
-            source_proj=ccrs.PlateCarree(),
-            target_proj=map_config.projection,
-            source_extent=[-180, 180, -90, 90],
-            target_extent=target_extent,
-            target_shape=target_shape,
-        )
-
-        # Store in style config so workers can access it
-        style.cached_target_extent = target_extent
-        style.cached_target_shape = target_shape
-        style.cached_transform_key = cache_key
-
-        print(f"✓ Transform cached with key: {cache_key[:16]}")
-        print(f"  Target extent: {target_extent}")
-        print(f"  Target shape: {target_shape}")
-        print("  All workers will use this cached transformation.\n")
-        print("=" * 70 + "\n")
-    # =========================================================================
+    print("\nLooking for transform cache instance")
+    get_transform_cache(cache_dir=args.cache_dir)
 
     # =========================================================================
-    # PRELOAD BASE IMAGES (after transform is computed)
+    # PRELOAD BASE IMAGES
     # =========================================================================
     from earthnow.wxmaps_base_images import (
         preload_base_images_from_style,
     )
 
-    # Preload base images (will use the same transform we just computed)
     preload_base_images_from_style(style, target_resolution=args.resolution)
     # =========================================================================
 

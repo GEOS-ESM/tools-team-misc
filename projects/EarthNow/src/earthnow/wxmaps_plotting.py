@@ -314,10 +314,11 @@ class WxMapPlotter:
                 )
                 print(f"   Using base image: {self.style.base_image_type}")
 
+            # TODO: come back to this eventually
             # Determine target resolution - must match what was preloaded!
-            target_resolution = getattr(
-                self.style, "base_image_target_resolution", 4000
-            )
+            # target_resolution = getattr(
+            #     self.style, "base_image_target_resolution", 4000
+            # )
 
             # Create plotter with matching resolution
             img_plotter = BaseImagePlotter(

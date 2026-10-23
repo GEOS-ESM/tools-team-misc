@@ -3,6 +3,10 @@ WxMaps Base Image Module
 Support for custom base earth imagery backgrounds
 """
 
+import hashlib
+import os
+import tempfile
+
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,6 +16,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 from enum import Enum
 from earthnow import paths
+from earthnow.wxmaps_config import WxMapsConfig
 
 import logging
 
@@ -121,10 +126,78 @@ class BaseImageConfig:
 
 
 class BaseImageCache:
-    """Singleton cache for base images to avoid reloading in parallel workers"""
+    """Memory and disk cache for decoded/downsampled base images."""
 
     _cache = {}
-    _preloaded = {}  # Separate dict for images preloaded before forking
+    _preloaded = {}  # Separate dict for images preloaded before forking (I dont think we need this for our workflow)
+    _disk_cache_version = 2
+
+    @classmethod
+    def _get_cache_identity(cls, image_path: str, target_resolution: str):
+        source_path = Path(image_path).expanduser()
+        try:
+            source_path = source_path.resolve(strict=True)
+            source_stat = source_path.stat()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Base image not found: {image_path}") from None
+
+        cache_key = (
+            str(source_path),
+            target_resolution,
+            source_stat.st_size,
+            source_stat.st_mtime_ns,
+        )
+        fingerprint = "\0".join(map(str, (cls._disk_cache_version, *cache_key)))
+        cache_filename = hashlib.sha256(fingerprint.encode()).hexdigest() + ".npy"
+        return cache_key, paths.BASE_IMAGE_CACHE_DIR / cache_filename
+
+    @staticmethod
+    def _load_disk_cache(cache_path: Path) -> Optional[np.ndarray]:
+        try:
+            image_array = np.load(cache_path, allow_pickle=False)
+            if not isinstance(image_array, np.ndarray):
+                image_array.close()
+                raise ValueError("cache entry is not an ndarray")
+            if (
+                image_array.dtype != np.uint8
+                or image_array.ndim != 3
+                or image_array.shape[2] != 4
+            ):
+                raise ValueError("cache entry is not an RGBA uint8 image")
+            return image_array
+        except FileNotFoundError:
+            return None
+        except (OSError, ValueError, EOFError) as error:
+            logger.warning(
+                "Ignoring invalid base-image cache entry %s: %s", cache_path, error
+            )
+            return None
+
+    @staticmethod
+    def _save_disk_cache(cache_path: Path, image_array: np.ndarray) -> None:
+        temporary_path = None
+        try:
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                dir=cache_path.parent,
+                prefix=f".{cache_path.stem}.",
+                suffix=".tmp",
+                delete=False,
+            ) as temporary_file:
+                temporary_path = Path(temporary_file.name)
+                np.save(temporary_file, image_array, allow_pickle=False)
+                temporary_file.flush()
+            os.replace(temporary_path, cache_path)
+        except (OSError, ValueError) as error:
+            logger.warning(
+                "Unable to write base-image cache entry %s: %s", cache_path, error
+            )
+        finally:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
 
     @classmethod
     def get_image(cls, image_path: str, target_resolution: str) -> np.ndarray:
@@ -142,7 +215,9 @@ class BaseImageCache:
         --------
         np.ndarray : Downsampled image array
         """
-        cache_key = (image_path, target_width)
+        cache_key, disk_cache_path = cls._get_cache_identity(
+            image_path, target_resolution
+        )
 
         # Check preloaded cache first
         if cache_key in cls._preloaded:
@@ -154,11 +229,13 @@ class BaseImageCache:
             print("   Basemap image found in memory cache")
             return cls._cache[cache_key]
 
-        # Load image
-        if not Path(image_path).exists():
-            raise FileNotFoundError(f"Base image not found: {image_path}")
+        image_array = cls._load_disk_cache(disk_cache_path)
+        if image_array is not None:
+            cls._cache[cache_key] = image_array
+            print(f"   Loaded base image from disk cache: {disk_cache_path}")
+            return image_array
 
-        print(f"Loading base image: {image_path}")
+        print(f"  No image cache found. Loading base image: {image_path}")
 
         resolution_config = WxMapsConfig.RESOLUTIONS[target_resolution]
         target_width = resolution_config.width
@@ -177,9 +254,7 @@ class BaseImageCache:
 
             # Only downsample if image is larger than target
             if orig_width > target_width:
-                # Calculate target height maintaining aspect ratio
-                aspect_ratio = orig_height / orig_width
-                target_height = int(target_width * aspect_ratio)
+                target_height = max(1, round(target_width * orig_height / orig_width))
 
                 # Downsample with high-quality Lanczos filter
                 print(
@@ -194,12 +269,11 @@ class BaseImageCache:
                 print("  Using original size (already smaller than target)")
                 img_array = np.array(img)
 
-            print(f"  Cached. Memory: {img_array.nbytes / (1024**2):.1f} MB")
-
-        # Cache it
         cls._cache[cache_key] = img_array
-        logger.info(f"Image converted: {img_array.shape}")
-
+        cls._save_disk_cache(disk_cache_path, img_array)
+        print(
+            f"  Cached base image for other workers. Memory: {img_array.nbytes / (1024**2):.1f} MB   Image converted: {img_array.shape}\n  Cache: {disk_cache_path}"
+        )
         return img_array
 
     @classmethod
@@ -207,8 +281,10 @@ class BaseImageCache:
         """
         Mark an image as preloaded so workers know to use the forked copy.
         Call this BEFORE forking workers.
+        This doesn't work for our workflow, SLURM distributes each date to a worker, there is no central process that is performed first.
         """
-        cache_key = (image_path, target_width)
+
+        cache_key, _ = cls._get_cache_identity(image_path, target_resolution)
         if cache_key in cls._cache:
             cls._preloaded[cache_key] = cls._cache[cache_key]
 
@@ -293,6 +369,7 @@ class BaseImagePlotter:
             self.image_array = BaseImageCache.get_image(
                 self.image_path, target_resolution=self.target_resolution
             )
+
         return self.image_array
 
     def plot_on_map(
@@ -301,12 +378,10 @@ class BaseImagePlotter:
         alpha: float = 1.0,
         interpolation: str = "bilinear",
         zorder: int = 0,
-        style=None,
     ):
         """
         Plot base image on a Cartopy map using cached transform
         """
-        # Load from cache (fast after first load)
         if self.image_array is None:
             self.load_image()
 
@@ -315,18 +390,14 @@ class BaseImagePlotter:
         # Use cached coordinate transformation
         from earthnow.wxmaps_transform_cache import get_transform_cache
 
-        print("   Looking for transform cache instance...")
         transform_cache = get_transform_cache()
 
-        # Use pre-computed extent/shape if available (ensures cache hit)
-        if style and hasattr(style, "cached_target_extent"):
-            target_extent = style.cached_target_extent
-            target_shape = style.cached_target_shape
-            print(f"    Using pre-computed extent from style")
-        else:
-            target_extent = ax.get_extent()
-            target_shape = (2160, 4320)
+        target_extent = ax.get_extent(crs=ax.projection)
+        resolution_config = WxMapsConfig.RESOLUTIONS[self.target_resolution]
+        target_shape = (resolution_config.height, resolution_config.width)
+        print(f"      Target extent: {target_extent}, target shape: {target_shape}")
 
+        # Why can't we just cache the transformed image? That would be faster right?
         # Get or compute transform (should hit cache now!)
         transform_data, cache_key = transform_cache.get_or_compute_transform(
             source_proj=ccrs.PlateCarree(),
