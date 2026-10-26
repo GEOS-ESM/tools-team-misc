@@ -33,7 +33,7 @@ Sandwich RGB - Blended LW IR and Veggie VIS
 `ploteic_radar`
 Radar Reflectivity [Rain/Snow/Ice]
 - Assignee: Emily
-- Status: CONUS works with existing LCC files; Global requires in situ interpolation from cube sphere to lat/lon. Future work.
+- Status: Global maps still have small discrepancies compared to Bill's IDL output. Suspicion is that pressure layer thicknesses are defined differently between the files he reads and files we read. Future work.
 
 `ploteic_precip`
 Accumulated Precip [Rain & Snow]
