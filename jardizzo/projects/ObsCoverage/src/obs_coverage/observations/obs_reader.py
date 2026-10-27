@@ -7,15 +7,17 @@ from scipy.spatial import cKDTree
 
 class ObsReader(object):
 
-    def __init__(self, filename, **kwargs):
+    def __init__(self, filename=None, **kwargs):
 
         self.quiet = kwargs.get("quiet", False)
         self.debug = kwargs.get("debug", False)
+        self.observations = {}
 
-        self.fh = xr.open_dataset(filename)
+        if filename:
+            self.fh = xr.open_dataset(filename)
 
-        if not self.quiet:
-            print(f"Reading: {filename}")
+            if not self.quiet:
+                print(f"Reading: {filename}")
 
     def grid_map(self, loninc, latinc, lons, lats):
 
@@ -107,3 +109,15 @@ class ObsReader(object):
         best_obs_indices = sorted_obs_indices[unique_positions]
 
         return best_obs_indices
+
+    def accumulate(self, obs):
+
+        sort_indices = obs.time.argsort()
+        for i in sort_indices:
+             dattim = obs.time[i].strftime('%Y%m%d%H')
+             tbin = obs.time[i].round('6h')
+             delta = (self.time[i] - tbin) / np.timedelta64(1, 'h')
+             bin = self.observations.get(dattim, [])
+             bin.append((obs.lons[i],obs.lats[i],obs.time[i],tbin,delta))
+             self.observations[dattim] = bin
+

@@ -30,7 +30,7 @@ class AERDB_L2_VIIRS_SNPP(ObsReader):
 
         nobs = self.lons.size
 
-        mapper = self.grid_map(loninc, latinc, self.lons, self.lats)
+        mapper = self.grid_map_new(loninc, latinc, self.lons, self.lats)
         self._lons = self.lons[mapper]
         self._lats = self.lats[mapper]
         self._time = self.time[mapper]
