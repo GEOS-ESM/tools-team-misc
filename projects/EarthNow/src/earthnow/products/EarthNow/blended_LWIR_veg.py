@@ -1,39 +1,48 @@
 """
-Sandwich product: Longwave window IR (band 14) blended with a
-vegetation field (green channel) derived from OSRB09RG.
-Based on ploteic_sandwich_eblocal.pro
+Sandwich RGB: longwave window IR (band 14) blended over a vegetation field.
+Translation of ploteic_sandwich_eblocal.pro (CONUS branch)
+
+Plots on the native 2-D lons/lats grid, like longwave_window_ir.py.
+
+NOTE: The IDL script reads OSRB08RG (RRTMG) or OSRB09RG (RRTMGP). This
+translation always uses OSRB09RG for now.
 """
 
 import datetime
-import time
 import numpy as np
 import cartopy.crs as ccrs
-from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib import colormaps
+from matplotlib.colors import ListedColormap, Normalize
 from earthnow.products.registry import register
-from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 
 # ------------------------------------------------------------------
-# Longwave IR colormap + levels (wxmaps-style)
+# Constants (from ploteic_sandwich_eblocal.pro)
 # ------------------------------------------------------------------
 
-COLORS = load_color_table(paths.colortable("NESDIS_IR_10p3micron.txt"))
+LWIR_MIN = -93.0  # Celsius, coldest level in the IDL clevs
+LWIR_MAX = -15.0  # Celsius, warmest level in the IDL clevs
+LWIR_OPACITY = 0.66  # IDL: 0.66*255 alpha for the LWIR layer
+ALPHA_LIMIT = 600.0  # IDL: normalize(SWTDN, 0, 600)
+FILL_VALUE = 1e14  # IDL undef = 1e15; anything above this is missing
 
-clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
-LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
+# ------------------------------------------------------------------
+# Colormap + levels (turbo replaces IDL colortable 33)
+# ------------------------------------------------------------------
 
-IR_ALPHA = 0.66
-ALPHA_LIMIT = 600.0  # SWTDN (W m-2) upper bound used by IDL normalize
+COLORS = colormaps["turbo_r"](np.linspace(0, 1, 256))[:, :3]
+LEVELS = np.linspace(LWIR_MIN, LWIR_MAX, 256)  # Celsius, one per color index
 
 
 # ------------------------------------------------------------------
-# Solar geometry + vegetation helpers (from geocolor_rgb.py)
+# Helpers (same logic as geocolor_rgb.py)
 # ------------------------------------------------------------------
 
 
 def solar_distance_au(pdate):
     """
     Compute Earth–Sun distance in AU for the valid time.
+    LAZY IMPORT astropy here - only when actually called
     """
     from astropy.time import Time
     from astropy.coordinates import get_sun
@@ -61,24 +70,13 @@ def solar_distance_au(pdate):
     return get_sun(t).distance.to(u.au).value
 
 
-def vegetation_field(osr, isr, sun_distance_au, min_solar_threshold=0.001):
-    """
-    Vegetation (green-channel) reflectance from NIR OSR, scaled by the
-    incoming solar flux. Matches the IDL factor * osr * data_a construction.
-    Returns values clipped to [0, 1] and the solar alpha layer.
-    """
-    isr_masked = np.where(isr < min_solar_threshold, np.nan, isr)
-    factor = np.pi / (isr_masked * sun_distance_au**2)
-
-    osr = np.where(np.isfinite(osr), osr, 0.0)
-    alpha = np.clip(isr / ALPHA_LIMIT, 0.0, 1.0)
-
-    veg = np.nan_to_num(factor * osr * alpha, nan=0.0, posinf=0.0, neginf=0.0)
-    veg = np.clip(veg, 0.0, 1.0)
-
-    # IDL sqrt enhancement
-    veg = np.sqrt(veg)
-    return veg, alpha
+def read_field(reader, args, name):
+    data, lats, lons, meta = reader.read_variable(
+        args.fdate, args.pdate, variables=[name]
+    )
+    data = np.ma.filled(np.ma.asarray(data, dtype=np.float32), np.nan)
+    data = np.where(np.abs(data) >= FILL_VALUE, np.nan, data)
+    return data, lats, lons
 
 
 # ------------------------------------------------------------------
@@ -89,95 +87,85 @@ def vegetation_field(osr, isr, sun_distance_au, min_solar_threshold=0.001):
 @register("blended_LWIR_veg_EarthNow")
 def plot_blended_LWIR_veg(fig, ax, plotter, reader, args):
     """
-    Plot longwave window IR blended with vegetation field
+    Plot longwave window IR blended over vegetation field
     """
     # ------------------------------------------------------------
-    # Longwave IR (band 14)
+    # Longwave IR (band 14) -> Celsius (lccdataG in IDL)
     # ------------------------------------------------------------
-    data, lats, lons, meta = reader.read_variable(
-        args.fdate, args.pdate, variables=["TBRB06RG"]
-    )
-    data = data.astype(np.float32) - 273.15  # Celcius
+    tb, lats, lons = read_field(reader, args, "TBRB06RG")
+    lwir_c = tb - 273.15
 
     # ------------------------------------------------------------
-    # Vegetation field (IDL data_g / lccdata_g)
+    # Solar alpha (lccdata_a in IDL): normalize(SWTDN, 0, 600)
     # ------------------------------------------------------------
-    isr, _, _, _ = reader.read_variable(args.fdate, args.pdate, variables=["SWTDN"])
-    osr_nir, _, _, _ = reader.read_variable(
-        args.fdate, args.pdate, variables=["OSRB09RG"]
-    )
+    isr, _, _ = read_field(reader, args, "SWTDN")
+    isr = np.nan_to_num(isr, nan=0.0)
+    alpha = np.clip(isr / ALPHA_LIMIT, 0.0, 1.0)
+
+    # ------------------------------------------------------------
+    # Vegetation field (lccdata_g in IDL)
+    # factor = pi / (ISR * d^2); osr NaN -> 0; night (ISR = 0) -> 0
+    # ------------------------------------------------------------
+    osr, _, _ = read_field(reader, args, "OSRB09RG")
+    osr = np.nan_to_num(osr, nan=0.0)
     sun_dist = solar_distance_au(args.pdate)
-    veg, veg_alpha = vegetation_field(
-        osr_nir.astype(np.float32), isr.astype(np.float32), sun_dist
+    with np.errstate(divide="ignore", invalid="ignore"):
+        veg = np.where(isr > 0, np.pi * osr / (isr * sun_dist**2), 0.0)
+    veg = np.nan_to_num(veg, nan=0.0, posinf=0.0, neginf=0.0)
+    veg = veg * alpha
+
+    # IDL: 255*SQRT(bytscl(x, 0, 1)/255) -> sqrt of the clipped field on 0-1
+    veg_gray = np.sqrt(np.clip(veg, 0.0, 1.0))
+    veg_alpha = alpha
+
+    # ------------------------------------------------------------
+    # LWIR colormap (IDL CONUS contour branch)
+    # Levels span -93..-15 C; values outside that range are not drawn
+    # ------------------------------------------------------------
+    valid = np.isfinite(lwir_c) & (lwir_c >= LWIR_MIN) & (lwir_c <= LWIR_MAX)
+    frac = (lwir_c - LWIR_MIN) / (LWIR_MAX - LWIR_MIN)
+    idx = np.clip(np.floor(np.nan_to_num(frac) * 256.0), 0, 255).astype(np.int64)
+    lwir_rgb = COLORS[idx]
+    lwir_alpha = np.where(valid, LWIR_OPACITY, 0.0).astype(np.float32)
+
+    # ------------------------------------------------------------
+    # Blend: vegetation bottom, LWIR on top (IDL Blend_Func=[3,4])
+    # ------------------------------------------------------------
+    veg_rgb = np.repeat(veg_gray[..., None], 3, axis=-1)
+    out_alpha = lwir_alpha + veg_alpha * (1.0 - lwir_alpha)
+    out_rgb = (
+        lwir_rgb * lwir_alpha[..., None]
+        + veg_rgb * (veg_alpha * (1.0 - lwir_alpha))[..., None]
     )
+    out_rgb = out_rgb / np.maximum(out_alpha, 1e-6)[..., None]
+    rgba = np.dstack([out_rgb, out_alpha]).astype(np.float32)
 
     # ------------------------------------------------------------
-    # IR RGBA (underlay)
+    # Plot on native grid: one color per cell, carrying the blended RGBA
     # ------------------------------------------------------------
-    cmap = ListedColormap(COLORS)
-    norm = BoundaryNorm(LEVELS, ncolors=cmap.N, clip=True)
-    ir_rgba = cmap(norm(data))
-    ir_rgba[..., 3] = np.where(np.isfinite(data), IR_ALPHA, 0.0)
+    ny, nx = rgba.shape[:2]
+    n_colors = ny * nx
+    cmap = ListedColormap(rgba.reshape(-1, 4))
+    norm = Normalize(vmin=-0.5, vmax=n_colors - 0.5)
+    cell_index = np.arange(n_colors, dtype=np.float32).reshape(ny, nx)
 
-    # ------------------------------------------------------------
-    # Vegetation RGBA (underlay, grayscale green level)
-    # ------------------------------------------------------------
-    veg_rgb = np.dstack([veg, veg, veg])
-    va = veg_alpha[..., None]
-    ia = ir_rgba[..., 3:4]
-
-    # ------------------------------------------------------------
-    # Composite IR over vegetation (IDL draws m1ImageObj after m0ImageObj)
-    # ------------------------------------------------------------
-    out_a = ia + va * (1.0 - ia)
-    out_rgb = (ia * ir_rgba[..., :3] + va * (1.0 - ia) * veg_rgb) / np.maximum(
-        out_a, 1e-6
-    )
-    rgba = np.dstack([out_rgb, out_a])
-
-    # ------------------------------------------------------------
-    # Plot image on map
-    # ------------------------------------------------------------
-    start = time.time()
-    from earthnow.wxmaps_transform_cache import get_transform_cache
-
-    transform_cache = get_transform_cache()
-    target_extent = ax.get_extent()
-    target_shape = (2160, 4320)  # height, width for target
-    transform_data, cache_key = transform_cache.get_or_compute_transform(
-        source_proj=ccrs.PlateCarree(),
-        target_proj=ax.projection,
-        source_extent=[-180, 180, -90, 90],
-        target_extent=target_extent,
-        target_shape=target_shape,
-    )
-    warped_rgba, warped_extent = transform_cache.apply_transform(
-        source_data=rgba,
-        transform_data=transform_data,
-        fill_value=0.0,
-        flip_source_y=True,
-    )
-    ax.imshow(
-        warped_rgba,
-        origin="upper",
-        extent=warped_extent,
-        transform=ax.projection,
-        interpolation="antialiased",
-        resample=False,
+    ax.pcolormesh(
+        lons,
+        lats,
+        cell_index,
+        cmap=cmap,
+        norm=norm,
+        transform=ccrs.PlateCarree(),
+        shading="nearest",
         zorder=4,
-        rasterized=True,
     )
-    print(f"Blended LWIR/veg composite finished: {time.time() - start:.2f}s")
 
 
 def generate_colorbar():
-    """Generate colorbar for longwave window IR"""
+    """Generate colorbar for the blended LWIR / vegetation product"""
     from earthnow.wxmaps_utils import save_colorbar_single
 
-    # Use representative tick levels instead of all 256
-    tick_levels = np.array([-110, -80, -50, -20, 0, 20, 40, 57])
-
-    output = paths.colorbar_output("longwave_window_ir.png")
+    output = paths.colorbar_output("blended_LWIR_veg.png")
     save_colorbar_single(
         COLORS,
         LEVELS,
