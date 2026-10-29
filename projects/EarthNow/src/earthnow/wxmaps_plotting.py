@@ -114,6 +114,8 @@ class WxMapPlotter:
     ) -> Tuple[plt.Figure, plt.Axes]:
         """Create base map with specified boundaries"""
 
+        self.feature_resolution = feature_resolution
+
         # Turn off boundaries for all global views
         if self.config.name == "global":
             boundaries = []
@@ -150,12 +152,12 @@ class WxMapPlotter:
         # ===================================================================
         if self.style.use_base_image:
             # Use base earth image
-            print("Using base earth image...")
+            print("Plotting base image...")
             self._add_base_image()
         elif self.style.use_gshhs:
             # Use GSHHS for high-resolution land/water
-            print("Using GSHHS for land/water boundaries...")
             self._add_gshhs_background()
+            print("Added GSHHS for land/water boundaries...")
         elif self.style.use_base_shapefiles:
             # Use default Cartopy features
             self.ax.add_feature(
@@ -170,7 +172,7 @@ class WxMapPlotter:
                 facecolor=self.style.ocean_color,
                 zorder=0,
             )
-            print("Added base cartopy shapes")
+            print("Added Cartopy land/water boundaries")
 
         # ===================================================================
         # Add boundary features (countries, states, etc.)
@@ -304,33 +306,25 @@ class WxMapPlotter:
             if self.style.base_image_path:
                 # Custom image path provided
                 image_path = self.style.base_image_path
-                print(f"Using custom base image: {image_path}")
+                print(f"   Using custom base image: {image_path}")
             else:
                 # Use predefined image type
                 image_path = BaseImageConfig.get_image_path(
                     self.style.base_image_type, month=self.style.base_image_month
                 )
-                print(f"Using base image: {self.style.base_image_type}")
+                print(f"   Using base image: {self.style.base_image_type}")
 
-            # Determine target resolution - must match what was preloaded!
-            target_resolution = getattr(
-                self.style, "base_image_target_resolution", 4000
-            )
-
-            # Create plotter with matching resolution
             img_plotter = BaseImagePlotter(
-                image_path, target_resolution=target_resolution
+                image_path,
+                target_resolution=self.resolution,
+                cache_directory=self.style.image_cache_directory,
             )
-
-            # Load image (will use preloaded cache if available)
-            img_plotter.load_image()
 
             # Plot on map
             img_plotter.plot_on_map(
                 self.ax,
                 alpha=self.style.base_image_alpha,
                 interpolation=self.style.base_image_interpolation,
-                zorder=0,
             )
 
         except Exception as e:
@@ -871,15 +865,14 @@ class WxMapPlotter:
                         ),
                     )
 
-    def add_roads(self, road_scale: str = "50m", major_only: bool = True):
+    def add_roads(self):
         """
         Add road features
 
         Parameters:
         -----------
-        road_scale : str
-            '110m', '50m', '10m'
-        major_only : bool
+        road_scale : Only '10m' scale is currently supported
+        self.style.major_only : bool
             If True, only show major highways/interstates
             If False, show all roads
         """
@@ -1575,9 +1568,9 @@ class WxMapPlotter:
 
         print(f"Saved: {filename}")
         print(
-            f"  Resolution: {self.resolution_config.width}x{self.resolution_config.height}"
+            f"Resolution: {self.resolution_config.width}x{self.resolution_config.height}"
         )
-        print(f"  File size: {file_size_mb:.2f} MB")
+        print(f"File size: {file_size_mb:.2f} MB")
 
         # CRITICAL: Close figure to free memory
         plt.close(self.fig)

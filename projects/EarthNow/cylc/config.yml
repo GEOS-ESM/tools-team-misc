@@ -14,35 +14,23 @@ mp4size: [8k, 4k, HD]
 driver: enow_plot.py
 # Tasks
 # =====
-plot_all: [plot_global, plot_conus]
+plot_all: [plot_global, plot_conus_LCC, plot_conus_latlon] # This didn't work when I tried it
+plot_conus: [plot_conus_LCC, plot_conus_latlon]
 plot_global:
   products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon, geocolor, band16, band09, band14, radar]
   streams: [conus2km]
   regions: [global]
-plot_conus:
-  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon, geocolor, band16, band09, band14, radar]
+plot_conus_LCC:
+  products: [cape, band16, band14, band09, winds, t2m] # plus Sandwich RBG but its not done yet?
   streams: [conus2km_lcc]
   regions: [conus]
+plot_conus_latlon:
+  products: [vort500, wind250, helicity, aerosols, carbon, geocolor, radar]
+  streams: [conus2km]
+  regions: [conus]
+
 # Product Definitions
 # ===================
-
-#aerosols
-#band09
-#band14
-#band16
-#cape
-#carbon
-#geocolor
-#helicity
-#precip
-#radar
-#rainsnow
-#sandwich
-#t2m
-#tanom
-#vort500
-#wind250
-#winds
 products:
   t2m:
     product: temperature_2m_EarthNow
@@ -73,7 +61,7 @@ products:
     style: greyblue_plain
   geocolor:
     product: geocolor_rgb_EarthNow
-    style: satellite
+    style: nightlights
   band16:
     product: co2_longwave_ir_EarthNow
     style: white_state_coast

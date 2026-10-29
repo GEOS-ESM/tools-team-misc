@@ -3,20 +3,29 @@ WxMaps Base Image Module
 Support for custom base earth imagery backgrounds
 """
 
+import hashlib
+import os
+import tempfile
+import zipfile
+
 from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
-from cartopy.img_transform import warp_array
 from pathlib import Path
 from typing import Optional, Tuple
 from enum import Enum
+from earthnow import paths
+from earthnow.wxmaps_config import WxMapsConfig
+from earthnow.wxmaps_transform_cache import TransformCache
 
 import logging
 
 logger = logging.getLogger(__name__)
 
-from earthnow import paths
+Extent = Tuple[float, float, float, float]
+
+# Bump when warping/limb-darkening output changes so stale cache files are ignored.
+WARPED_CACHE_VERSION = 1
 
 
 class BaseImageType(Enum):
@@ -121,111 +130,15 @@ class BaseImageConfig:
             print(f"  Path: {BaseImageConfig.BASE_IMAGE_DIR}/{info['path']}")
 
 
-class BaseImageCache:
-    """Singleton cache for base images to avoid reloading in parallel workers"""
-
-    _cache = {}
-    _preloaded = {}  # Separate dict for images preloaded before forking
-
-    @classmethod
-    def get_image(cls, image_path: str, target_width: int = 4000) -> np.ndarray:
-        """
-        Load and downsample base image with caching.
-
-        Parameters:
-        -----------
-        image_path : str
-            Path to base image
-        target_width : int
-            Target width for downsampling (default: 4000)
-            Higher = better quality but slower (4000-8000 recommended)
-
-        Returns:
-        --------
-        np.ndarray : Downsampled image array
-        """
-        cache_key = (image_path, target_width)
-
-        # Check preloaded cache first (set before forking)
-        if cache_key in cls._preloaded:
-            return cls._preloaded[cache_key]
-
-        # Return cached version if available
-        if cache_key in cls._cache:
-            return cls._cache[cache_key]
-
-        # Load image
-        if not Path(image_path).exists():
-            raise FileNotFoundError(f"Base image not found: {image_path}")
-
-        print(f"Loading base image: {image_path}")
-
-        # Disable decompression bomb check for legitimate large images
-        Image.MAX_IMAGE_PIXELS = None
-
-        with Image.open(image_path) as img:
-            orig_width, orig_height = img.size
-            orig_pixels = (orig_width * orig_height) / 1e6
-
-            print(
-                f"  Original size: {orig_width}x{orig_height} ({orig_pixels:.1f}M pixels)"
-            )
-            # Convert to RBGA if in greyscale luminance alpha
-            img = img.convert("RGBA")
-
-            # Only downsample if image is larger than target
-            if orig_width > target_width:
-                # Calculate target height maintaining aspect ratio
-                aspect_ratio = orig_height / orig_width
-                target_height = int(target_width * aspect_ratio)
-
-                # Downsample with high-quality Lanczos filter
-                print(
-                    f"  Downsampling to: {target_width}x{target_height} ({(target_width * target_height) / 1e6:.1f}M pixels)"
-                )
-                img_resized = img.resize(
-                    (target_width, target_height), Image.Resampling.LANCZOS
-                )
-                img_array = np.array(img_resized)
-            else:
-                # Use original size if already smaller than target
-                print(f"  Using original size (already smaller than target)")
-                img_array = np.array(img)
-
-            print(f"  Cached. Memory: {img_array.nbytes / (1024**2):.1f} MB")
-
-        # Cache it
-        cls._cache[cache_key] = img_array
-        logger.info(f"Image converted: {img_array.shape}")
-
-        return img_array
-
-    @classmethod
-    def mark_as_preloaded(cls, image_path: str, target_width: int):
-        """
-        Mark an image as preloaded so workers know to use the forked copy.
-        Call this BEFORE forking workers.
-        """
-        cache_key = (image_path, target_width)
-        if cache_key in cls._cache:
-            cls._preloaded[cache_key] = cls._cache[cache_key]
-
-    @classmethod
-    def clear_cache(cls):
-        """Clear the image cache to free memory"""
-        cls._cache = {}
-        cls._preloaded = {}
-        print("Base image cache cleared.")
-
-
 class BaseImagePlotter:
     """Handler for plotting base earth images"""
 
     def __init__(
         self,
         image_path: str,
-        extent: Tuple[float, float, float, float] = None,
-        target_resolution: int = 4000,
+        cache_directory: str | Path,
+        extent: Extent = (-180.0, 180.0, -90.0, 90.0),
+        target_resolution: str = "4k",
     ):
         """
         Initialize base image plotter
@@ -234,17 +147,21 @@ class BaseImagePlotter:
         -----------
         image_path : str
             Path to base image file
+        cache_directory : str | Path
+            Directory for warped-image cache files
         extent : tuple, optional
             Image extent [lon_min, lon_max, lat_min, lat_max]
-            Default: [-180, 180, -90, 90] for global images
-        target_resolution : int
-            Target width for downsampling (default: 4000)
-            Recommended: 4000 for fast, 8000 for high quality
+            Default: (-180, 180, -90, 90)
+        target_resolution : str
+            Output resolution key ('hd', 'fhd', '2k', '4k', '8k')
+
         """
         self.image_path = image_path
-        self.extent = extent if extent else [-180, 180, -90, 90]
+        self.extent = extent
+        self.cache_directory = cache_directory
         self.target_resolution = target_resolution
-        self.image_array = None
+        resolution_config = WxMapsConfig.RESOLUTIONS[target_resolution]
+        self.target_shape = (resolution_config.height, resolution_config.width)
 
     @staticmethod
     def apply_limb_darkening(img, strength=0.3, gamma=3.0):
@@ -283,15 +200,151 @@ class BaseImagePlotter:
 
         return np.clip(img_out, 0, 255).astype(img.dtype)
 
-    def load_image(self):
-        """
-        Load the base image using cache
-        """
-        if self.image_array is None:
-            self.image_array = BaseImageCache.get_image(
-                self.image_path, target_width=self.target_resolution
+    def _load_source_image(self) -> np.ndarray:
+        """Decode the source image as RGBA, downsampled to the output width."""
+        target_width = self.target_shape[1]
+        # Source basemaps are legitimately larger than PIL's decompression-bomb limit.
+        Image.MAX_IMAGE_PIXELS = None
+
+        print(f"   Loading source base image and resampling: {self.image_path}")
+        with Image.open(self.image_path) as img:
+            orig_width, orig_height = img.size
+            img = img.convert("RGBA")
+            if orig_width > target_width:
+                target_height = max(1, round(target_width * orig_height / orig_width))
+                img = img.resize(
+                    (target_width, target_height), Image.Resampling.LANCZOS
+                )
+            return np.array(img)
+
+    def _create_warped_image(
+        self, projection, target_extent: Extent
+    ) -> Tuple[np.ndarray, Extent]:
+        """Warp the source image onto the target projection and extent."""
+        source_image = self._load_source_image()
+        transform_data = TransformCache.compute_transform_data(
+            source_proj=ccrs.PlateCarree(),
+            target_proj=projection,
+            source_extent=self.extent,
+            target_extent=target_extent,
+            target_shape=self.target_shape,
+        )
+        # Image rows run north-to-south; the transform expects south-to-north.
+        warped_image, warped_extent = TransformCache.apply_transform(
+            source_data=source_image,
+            transform_data=transform_data,
+            fill_value=0,
+            flip_source_y=True,
+        )
+        if isinstance(projection, ccrs.Geostationary):
+            warped_image = BaseImagePlotter.apply_limb_darkening(warped_image)
+        print("   Created warped image")
+        return warped_image, warped_extent
+
+    @staticmethod
+    def _save_warped_image(
+        cache_path: Path, warped_image: np.ndarray, warped_extent: Extent
+    ) -> None:
+        """Atomically write the warped image so concurrent jobs never read a partial file."""
+        temporary_path = None
+        try:
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                dir=cache_path.parent,
+                prefix=f".{cache_path.stem}.",
+                suffix=".tmp",
+                delete=False,
+            ) as temporary_file:
+                temporary_path = Path(temporary_file.name)
+                np.savez(
+                    temporary_file,
+                    rgba=warped_image,
+                    extent=np.asarray(warped_extent, dtype=np.float64),
+                )
+            os.replace(temporary_path, cache_path)
+            print(f"   Saved warped base image to cache: {cache_path}")
+        except (OSError, ValueError) as error:
+            print(
+                f"   Warning: Unable to write warped image cache {cache_path}: {error}"
             )
-        return self.image_array
+        finally:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+
+    def _warped_cache_path(
+        self,
+        target_extent: Extent,
+        projection: ccrs.Projection,
+        source_projection: ccrs.Projection = ccrs.PlateCarree(),
+    ) -> Path:
+        """Cache file for one source image warped onto one map geometry."""
+        transform_key = TransformCache.make_cache_key(
+            projection,
+            source_projection,
+            self.extent,
+            target_extent,
+            self.target_shape,
+        )
+
+        source_path = Path(self.image_path).expanduser().resolve(strict=True)
+        source_stat = source_path.stat()
+        fingerprint = "\0".join(
+            map(
+                str,
+                (
+                    WARPED_CACHE_VERSION,
+                    source_path,
+                    source_stat.st_size,
+                    source_stat.st_mtime_ns,
+                    transform_key,
+                ),
+            )
+        )
+        digest = hashlib.sha256(fingerprint.encode()).hexdigest()
+        return Path(self.cache_directory).expanduser() / f"{digest}.npz"
+
+    def _load_warped_image(
+        self, cache_path: Path
+    ) -> Optional[Tuple[np.ndarray, Extent]]:
+        """Return the cached warped RGBA image and extent, or None if unusable."""
+        try:
+            with np.load(cache_path, allow_pickle=False) as cache_file:
+                warped_image = cache_file["rgba"]
+                warped_extent = cache_file["extent"]
+            if (
+                warped_image.dtype != np.uint8
+                or warped_image.shape != (*self.target_shape, 4)
+                or warped_extent.shape != (4,)
+                or not np.isfinite(warped_extent).all()
+            ):
+                raise ValueError("invalid warped image cache data")
+        except FileNotFoundError:
+            return None
+        except (OSError, EOFError, KeyError, ValueError, zipfile.BadZipFile) as error:
+            print(f"   Ignoring invalid warped image cache {cache_path}: {error}")
+            return None
+
+        x0, x1, y0, y1 = (float(value) for value in warped_extent)
+        print(f"   Loaded warped image from cache: {cache_path}")
+        return warped_image, (x0, x1, y0, y1)
+
+    def load_or_create_warped_image(
+        self, target_extent: Extent, projection: ccrs.Projection
+    ) -> Tuple[np.ndarray, Extent]:
+        """Load the warped image from cache, or create it and cache it."""
+        cache_path = self._warped_cache_path(target_extent, projection)
+        cached = self._load_warped_image(cache_path)
+        if cached is not None:
+            return cached
+
+        warped_image, warped_extent = self._create_warped_image(
+            projection, target_extent
+        )
+        self._save_warped_image(cache_path, warped_image, warped_extent)
+        return warped_image, warped_extent
 
     def plot_on_map(
         self,
@@ -299,63 +352,17 @@ class BaseImagePlotter:
         alpha: float = 1.0,
         interpolation: str = "bilinear",
         zorder: int = 0,
-        style=None,
     ):
-        """
-        Plot base image on a Cartopy map using cached transform
-        """
-        # Load from cache (fast after first load)
-        if self.image_array is None:
-            self.load_image()
+        """Plot the warped base image, loading it from cache when available."""
+        target_extent = ax.get_extent(crs=ax.projection)
 
-        print(f"  Plotting base image: {Path(self.image_path).name}")
-
-        # Use cached coordinate transformation
-        from earthnow.wxmaps_transform_cache import get_transform_cache
-
-        transform_cache = get_transform_cache()
-
-        # Use pre-computed extent/shape if available (ensures cache hit)
-        if style and hasattr(style, "cached_target_extent"):
-            target_extent = style.cached_target_extent
-            target_shape = style.cached_target_shape
-            print(f"    Using pre-computed extent from style")
-        else:
-            target_extent = ax.get_extent()
-            target_shape = (2160, 4320)
-
-        # Get or compute transform (should hit cache now!)
-        transform_data, cache_key = transform_cache.get_or_compute_transform(
-            source_proj=ccrs.PlateCarree(),
-            target_proj=ax.projection,
-            source_extent=self.extent,
-            target_extent=target_extent,
-            target_shape=target_shape,
+        warped_image, warped_extent = self.load_or_create_warped_image(
+            target_extent, ax.projection
         )
 
-        # Apply the cached transform
-        # CRITICAL: Base images (JPEG/PNG) have origin='upper' (row 0 = North)
-        # But geographic data convention is origin='lower' (row 0 = South)
-        # The transformation expects source data in origin='lower' format, so we must flip
-        print(f"    Applying cached transform to base image...")
-        warped_img, warped_extent = transform_cache.apply_transform(
-            source_data=self.image_array,
-            transform_data=transform_data,
-            fill_value=0,
-            flip_source_y=True,  # Flip source from origin='upper' to origin='lower' before interpolation
-        )
-        logger.info(f"Image dims: {warped_img.shape}")
-
-        # Automatic limb darkening for full disk GEO
-        if isinstance(ax.projection, ccrs.Geostationary):
-            warped_img = BaseImagePlotter.apply_limb_darkening(warped_img)
-
-        # Plot the transformed image
-        # The warped_img array is constructed with row 0 = bottom (target_extent[2])
-        # This is origin='lower' convention, matching how compute_transform() builds the coordinate mapping
-        im = ax.imshow(
-            warped_img,
-            origin="lower",  # Output array has row 0 at bottom of map
+        return ax.imshow(
+            warped_image,
+            origin="lower",
             extent=warped_extent,
             transform=ax.projection,
             interpolation=interpolation,
@@ -364,44 +371,3 @@ class BaseImagePlotter:
             zorder=zorder,
             rasterized=True,
         )
-
-        print(f"    Done (interpolation={interpolation}, alpha={alpha})")
-
-        return im
-
-
-def preload_base_images_from_style(style, target_resolution: int = 4000):
-    """
-    Preload base images into cache based on StyleConfig.
-    Call this once in main process before forking workers.
-
-    Parameters:
-    -----------
-    style : StyleConfig
-        Style configuration that may request base images
-    target_resolution : int
-        Target width for downsampling (default: 4000)
-    """
-    if not style.use_base_image:
-        return  # No base image requested
-
-    print("\n" + "=" * 70)
-    print("Preloading base images into cache...")
-    print("=" * 70)
-
-    # Determine which image to load
-    if style.base_image_path:
-        image_path = style.base_image_path
-    else:
-        image_path = BaseImageConfig.get_image_path(
-            style.base_image_type, month=style.base_image_month
-        )
-
-    # Load into cache
-    BaseImageCache.get_image(image_path, target_width=target_resolution)
-
-    # Mark as preloaded so workers use the forked copy
-    BaseImageCache.mark_as_preloaded(image_path, target_resolution)
-
-    print("Base images preloaded successfully.")
-    print("Workers will use the preloaded copy from forked memory.\n")
