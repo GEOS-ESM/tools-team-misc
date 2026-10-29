@@ -9,7 +9,6 @@ Basemap is implemented as the first product.
 
 import argparse
 import sys
-import cartopy.crs as ccrs  # ADD THIS LINE
 import numpy as np
 
 from earthnow.wxmaps_config import WxMapsConfig, StyleConfig, STYLES
@@ -24,7 +23,7 @@ from earthnow.data_readers import DATA_READERS
 from earthnow.products import PRODUCTS
 
 import logging
-
+import os
 from pathlib import Path
 
 script_name = Path(__file__).stem
@@ -112,8 +111,8 @@ def parse_args():
     parser.add_argument(
         "--cache-dir",
         type=str,
-        default=None,
-        help="Directory for caching transforms (default: $TMPDIR/wxmaps_transform_cache)",
+        default=os.path.expandvars("/discover/nobackup/$USER/EarthNow/cache"),
+        help="Cache directory (I set the default by hand for now, can we make this an arg in the config?)",
     )
 
     # -------------------------------------------------------------------------
@@ -331,12 +330,15 @@ def plot_single_pdate(pdate, args, style, map_config):
     print(f"Working on {local_args.product} {local_args.pdate} {local_args.map_type}")
 
     # Plotter (fresh per pdate)
-    plotter = WxMapPlotter(map_config, resolution=local_args.resolution, style=style)
+    plotter = WxMapPlotter(
+        map_config,
+        resolution=local_args.resolution,
+        style=style,
+    )
 
     fig, ax = plotter.create_basemap(
         feature_resolution=local_args.feature_resolution,
     )
-
     # Create reader for this worker
     reader = create_data_reader(local_args)
     logger.info(f"Reader returned: {reader=}")
@@ -407,90 +409,7 @@ def main():
 
     map_config = all_maps[args.map_type]
     style = build_style(args)
-
-    # =========================================================================
-    # PRE-COMPUTE COORDINATE TRANSFORMS
-    # =========================================================================
-    if isinstance(map_config.projection, ccrs.Geostationary):
-        from earthnow.wxmaps_transform_cache import get_transform_cache
-        import matplotlib.pyplot as plt
-
-        print("\n" + "=" * 70)
-        print("Pre-computing coordinate transformations...")
-        print("=" * 70)
-
-        # Get cache with custom directory if specified
-        transform_cache = get_transform_cache(
-            cache_dir=getattr(args, "cache_dir", None)
-        )
-        transform_cache.clear_cache()  # clear once here only
-
-        # Create a minimal figure to get proper extent
-        # Use actual output size to ensure extent matches what workers will have
-        resolution_config = WxMapsConfig.RESOLUTIONS.get(args.resolution)
-        fig_temp = plt.figure(
-            figsize=resolution_config.figsize, dpi=resolution_config.dpi
-        )
-        ax_temp = fig_temp.add_subplot(1, 1, 1, projection=map_config.projection)
-
-        if map_config.extent is None:
-            ax_temp.set_global()
-        else:
-            ax_temp.set_extent(map_config.extent, crs=ccrs.PlateCarree())
-
-        xmin, xmax = ax_temp.get_xlim()
-        ymin, ymax = ax_temp.get_ylim()
-
-        target_extent = (xmin, xmax, ymin, ymax)
-        print(target_extent)
-
-        ax_temp.set_xlim(xmin, xmax)
-        ax_temp.set_ylim(ymin, ymax)
-
-        plt.close(fig_temp)
-
-        # Pre-compute the transform
-        target_shape = (
-            resolution_config.height,
-            resolution_config.width,
-        )  # height, width
-
-        transform_data, cache_key = transform_cache.get_or_compute_transform(
-            source_proj=ccrs.PlateCarree(),
-            target_proj=map_config.projection,
-            source_extent=[-180, 180, -90, 90],
-            target_extent=target_extent,
-            target_shape=target_shape,
-        )
-
-        # Store in style config so workers can access it
-        style.cached_target_extent = target_extent
-        style.cached_target_shape = target_shape
-        style.cached_transform_key = cache_key
-
-        print(f"✓ Transform cached with key: {cache_key[:16]}")
-        print(f"  Target extent: {target_extent}")
-        print(f"  Target shape: {target_shape}")
-        print("  All workers will use this cached transformation.\n")
-        print("=" * 70 + "\n")
-    # =========================================================================
-
-    # =========================================================================
-    # PRELOAD BASE IMAGES (after transform is computed)
-    # =========================================================================
-    from earthnow.wxmaps_base_images import preload_base_images_from_style
-
-    # Determine target resolution based on output resolution
-    resolution_map = {"hd": 4000, "fhd": 4000, "2k": 6000, "4k": 4000, "8k": 8000}
-    target_resolution = resolution_map.get(args.resolution, 4000)
-
-    # Store in style so workers can use the same value
-    style.base_image_target_resolution = target_resolution
-
-    # Preload base images (will use the same transform we just computed)
-    preload_base_images_from_style(style, target_resolution=target_resolution)
-    # =========================================================================
-
+    style.image_cache_directory = os.path.expandvars(args.cache_dir)
     # -------------------------------------------------------------------------
     # Data reader
     # -------------------------------------------------------------------------
@@ -499,7 +418,6 @@ def main():
     # -------------------------------------------------------------------------
     # PRODUCT DISPATCH
     # -------------------------------------------------------------------------
-
     plot_single_pdate(args.pdate, args, style=style, map_config=map_config)
 
 
