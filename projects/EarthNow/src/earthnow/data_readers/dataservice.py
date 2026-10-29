@@ -1,5 +1,6 @@
 import os
 import datetime as dt
+import numpy as np
 from netCDF4 import Dataset
 
 import logging
@@ -42,7 +43,13 @@ class SimpleNetCDFDataService(object):
             return lats, lons
         else:
             with Dataset(self.stream.coords) as nc:
-                return nc.variables["lats"][:], nc.variables["lons"][:]
+                lats = nc.variables["lats"][:]
+                lons = nc.variables["lons"][:]
+            if np.ma.any((lons < -180) | (lons >= 180)):
+                # Normalize values only; the curvilinear grid must not be reordered.
+                lons = (lons + 180) % 360 - 180
+                logger.debug("Normalized LCC longitudes to [-180, 180)")
+            return lats, lons
 
     def get_var(self, varname, level=None):
         var = self.nc.variables[varname]
