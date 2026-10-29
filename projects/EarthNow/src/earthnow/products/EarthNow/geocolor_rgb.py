@@ -4,10 +4,16 @@ import cartopy.crs as ccrs
 from matplotlib import cm
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
+from earthnow.wxmaps_config import WxMapsConfig
+from earthnow.wxmaps_transform_cache import TransformCache
 from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 from typing import Tuple, Optional
 import datetime
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def solar_alpha(isr, min_frac=0.02, max_frac=0.15):
@@ -81,7 +87,7 @@ def auto_enhance_rgb_histogram(red, green, blue, strength=0.5, debug=False):
     high_pct = 1.0 - low_pct
 
     if debug:
-        print(f"Histogram enhancement:")
+        print("Histogram enhancement:")
         print(f"  strength = {strength}")
         print(f"  low_pct  = {low_pct*100:.2f}%")
         print(f"  high_pct = {high_pct*100:.2f}%")
@@ -257,7 +263,7 @@ class DaytimeRGB:
         return out
 
     def get_reflectance_channels(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        print("Loading solar radiation bands...")
+        logger.debug("Loading solar radiation bands...")
 
         # These are not actually used and isr_blue is missing from inst1_2d_avg files
         # comment out for now
@@ -276,7 +282,7 @@ class DaytimeRGB:
         #        )
 
         isr = self._load_variable(self.swtdn)
-        print(
+        logger.debug(
             f"ISR : min={np.nanmin(isr):.6f}, max={np.nanmax(isr):.6f}, mean={np.nanmean(isr):.6f}"
         )
         isr_blue = isr
@@ -287,36 +293,36 @@ class DaytimeRGB:
         osr_red = self._load_variable(self.osr_red)
         osr_nir = self._load_variable(self.osr_nir)
 
-        print(
+        logger.debug(
             f"OSR Red:  min={np.nanmin(osr_red):.6f}, max={np.nanmax(osr_red):.6f}, mean={np.nanmean(osr_red):.6f}"
         )
-        print(
+        logger.debug(
             f"OSR NIR:  min={np.nanmin(osr_nir):.6f}, max={np.nanmax(osr_nir):.6f}, mean={np.nanmean(osr_nir):.6f}"
         )
-        print(
+        logger.debug(
             f"OSR Blue: min={np.nanmin(osr_blue):.6f}, max={np.nanmax(osr_blue):.6f}, mean={np.nanmean(osr_blue):.6f}"
         )
 
-        print("\nComputing reflectance...")
+        logger.debug("\nComputing reflectance...")
 
         sun_dist = self._solar_distance_au()
         blu_refl = self._compute_reflectance(osr_blue, isr_blue, sun_dist)
         red_refl = self._compute_reflectance(osr_red, isr_red, sun_dist)
         nir_refl = self._compute_reflectance(osr_nir, isr_nir, sun_dist)
 
-        print(
+        logger.debug(
             f"\nReflectance Red:  min={np.nanmin(red_refl):.6f}, max={np.nanmax(red_refl):.6f}, mean={np.nanmean(red_refl):.6f}"
         )
-        print(
+        logger.debug(
             f"Reflectance NIR:    min={np.nanmin(nir_refl):.6f}, max={np.nanmax(nir_refl):.6f}, mean={np.nanmean(nir_refl):.6f}"
         )
-        print(
+        logger.debug(
             f"Reflectance Blue: min={np.nanmin(blu_refl):.6f}, max={np.nanmax(blu_refl):.6f}, mean={np.nanmean(blu_refl):.6f}"
         )
 
         isr = self._load_variable(self.swtdn)
         alpha = solar_alpha(isr, min_frac=0.02, max_frac=0.66)
-        print(
+        logger.debug(
             f"Alpha Layer: min={np.nanmin(alpha):.6f}, max={np.nanmax(alpha):.6f}, mean={np.nanmean(alpha):.6f}"
         )
 
@@ -327,19 +333,21 @@ class DaytimeRGB:
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         blu_refl, red_refl, nir_refl, alpha = self.get_reflectance_channels()
 
-        print(f"\nCreating true-color composite (enhance={enhance}, gamma={gamma})...")
+        logger.debug(
+            f"\nCreating true-color composite (enhance={enhance}, gamma={gamma})..."
+        )
 
         grn_refl = (
             0.35 * red_refl + 0.35 * blu_refl + 0.3 * nir_refl
         )  # edited to match ratios used in IDL
 
-        print(
+        logger.debug(
             f"\nReflectance Red:  min={np.nanmin(red_refl):.6f}, max={np.nanmax(red_refl):.6f}, mean={np.nanmean(red_refl):.6f}"
         )
-        print(
+        logger.debug(
             f"Reflectance Green:  min={np.nanmin(grn_refl):.6f}, max={np.nanmax(grn_refl):.6f}, mean={np.nanmean(grn_refl):.6f}"
         )
-        print(
+        logger.debug(
             f"Reflectance Blue: min={np.nanmin(blu_refl):.6f}, max={np.nanmax(blu_refl):.6f}, mean={np.nanmean(blu_refl):.6f}"
         )
 
@@ -351,13 +359,13 @@ class DaytimeRGB:
         red_refl = red_refl.filled(0.0)
         grn_refl = grn_refl.filled(0.0)
 
-        print(
+        logger.debug(
             f"\nReflectance-Norm Red:   min={np.nanmin(red_refl):.6f}, max={np.nanmax(red_refl):.6f}, mean={np.nanmean(red_refl):.6f}"
         )
-        print(
+        logger.debug(
             f"Reflectance-Norm Green: min={np.nanmin(grn_refl):.6f}, max={np.nanmax(grn_refl):.6f}, mean={np.nanmean(grn_refl):.6f}"
         )
-        print(
+        logger.debug(
             f"Reflectance-Norm Blue:  min={np.nanmin(blu_refl):.6f}, max={np.nanmax(blu_refl):.6f}, mean={np.nanmean(blu_refl):.6f}"
         )
 
@@ -370,29 +378,25 @@ class DaytimeRGB:
         if gamma != 1.0:
             rgb = np.power(rgb, 1.0 / gamma)
 
-        print(f"Enhanced RGB:")
-        print(
-            f"  Red:   min={np.nanmin(rgb[:,:,0]):.6f}, max={np.nanmax(rgb[:,:,0]):.6f}, mean={np.nanmean(rgb[:,:,0]):.6f}"
+        logger.debug("Enhanced RGB:")
+        logger.debug(
+            f"  Red:   min={np.nanmin(rgb[:, :, 0]):.6f}, max={np.nanmax(rgb[:, :, 0]):.6f}, mean={np.nanmean(rgb[:, :, 0]):.6f}"
         )
-        print(
-            f"  Green: min={np.nanmin(rgb[:,:,1]):.6f}, max={np.nanmax(rgb[:,:,1]):.6f}, mean={np.nanmean(rgb[:,:,1]):.6f}"
+        logger.debug(
+            f"  Green: min={np.nanmin(rgb[:, :, 1]):.6f}, max={np.nanmax(rgb[:, :, 1]):.6f}, mean={np.nanmean(rgb[:, :, 1]):.6f}"
         )
-        print(
-            f"  Blue:  min={np.nanmin(rgb[:,:,2]):.6f}, max={np.nanmax(rgb[:,:,2]):.6f}, mean={np.nanmean(rgb[:,:,2]):.6f}"
+        logger.debug(
+            f"  Blue:  min={np.nanmin(rgb[:, :, 2]):.6f}, max={np.nanmax(rgb[:, :, 2]):.6f}, mean={np.nanmean(rgb[:, :, 2]):.6f}"
         )
 
-        print(
+        logger.debug(
             f"Final RGB: shape={rgb.shape}, min={np.nanmin(rgb):.6f}, max={np.nanmax(rgb):.6f}, mean={np.nanmean(rgb):.6f}"
         )
-        print("True-color composite created.")
+        logger.debug("True-color composite created.")
 
         return rgb, alpha, self.lats, self.lons
 
     # ... rest of methods unchanged ...
-
-    def clear_cache(self):
-        self._cache = {}
-        print("Cache cleared.")
 
     def create_natural_color(
         self, gamma: float = 1.0, veggie_factor: float = 0.3
@@ -423,7 +427,7 @@ class DaytimeRGB:
             + veggie_factor * nir_refl
         )
 
-        print("Creating natural-color composite...")
+        logger.debug("Creating natural-color composite...")
 
         # Normalize channels
         blue_norm = self._normalize_channel(blue_refl, gamma=gamma)
@@ -433,7 +437,7 @@ class DaytimeRGB:
         # Stack into RGB
         rgb = np.dstack([red_norm, green_norm, blue_norm])
 
-        print("Natural-color composite created.")
+        logger.debug("Natural-color composite created.")
 
         return rgb, alpha, self.lats, self.lons
 
@@ -464,7 +468,7 @@ class DaytimeRGB:
         # Get reflectance channels
         blue_refl, red_refl, nir_refl = self.get_reflectance_channels()
 
-        print("Creating day snow-fog composite...")
+        logger.debug("Creating day snow-fog composite...")
 
         # Snow-fog specific normalization
         red_channel = self._normalize_channel(nir_refl, gamma=gamma)
@@ -473,7 +477,7 @@ class DaytimeRGB:
 
         rgb = np.dstack([red_channel, green_channel, blue_channel])
 
-        print("Day snow-fog composite created.")
+        logger.debug("Day snow-fog composite created.")
 
         return rgb, self.lats, self.lons
 
@@ -503,7 +507,7 @@ class DaytimeRGB:
         # Get reflectance channels
         blue_refl, red_refl, nir_refl = self.get_reflectance_channels()
 
-        print("Creating day cloud-phase composite...")
+        logger.debug("Creating day cloud-phase composite...")
 
         # Cloud phase specific normalization
         red_channel = self._normalize_channel(nir_refl, vmin=0, vmax=0.6, gamma=gamma)
@@ -512,7 +516,7 @@ class DaytimeRGB:
 
         rgb = np.dstack([red_channel, green_channel, blue_channel])
 
-        print("Day cloud-phase composite created.")
+        logger.debug("Day cloud-phase composite created.")
 
         return rgb, self.lats, self.lons
 
@@ -568,8 +572,13 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Longwave IR night image
     # ------------------------------------------------------------
-    data, lats, lons, meta = reader.read_variable(
+    print("Plotting GeoColor RGB...")
+    data, lats, lons_raw, meta = reader.read_variable(
         args.fdate, args.pdate, variables=["TBRB06RG"]
+    )
+    lons = ((lons_raw + 180) % 360) - 180
+    print(
+        f"  RBGA check: lats: min={lats.min()}, max={lats.max()}, lons: min={lons.min()}, max={lons.max()}"
     )
     data = data.astype(np.float32) - 273.15  # Celcius
     # ------------------------------------------------------------
@@ -582,7 +591,7 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     norm = BoundaryNorm(LEVELS, ncolors=cmap.N, clip=True)
     normalized = norm(data)
     print(
-        f"IR normalized: min={np.nanmin(normalized):.6f}, max={np.nanmax(normalized):.6f}, mean={np.nanmean(normalized):.6f}"
+        f"   IR normalized: min={np.nanmin(normalized):.6f}, max={np.nanmax(normalized):.6f}, mean={np.nanmean(normalized):.6f}"
     )
     ir_rgba = cmap(normalized)
     # create IR alpha layer
@@ -618,52 +627,50 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     # The RGB array is shape (height, width, 3) with values in range [0, 1]
     # Plot image on map - let Cartopy handle the reprojection
     start = time.time()
-    from earthnow.wxmaps_transform_cache import get_transform_cache
-
-    transform_cache = get_transform_cache()
-    # Get or load cached transform
+    # This is effectively the BaseImage Plotter  but with a diff source image and no downsampling
     target_extent = ax.get_extent()
-    target_shape = (2160, 4320)  # height, width for target
-    transform_data, cache_key = transform_cache.get_or_compute_transform(
-        source_proj=ccrs.PlateCarree(),
-        target_proj=ax.projection,
-        source_extent=[-180, 180, -90, 90],  # Adjust to your data extent
-        target_extent=target_extent,
-        target_shape=target_shape,
+    resolution_config = WxMapsConfig.RESOLUTIONS[args.resolution]
+    target_shape = (
+        resolution_config.height,
+        resolution_config.width,
     )
-    # Apply the cached transform to this worker's data
-    warped_rgba, warped_extent = transform_cache.apply_transform(
-        source_data=rgba,
-        transform_data=transform_data,
-        fill_value=0.0,
-        flip_source_y=True,  # Don't flip for NetCDF data
-    )
+    # I don't see much of a point of transforming this before plotting?
+    # If we still have runtime speed issues we could look into it
+
+    # transform_data = TransformCache.compute_transform_data(
+    #     source_proj=ccrs.PlateCarree(),
+    #     target_proj=ax.projection,
+    #     source_extent=(
+    #         lons.min(),
+    #         lons.max(),
+    #         lats.min(),
+    #         lats.max(),
+    #     ),  # The source extent is the extent of the data..., could be global or could be conus
+    #     target_extent=target_extent,
+    #     target_shape=target_shape,
+    # )
+    # # Apply the cached transform to this worker's data
+    # warped_rgba, warped_extent = TransformCache.apply_transform(
+    #     source_data=rgba,
+    #     transform_data=transform_data,
+    #     fill_value=0.0,
+    #     flip_source_y=True,  # Don't flip for NetCDF data
+    # )
     # Plot the transformed image (FAST!)
-    im = ax.imshow(
-        warped_rgba,
-        origin="upper",
-        extent=warped_extent,
-        transform=ax.projection,
+    img_extent = (
+        lons.min(),
+        lons.max(),
+        lats.min(),
+        lats.max(),
+    )
+    ax.imshow(
+        rgba,
+        origin="lower",
+        extent=img_extent,
+        transform=ccrs.PlateCarree(),
         interpolation="antialiased",
         resample=False,
         zorder=4,
         rasterized=True,
     )
-    print(f"GeoColor composite finished: {time.time() - start:.2f}s")
-
-
-def generate_colorbar():
-    """Generate colorbar for longwave window IR"""
-    from earthnow.wxmaps_utils import save_colorbar_single
-
-    # Use representative tick levels instead of all 256
-    tick_levels = np.array([-110, -80, -50, -20, 0, 20, 40, 57])
-
-    output = paths.colorbar_output("longwave_window_ir.png")
-    save_colorbar_single(
-        COLORS,
-        LEVELS,
-        output,
-        label="11.2 μm Longwave Window Brightness Temperature (°C)",
-        extend="both",
-    )
+    print(f"   GeoColor composite finished: {time.time() - start:.2f}s")

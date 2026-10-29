@@ -73,7 +73,7 @@ products:
     style: greyblue_plain
   geocolor:
     product: geocolor_rgb_EarthNow
-    style: satellite
+    style: nightlights
   band16:
     product: co2_longwave_ir_EarthNow
     style: white_state_coast
