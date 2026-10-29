@@ -871,15 +871,14 @@ class WxMapPlotter:
                         ),
                     )
 
-    def add_roads(self, road_scale: str = "50m", major_only: bool = True):
+    def add_roads(self):
         """
         Add road features
 
         Parameters:
         -----------
-        road_scale : str
-            '110m', '50m', '10m'
-        major_only : bool
+        road_scale : Only '10m' scale is currently supported
+        self.style.major_only : bool
             If True, only show major highways/interstates
             If False, show all roads
         """

@@ -53,7 +53,9 @@ class StyleConfig:
     ocean_color: str = "#D0E8F2"  # Light blue
     land_color: str = "white"
 
-    # Base image options (ADD THESE)
+    # Default basemap shapefiles (only if no basemap or GSHHS)
+    use_base_shapefiles: bool = True
+
     # Base image options
     use_base_image: bool = False
     base_image_type: str = "natural_earth_greyblue"
@@ -77,9 +79,6 @@ class StyleConfig:
     gshhs_outline: bool = False
     gshhs_outline_color: str = "#FFFFFF"
     gshhs_outline_width: float = 0.3
-
-    # Default basemap shapefiles (only if no basemap or GSHHS)
-    use_base_shapefiles: bool = True
 
     # NWS Warnings options
     show_nws_warnings: bool = False
@@ -396,12 +395,20 @@ class StyleConfig:
         )
 
     @staticmethod
-    @register_style("empty")
-    def empty() -> "StyleConfig":
+    @register_style("greybackground")
+    def greybackground() -> "StyleConfig":
         """Grey land/ocean style for testing"""
         return StyleConfig(
             ocean_color="#808080",
             land_color="#808080",
+        )
+
+    @staticmethod
+    @register_style("empty")
+    def empty() -> "StyleConfig":
+        """Empty style for testing"""
+        return StyleConfig(
+            use_base_shapefiles=False,
         )
 
 
