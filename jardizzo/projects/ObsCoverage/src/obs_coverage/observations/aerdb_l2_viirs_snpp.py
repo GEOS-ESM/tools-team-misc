@@ -2,12 +2,12 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-from .obs_reader import ObsReader
+from .observation import Observation
 from .registry import register
 
 
 @register("viirs_snpp")
-class AERDB_L2_VIIRS_SNPP(ObsReader):
+class AERDB_L2_VIIRS_SNPP(Observation):
 
     def __init__(self, *args, **kwargs):
 
@@ -17,25 +17,19 @@ class AERDB_L2_VIIRS_SNPP(ObsReader):
         self.legend_category = 'VIIRS SNPP'
         self.isis = 'none'
 
-    def get_obs(self):
+    def read(self, filename):
 
-        base_epoch = datetime(1993, 1, 1, 0, 0, 0)
+        fh = self.open(filename)
 
-        self.lats = self.fh["Latitude"].data.flatten()
-        self.lons = self.fh["Longitude"].data.flatten()
-        self.time = self.fh["Scan_Start_Time"].data.flatten()
-        self.time = pd.to_timedelta(self.time, unit='s') + base_epoch
+      # base_epoch = datetime(1993, 1, 1, 0, 0, 0)
+        base_epoch = np.datetime64('1993-01-01T00:00:00')
 
-    def thin_obs(self, loninc=1.0, latinc=1.0):
+        self.lats = fh["Latitude"].data.flatten()
+        self.lons = fh["Longitude"].data.flatten()
+        times = fh["Scan_Start_Time"].data.flatten()
+        self.times = base_epoch + times.astype('timedelta64[s]')
+      # self.times = pd.to_timedelta(times, unit='s') + base_epoch
 
-        nobs = self.lons.size
+        print(self.times)
 
-        mapper = self.grid_map_new(loninc, latinc, self.lons, self.lats)
-        self._lons = self.lons[mapper]
-        self._lats = self.lats[mapper]
-        self._time = self.time[mapper]
-
-        n = self._lons.size
-
-        if not self.quiet:
-            print(f'{nobs} observations thinned down to {n}')
+        fh.close()

@@ -1,25 +1,55 @@
-import json
+import copy
+import pandas as pd
 import numpy as np
 import xarray as xr
 import pandas as pd
 from scipy.spatial import cKDTree
 
 
-class ObsReader(object):
+class Observation(object):
 
-    def __init__(self, filename=None, **kwargs):
+    def __init__(self, filename=None, mapping="closest", **kwargs):
 
         self.quiet = kwargs.get("quiet", False)
         self.debug = kwargs.get("debug", False)
-        self.observations = {}
+        self.mapping = {
+            "fastest": self.grid_map_fastest,
+            "closest": self.grid_map_closest,
+        }
+        self.grid_map = self.mapping.get(mapping)
 
-        if filename:
-            self.fh = xr.open_dataset(filename)
+        self.lons = np.array([])
+        self.lats = np.array([])
+        self.times = np.array([], dtype='datetime64[s]')
 
-            if not self.quiet:
-                print(f"Reading: {filename}")
+    def open(self, filename):
 
-    def grid_map(self, loninc, latinc, lons, lats):
+        fh = xr.open_dataset(filename)
+
+        if not self.quiet:
+            print(f"Reading: {filename}")
+
+        return fh
+
+    def set_mapping(self, mapping):
+
+        self.grid_map = self.mapping.get(mapping, self.grid_map_fastest)
+
+    def thin(self, loninc=1.0, latinc=1.0):
+
+        nobs = self.lons.size
+
+        mapper = self.grid_map(loninc, latinc, self.lons, self.lats)
+        self.lons = self.lons[mapper]
+        self.lats = self.lats[mapper]
+        self.times = self.times[mapper]
+
+        n = self.lons.size
+
+        if not self.quiet:
+            print(f'{nobs} observations thinned down to {n}')
+
+    def grid_map_fastest(self, loninc, latinc, lons, lats):
 
         nobs = lons.size
 
@@ -42,41 +72,9 @@ class ObsReader(object):
 
         return mapper.compressed()
 
-    def write_csv(self):
+    def grid_map_closest(self, loninc, latinc, lons, lats):
 
-        sort_indices = self._time.argsort()
-
-        times = self._time.round('6h')
-        delta = (self._time - times) / np.timedelta64(1, 'h')
-
-        for i in sort_indices:
-             obtime = f'{delta[i]:.1f}'
-             obtime = float(obtime)
-             dattim = times[i].strftime('%Y%m%d%H')
-             rec = f'{self.obs_category},{self.legend_category},{self.isis},{dattim},{obtime:.1f},{self._lons[i]:.1f},{self._lats[i]:.1f}'
-             print(rec)
-
-    def write_json(self):
-
-        observations = {}
-        sort_indices = self._time.argsort()
-        
-        for i in sort_indices:
-             dattim = self._time[i].strftime('%Y%m%d%H')
-             bin = observations.get(dattim, [])
-             bin.append(f'{self._lons[i]:.2f} {self._lats[i]:.2f}')
-             observations[dattim] = bin
-
-        for time,obs in observations.items():
-            with open(time+'.json', 'a') as f:
-                json.dump(obs, f)
-
-    def grid_map_new(self, loninc, latinc, lons, lats):
-
-        obs_df = pd.DataFrame({
-            'lat': lats,
-            'lon': lons
-        })
+        obs_df = pd.DataFrame({"lat": lats, "lon": lons})
 
         # Define your target grid resolution and boundaries
         lon_start, lon_end, lon_step = -180.0, 180.0, loninc
@@ -90,7 +88,7 @@ class ObsReader(object):
         grid_centers = np.vstack([lat_mesh.ravel(), lon_mesh.ravel()]).T
 
         # Build a KDTree of the observation locations
-        obs_coords = obs_df[['lat', 'lon']].values
+        obs_coords = obs_df[["lat", "lon"]].values
         tree = cKDTree(grid_centers)
 
         # For every observation, find the nearest grid index
@@ -110,14 +108,18 @@ class ObsReader(object):
 
         return best_obs_indices
 
-    def accumulate(self, obs):
+    def __iadd__(self, other):
 
-        sort_indices = obs.time.argsort()
-        for i in sort_indices:
-             dattim = obs.time[i].strftime('%Y%m%d%H')
-             tbin = obs.time[i].round('6h')
-             delta = (self.time[i] - tbin) / np.timedelta64(1, 'h')
-             bin = self.observations.get(dattim, [])
-             bin.append((obs.lons[i],obs.lats[i],obs.time[i],tbin,delta))
-             self.observations[dattim] = bin
+        self.lats = np.concatenate((self.lats, other.lats))
+        self.lons = np.concatenate((self.lons, other.lons))
+        self.times = np.concatenate((self.times, other.times))
 
+        print(self.lats.size, other.lats.size)
+
+        return self
+
+    def __add__(self, other):
+
+        result = copy.deepcopy(self)
+        result += other
+        return result
