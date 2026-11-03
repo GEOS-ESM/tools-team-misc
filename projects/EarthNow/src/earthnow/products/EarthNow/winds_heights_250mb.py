@@ -115,11 +115,12 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot wind field
     # ------------------------------------------------------------
+    image, image_extent = plotter.crop_image_to_view(wspd, lats, lons)
     plot = ax.imshow(
-        wspd,
+        image,
         cmap=cmap,
         norm=norm,
-        extent=[lons.min(), lons.max(), lats.min(), lats.max()],
+        extent=image_extent,
         origin="lower",
         transform=ccrs.PlateCarree(),
         interpolation="nearest",
@@ -139,6 +140,9 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     window_size = int(pngImgIdim * 0.025)  # This is the window size bill's IDL uses
 
     slp_smoothed = boxcar_smooth_2D(slp, window_size=window_size)
+    lats, lons, slp_smoothed = plotter.crop_data_to_view(
+        lats, lons, slp_smoothed
+    )
 
     # ------------------------------------------------------------
     # Plot SLP contours

@@ -301,6 +301,106 @@ class WxMapPlotter:
 
         return self.fig, self.ax
 
+    def _conus_grid_slices(
+        self, lats: np.ndarray, lons: np.ndarray
+    ) -> Tuple[slice, slice]:
+        if self.config.name != "conus" or lats.ndim != 1 or lons.ndim != 1:
+            return slice(None), slice(None)
+        if len(lats) < 2 or len(lons) < 2:
+            raise ValueError("CONUS cropping requires at least two coordinates per axis")
+        for coordinates in (lats, lons):
+            steps = np.diff(coordinates)
+            if not np.all(np.isfinite(coordinates)) or not (
+                np.all(steps > 0) or np.all(steps < 0)
+            ):
+                raise ValueError("CONUS cropping requires finite monotonic coordinates")
+
+        # Include the curved frame, not just the configured geographic input limits.
+        x = np.linspace(*self.ax.get_xlim(), 129)
+        y = np.linspace(*self.ax.get_ylim(), 129)
+        xx, yy = np.meshgrid(x, y)
+        geographic = ccrs.PlateCarree().transform_points(
+            self.ax.projection, xx, yy
+        )
+        if not np.all(np.isfinite(geographic[:, :, :2])):
+            raise ValueError("Cannot determine finite geographic CONUS crop bounds")
+        west, south = geographic[:, :, :2].min(axis=(0, 1)) - 1
+        east, north = geographic[:, :, :2].max(axis=(0, 1)) + 1
+        wrapped_lons = (lons + 180) % 360 - 180
+
+        slices = []
+        for coordinates, lower, upper in (
+            (lats, south, north), (wrapped_lons, west, east)
+        ):
+            indices = np.flatnonzero(
+                (coordinates >= lower) & (coordinates <= upper)
+            )
+            if not len(indices):
+                raise ValueError("Source grid does not overlap the CONUS viewport")
+            # Retain neighboring cells for mesh edges and interpolation.
+            slices.append(slice(
+                max(0, indices[0] - 2),
+                min(len(coordinates), indices[-1] + 3),
+            ))
+        return slices[0], slices[1]
+
+    def crop_data_to_view(
+        self, lats: np.ndarray, lons: np.ndarray, *fields: np.ndarray
+    ) -> Tuple[np.ndarray, ...]:
+        """Subset rectilinear CONUS rendering inputs after product processing."""
+        rows, columns = self._conus_grid_slices(lats, lons)
+        if rows == slice(None) and columns == slice(None):
+            return (lats, lons, *fields)
+        expected_shape = (len(lats), len(lons))
+        for field in fields:
+            if field.shape[:2] != expected_shape:
+                raise ValueError(
+                    f"Field shape {field.shape} does not match grid {expected_shape}"
+                )
+        cropped = tuple(field[rows, columns, ...] for field in fields)
+        logger.info(
+            "Cropping CONUS render grid from %s to %s",
+            expected_shape, (len(lats[rows]), len(lons[columns])),
+        )
+        return (lats[rows], lons[columns], *cropped)
+
+    def crop_image_to_view(
+        self, data: np.ndarray, lats: np.ndarray, lons: np.ndarray
+    ) -> Tuple[np.ndarray, Tuple[float, float, float, float]]:
+        """Crop an imshow raster while preserving its original pixel registration."""
+        extent = (lons.min(), lons.max(), lats.min(), lats.max())
+        if self.config.name != "conus" or lats.ndim != 1 or lons.ndim != 1:
+            return data, extent
+        height, width = data.shape[:2]
+        dx = (extent[1] - extent[0]) / width
+        dy = (extent[3] - extent[2]) / height
+        # Existing product images use min/max extents with origin="lower".
+        image_lons = extent[0] + (np.arange(width) + 0.5) * dx
+        image_lats = extent[2] + (np.arange(height) + 0.5) * dy
+        rows, columns = self._conus_grid_slices(image_lats, image_lons)
+        cropped_extent = (
+            extent[0] + columns.start * dx,
+            extent[0] + columns.stop * dx,
+            extent[2] + rows.start * dy,
+            extent[2] + rows.stop * dy,
+        )
+        # Cartopy's raster warper expects PlateCarree x coordinates in -180..180.
+        longitude_offset = 360 * np.floor(
+            ((cropped_extent[0] + cropped_extent[1]) / 2 + 180) / 360
+        )
+        cropped_extent = (
+            cropped_extent[0] - longitude_offset,
+            cropped_extent[1] - longitude_offset,
+            cropped_extent[2],
+            cropped_extent[3],
+        )
+        cropped = data[rows, columns, ...]
+        logger.info(
+            "Cropping CONUS render image from %s to %s",
+            data.shape, cropped.shape,
+        )
+        return cropped, cropped_extent
+
     def _add_base_image(self):
         """Add base earth image background"""
         try:

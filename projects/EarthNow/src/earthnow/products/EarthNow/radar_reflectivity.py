@@ -337,6 +337,9 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
 
         # Plot rain reflectivity
         # ------------------------------------------------------------
+        lats, lons, rain, frzr, ice, snow = plotter.crop_data_to_view(
+            lats, lons, rain, frzr, ice, snow
+        )
         rain_plot = ax.pcolormesh(
             lons,
             lats,

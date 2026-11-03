@@ -656,12 +656,7 @@ def plot_geocolor_rgb(fig, ax, plotter, reader, args):
     #     flip_source_y=True,  # Don't flip for NetCDF data
     # )
     # Plot the transformed image (FAST!)
-    img_extent = (
-        lons.min(),
-        lons.max(),
-        lats.min(),
-        lats.max(),
-    )
+    rgba, img_extent = plotter.crop_image_to_view(rgba, lats, lons)
     ax.imshow(
         rgba,
         origin="lower",
