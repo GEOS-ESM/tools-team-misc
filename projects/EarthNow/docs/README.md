@@ -21,6 +21,29 @@ BASIC EARTHNOW INFORMATION (EXISTING IDL WORKFLOW)
 **Web Scripts**: `/discover/nobackup/projects/gmao/g6dev/pub/WebGL`
 
 ## Caching Processes
+### CONUS map geometry
+The shared `conus` output view matches IDL `setup_region.pro` region 104
+(`eicusa_mapset`): oblique cylindrical equidistant centered at 30 N, 97 W,
+implemented with Cartopy `RotatedPole(pole_longitude=83, pole_latitude=60)`.
+The geographic input limits remain west/east/south/north
+`[-125.75, -68.25, 23, 50]`. The plotter uses explicit native rotated-degree
+limits `[-26.33985162225, 26.33985162225, -7, 22.43526791581]` to reproduce
+IDL's projected viewport; applying geographic `set_extent` alone is not exact.
+The map-frame longitude envelope is approximately 134.91380 W to 59.08620 W.
+Equal aspect fits this frame inside the 16:9 canvas with small vertical margins.
+
+This output geometry is shared by LCC and regular latitude/longitude products.
+Their source grids and plotting transforms are unchanged. Curved edges
+of an LCC field mark its limited data coverage, not a separate output projection.
+Other regional presets retain their existing projections. Projection and extent
+are part of the warped-basemap cache key, so old Lambert entries are not reused.
+
+The shared forecast/replay LCC reader normalizes geographic longitudes to
+`[-180, 180)` when needed. Latitude values, coordinate masks, grid ordering,
+and data ordering are preserved. These remain geographic coordinates for
+`transform=ccrs.PlateCarree()`, not native projected LCC x/y coordinates.
+Regular latitude/longitude readers retain their original longitude convention.
+
 ### Processed base-image cache
 EarthNow persists a warped RGBA basemap and its target extent, as one `.npz` file per source image and map geometry. Downsampled source images and coordinate transforms are not cached for this path, as they were originally set up to in the source code.
 Source-image downsampling preserves the input aspect ratio; output canvas dimensions belong to the map transform. A regional crop before resizing could retain more CONUS detail, but is not currently applied. A safe crop must cover the inverse-projected viewport, include an interpolation margin, and use its actual pixel-aligned geographic extent. Cropping pixels while retaining the global source extent would misregister the map. A warped-cache hit skips mapping computation and pixel interpolation.

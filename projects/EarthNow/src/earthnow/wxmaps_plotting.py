@@ -133,7 +133,11 @@ class WxMapPlotter:
         self.ax = self.fig.add_axes([0, 0, 1, 1], projection=self.config.projection)
 
         # Set extent - handle geostationary projections differently
-        if self.config.extent is None:
+        if self.config.native_extent is not None:
+            xmin, xmax, ymin, ymax = self.config.native_extent
+            self.ax.set_xlim(xmin, xmax)
+            self.ax.set_ylim(ymin, ymax)
+        elif self.config.extent is None:
             print("Skipping set_extent")
         else:
             self.ax.set_extent(self.config.extent, crs=ccrs.PlateCarree())
