@@ -17,6 +17,8 @@ class AERDB_L2_VIIRS_SNPP(Observation):
         self.legend_category = 'VIIRS SNPP'
         self.isis = 'none'
 
+        self.set_grid("h3", 3)
+
     def read(self, filename):
 
         fh = self.open(filename)

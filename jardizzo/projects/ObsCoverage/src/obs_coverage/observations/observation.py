@@ -1,4 +1,5 @@
 import copy
+import h3
 import pandas as pd
 import numpy as np
 import xarray as xr
@@ -8,15 +9,17 @@ from scipy.spatial import cKDTree
 
 class Observation(object):
 
-    def __init__(self, filename=None, mapping="closest", **kwargs):
+    def __init__(self, filename=None, **kwargs):
 
         self.quiet = kwargs.get("quiet", False)
         self.debug = kwargs.get("debug", False)
-        self.mapping = {
+        self.grid_methods = {
             "fastest": self.grid_map_fastest,
             "closest": self.grid_map_closest,
+            "h3": self.grid_map_h3,
         }
-        self.grid_map = self.mapping.get(mapping)
+
+        self.set_grid('fastest', (2.0, 2.0))
 
         self.lons = np.array([])
         self.lats = np.array([])
@@ -31,15 +34,16 @@ class Observation(object):
 
         return fh
 
-    def set_mapping(self, mapping):
+    def set_grid(self, method, resolution):
 
-        self.grid_map = self.mapping.get(mapping, self.grid_map_fastest)
+        self.grid_map = self.grid_methods[method]
+        self.resolution = resolution
 
-    def thin(self, loninc=1.0, latinc=1.0):
+    def thin(self):
 
         nobs = self.lons.size
 
-        mapper = self.grid_map(loninc, latinc, self.lons, self.lats)
+        mapper = self.grid_map(self.lons, self.lats, self.resolution)
         self.lons = self.lons[mapper]
         self.lats = self.lats[mapper]
         self.times = self.times[mapper]
@@ -49,9 +53,10 @@ class Observation(object):
         if not self.quiet:
             print(f'{nobs} observations thinned down to {n}')
 
-    def grid_map_fastest(self, loninc, latinc, lons, lats):
+    def grid_map_fastest(self, lons, lats, resolution):
 
         nobs = lons.size
+        loninc, latinc = resolution
 
         lon_start, lon_end, lon_step = -180.0, 180.0, loninc
         lat_start, lat_end, lat_step = -90.0, 90.0, latinc
@@ -72,7 +77,9 @@ class Observation(object):
 
         return mapper.compressed()
 
-    def grid_map_closest(self, loninc, latinc, lons, lats):
+    def grid_map_closest(self, lons, lats, resolution):
+
+        loninc, latinc = resolution
 
         obs_df = pd.DataFrame({"lat": lats, "lon": lons})
 
@@ -108,7 +115,23 @@ class Observation(object):
 
         return best_obs_indices
 
+    def grid_map_h3(self, lons, lats, resolution):
+
+        df = pd.DataFrame({'latitude': lats, 'longitude': lons})
+
+        # Map lat/lon to H3 cell IDs
+        df["h3_cell"] = df.apply(
+        lambda row: h3.geo_to_h3(row["latitude"], row["longitude"], resolution),
+            axis=1,
+        )
+
+        # Thin the data by taking the first observation in each hexagon
+        indices_array = df.drop_duplicates(subset=["h3_cell"]).index.to_numpy()
+
+        return indices_array
+
     def __iadd__(self, other):
+        return mapping
 
         self.lats = np.concatenate((self.lats, other.lats))
         self.lons = np.concatenate((self.lons, other.lons))
