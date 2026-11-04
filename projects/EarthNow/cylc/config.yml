@@ -96,7 +96,7 @@ streams:
     model: conus2km
     ftime: PT0H
     stime: PT0H
-    etime: PT96H
+    etime: PT72H
     tinc: PT30M
   conus2kmrp:
     model: conus2km
@@ -107,7 +107,7 @@ streams:
     model: conus2km
     ftime: PT0H
     stime: PT0H
-    etime: PT96H
+    etime: PT72H
     tinc: PT30M
   conus2kmrp_lcc:
     model: conus2km
@@ -119,14 +119,14 @@ streams:
     streams: [conus2kmfc, conus2kmrp]
     ftime: PT0H
     stime: -P5D
-    etime: PT96H
+    etime: PT72H
     tinc: PT30M
   conus2km_lcc:
     model: conus2km
     streams: [conus2kmfc_lcc, conus2kmrp_lcc]
     ftime: PT0H
     stime: -P5D
-    etime: PT96H
+    etime: PT72H
     tinc: PT30M
 # Resolution Definitions
 # ======================
