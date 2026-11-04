@@ -99,6 +99,19 @@ The cache directory is set by `enow_plot.py --cache-dir`, which currently defaul
 
 Reuse across jobs/nodes requires writable shared storage. Missing or invalid entries are rebuilt from the source image. Cache filenames include the source file's path, size, and modification time, so replacing a source image produces a new entry. Entries are derived, can be deleted when jobs are idle, and are not automatically evicted.
 
+### One-frame comparison and/or basemap warm-up
+From the EarthNow project directory:
+```sh
+uv run bin/plot_all_pt0h.py YYYY-MM-DD --dry-run
+uv run bin/plot_all_pt0h.py YYYY-MM-DD 
+```
+
+This renders each product defined in `cylc/config.yml`, once for CONUS and once for global at 00Z on the required `YYYY-MM-DD` date (forecast offset PT0H).CONUS products listed in `plot_conus_LCC` use `conus2kmfc_lcc`; all others use `conus2kmfc`. Products run sequentially, with errors stopping the script. It creates images only, not movies or published outputs.
+
+Rendering also warms the persistent basemap cache for each encountered source image, CONUS/global geometry, and selected resolution. Subsequent jobs must use the same cache directory and matching source images, geometry, and resolution to reuse these entries. Monthly basemaps may need a new warm-up for another month.
+
+The default resolution comes from `pngsize` in the configuration, and output goes to `output/YYYYMMDD_pt0h/`. Override with `--resolution hd` (or `4k`, `8k`) and `--output-dir /path/to/test-output`. In an already configured HPC module environment with local source paths set, use `python bin/plot_all_pt0h.py 2026-10-29` instead of `uv run`.
+
 ### Transform cache (disabled)
 Transform geometry is derived from each map's axes/projection and requested output resolution. Basemap rendering checks its warped-image cache first; only a cache miss computes the mapping and warps source pixels. The basemap path does not persist a separate transform.
 
