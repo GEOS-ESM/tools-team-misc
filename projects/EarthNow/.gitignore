@@ -4,3 +4,4 @@ output/
 links/
 **/*.code-workspace
 **/AGENTS.md
+.vscode/
