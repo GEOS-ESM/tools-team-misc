@@ -25,7 +25,7 @@ def test_crop_reduces_grid_and_preserves_values_masks_and_coverage(
     plotter, positive_longitudes, descending
 ):
     lats = np.linspace(-90, 90, 181)
-    lons = np.arange(360.) if positive_longitudes else np.arange(-180., 180.)
+    lons = np.arange(360.0) if positive_longitudes else np.arange(-180.0, 180.0)
     if descending:
         lats = lats[::-1]
         lons = lons[::-1]
@@ -86,7 +86,9 @@ def test_image_crop_preserves_original_pixel_registration(
     plotter, channels, positive_longitudes
 ):
     lats = np.linspace(-90, 90, 181)
-    lons = np.linspace(0, 360, 361) if positive_longitudes else np.linspace(-180, 180, 361)
+    lons = (
+        np.linspace(0, 360, 361) if positive_longitudes else np.linspace(-180, 180, 361)
+    )
     data = np.arange(len(lats) * len(lons)).reshape(len(lats), len(lons))
     if channels:
         data = np.repeat(data[:, :, None], channels, axis=2)
@@ -99,7 +101,7 @@ def test_image_crop_preserves_original_pixel_registration(
     row = round((extent[2] - lats.min()) / dy)
     np.testing.assert_array_equal(
         cropped,
-        data[row:row + cropped.shape[0], column:column + cropped.shape[1], ...],
+        data[row : row + cropped.shape[0], column : column + cropped.shape[1], ...],
     )
     assert extent[1] == pytest.approx(extent[0] + cropped.shape[1] * dx)
     assert extent[3] == pytest.approx(extent[2] + cropped.shape[0] * dy)

@@ -37,7 +37,7 @@ def test_lcc_coordinates_normalized_without_reordering(tmp_path, values, expecte
 
 def test_lcc_longitude_mask_preserved(tmp_path):
     path = tmp_path / "masked.nc4"
-    values = np.ma.array([[230., 260.], [280., 290.]], mask=[[0, 1], [0, 0]])
+    values = np.ma.array([[230.0, 260.0], [280.0, 290.0]], mask=[[0, 1], [0, 0]])
     with Dataset(path, "w") as nc:
         nc.createDimension("y", 2)
         nc.createDimension("x", 2)

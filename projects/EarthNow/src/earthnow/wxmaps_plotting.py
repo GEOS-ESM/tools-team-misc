@@ -307,7 +307,9 @@ class WxMapPlotter:
         if self.config.name != "conus" or lats.ndim != 1 or lons.ndim != 1:
             return slice(None), slice(None)
         if len(lats) < 2 or len(lons) < 2:
-            raise ValueError("CONUS cropping requires at least two coordinates per axis")
+            raise ValueError(
+                "CONUS cropping requires at least two coordinates per axis"
+            )
         for coordinates in (lats, lons):
             steps = np.diff(coordinates)
             if not np.all(np.isfinite(coordinates)) or not (
@@ -319,9 +321,7 @@ class WxMapPlotter:
         x = np.linspace(*self.ax.get_xlim(), 129)
         y = np.linspace(*self.ax.get_ylim(), 129)
         xx, yy = np.meshgrid(x, y)
-        geographic = ccrs.PlateCarree().transform_points(
-            self.ax.projection, xx, yy
-        )
+        geographic = ccrs.PlateCarree().transform_points(self.ax.projection, xx, yy)
         if not np.all(np.isfinite(geographic[:, :, :2])):
             raise ValueError("Cannot determine finite geographic CONUS crop bounds")
         west, south = geographic[:, :, :2].min(axis=(0, 1)) - 1
@@ -330,18 +330,19 @@ class WxMapPlotter:
 
         slices = []
         for coordinates, lower, upper in (
-            (lats, south, north), (wrapped_lons, west, east)
+            (lats, south, north),
+            (wrapped_lons, west, east),
         ):
-            indices = np.flatnonzero(
-                (coordinates >= lower) & (coordinates <= upper)
-            )
+            indices = np.flatnonzero((coordinates >= lower) & (coordinates <= upper))
             if not len(indices):
                 raise ValueError("Source grid does not overlap the CONUS viewport")
             # Retain neighboring cells for mesh edges and interpolation.
-            slices.append(slice(
-                max(0, indices[0] - 2),
-                min(len(coordinates), indices[-1] + 3),
-            ))
+            slices.append(
+                slice(
+                    max(0, indices[0] - 2),
+                    min(len(coordinates), indices[-1] + 3),
+                )
+            )
         return slices[0], slices[1]
 
     def crop_data_to_view(
@@ -360,7 +361,8 @@ class WxMapPlotter:
         cropped = tuple(field[rows, columns, ...] for field in fields)
         logger.info(
             "Cropping CONUS render grid from %s to %s",
-            expected_shape, (len(lats[rows]), len(lons[columns])),
+            expected_shape,
+            (len(lats[rows]), len(lons[columns])),
         )
         return (lats[rows], lons[columns], *cropped)
 
@@ -397,7 +399,8 @@ class WxMapPlotter:
         cropped = data[rows, columns, ...]
         logger.info(
             "Cropping CONUS render image from %s to %s",
-            data.shape, cropped.shape,
+            data.shape,
+            cropped.shape,
         )
         return cropped, cropped_extent
 

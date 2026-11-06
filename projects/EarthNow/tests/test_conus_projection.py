@@ -12,7 +12,8 @@ from earthnow.wxmaps_plotting import WxMapPlotter
 def test_conus_matches_idl_viewport(resolution):
     config = WxMapsConfig.get_conus_map()
     plotter = WxMapPlotter(
-        config, resolution=resolution,
+        config,
+        resolution=resolution,
         style=StyleConfig(use_base_shapefiles=False),
     )
     try:
@@ -40,7 +41,8 @@ def test_conus_matches_idl_viewport(resolution):
         np.testing.assert_allclose(
             ax.get_position().bounds,
             [0, 0.00332517107, 1, 0.99334965766],
-            atol=1e-8, rtol=0,
+            atol=1e-8,
+            rtol=0,
         )
     finally:
         plotter.close()
@@ -51,7 +53,8 @@ def test_other_maps_keep_geographic_extent(map_name):
     config = WxMapsConfig.get_all_standard_maps()[map_name]
     assert config.native_extent is None
     plotter = WxMapPlotter(
-        config, resolution="hd",
+        config,
+        resolution="hd",
         style=StyleConfig(use_base_shapefiles=False),
     )
     reference = plt.figure()
@@ -70,12 +73,11 @@ def test_other_maps_keep_geographic_extent(map_name):
 def test_conus_renders_geographic_coordinates_from_both_grids(tmp_path, source_grid):
     geographic = ccrs.PlateCarree()
     if source_grid == "latlon":
-        lons, lats = np.meshgrid(
-            np.linspace(-140, -55, 80), np.linspace(15, 60, 45)
-        )
+        lons, lats = np.meshgrid(np.linspace(-140, -55, 80), np.linspace(15, 60, 45))
     else:
         source = ccrs.LambertConformal(
-            central_longitude=-97, central_latitude=35,
+            central_longitude=-97,
+            central_latitude=35,
             standard_parallels=(33, 45),
         )
         x, y = np.meshgrid(
@@ -86,15 +88,21 @@ def test_conus_renders_geographic_coordinates_from_both_grids(tmp_path, source_g
         lons, lats = coordinates[:, :, 0], coordinates[:, :, 1]
 
     plotter = WxMapPlotter(
-        WxMapsConfig.get_conus_map(), resolution="hd",
+        WxMapsConfig.get_conus_map(),
+        resolution="hd",
         style=StyleConfig(use_base_shapefiles=False),
     )
     try:
         _, ax = plotter.create_basemap()
         limits = (ax.get_xlim(), ax.get_ylim())
         ax.pcolormesh(
-            lons, lats, lats, transform=geographic,
-            shading="nearest", vmin=15, vmax=60,
+            lons,
+            lats,
+            lats,
+            transform=geographic,
+            shading="nearest",
+            vmin=15,
+            vmax=60,
         )
         output = tmp_path / f"conus_{source_grid}.png"
         plotter.save(str(output))
