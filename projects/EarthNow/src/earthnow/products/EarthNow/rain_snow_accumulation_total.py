@@ -132,6 +132,7 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
+    lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
     snowplot = ax.pcolormesh(
         lons,
         lats,
@@ -173,6 +174,7 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
+    lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
     rainplot = ax.pcolormesh(
         lons,
         lats,

@@ -39,6 +39,7 @@ class MapConfig:
     standard_parallels: Optional[Tuple[float, float]] = None
     contour_lineweight: float = 0.5
     contour_label_size: int = 8
+    native_extent: Optional[Tuple[float, float, float, float]] = None
 
 
 @dataclass
@@ -510,17 +511,16 @@ class WxMapsConfig:
 
     @staticmethod
     def get_conus_map() -> MapConfig:
-        """Continental United States - Lambert Conformal optimized for 16:9"""
+        """Continental United States - IDL region 104 oblique cylindrical view"""
         extent = [-125.75, -68.25, 23, 50]
         return MapConfig(
             name="conus",
-            projection=ccrs.LambertConformal(
-                central_longitude=-97, central_latitude=30, standard_parallels=(33, 45)
-            ),
+            projection=ccrs.RotatedPole(pole_longitude=83, pole_latitude=60),
             extent=extent,
-            center_lon=-96,
-            center_lat=37,
-            standard_parallels=(33, 45),
+            center_lon=-97,
+            center_lat=30,
+            # IDL MAP_SET UV_BOX, converted from radians to rotated degrees.
+            native_extent=(-26.33985162225, 26.33985162225, -7.0, 22.43526791581),
             contour_lineweight=1.25,
             contour_label_size=16,
         )
