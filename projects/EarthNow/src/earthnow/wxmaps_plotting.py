@@ -1662,6 +1662,9 @@ class WxMapPlotter:
         if optimize and filename.endswith(".png"):
             save_kwargs["pil_kwargs"] = {"compress_level": 6, "optimize": True}
 
+        if self.style.background_color == "None":
+            save_kwargs["transparent"] = True
+
         # Ensure output directory exists
         os.makedirs(os.path.dirname(filename), exist_ok=True)
 
