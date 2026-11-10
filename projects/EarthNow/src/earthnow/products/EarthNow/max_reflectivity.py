@@ -98,6 +98,7 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
     # Plot fields
     # ------------------------------------------------------------
     # Plot Radar Reflectivity
+    lats, lons, data, uphl_data = plotter.crop_data_to_view(lats, lons, data, uphl_data)
     radar_plot = ax.contourf(
         lons,
         lats,

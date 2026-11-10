@@ -107,6 +107,7 @@ def plot_winds_10m(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
+    lats, lons, wspd = plotter.crop_data_to_view(lats, lons, wspd)
     plot = ax.pcolormesh(
         lons,
         lats,

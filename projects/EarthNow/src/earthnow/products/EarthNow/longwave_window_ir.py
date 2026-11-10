@@ -44,6 +44,7 @@ def plot_longwave_window_ir(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
+    lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
     ax.pcolormesh(
         lons,
         lats,

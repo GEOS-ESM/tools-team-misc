@@ -125,6 +125,7 @@ def plot_temperature_2m(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot field
     # ------------------------------------------------------------
+    lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
     plot = ax.pcolormesh(
         lons,
         lats,
