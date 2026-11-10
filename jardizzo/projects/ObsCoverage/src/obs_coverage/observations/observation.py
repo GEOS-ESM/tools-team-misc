@@ -9,7 +9,7 @@ from scipy.spatial import cKDTree
 
 class Observation(object):
 
-    def __init__(self, filename=None, **kwargs):
+    def __init__(self, **kwargs):
 
         self.quiet = kwargs.get("quiet", False)
         self.debug = kwargs.get("debug", False)
@@ -53,6 +53,50 @@ class Observation(object):
         if not self.quiet:
             print(f'{nobs} observations thinned down to {n}')
 
+    def bin1(self, inchrs):
+
+        self.bins = {}
+        sort_indices = self.times.argsort()
+
+        for i in sort_indices:
+            hours_in_secs = inchrs * 3600
+            seconds = self.times[i].astype(int)
+            rounded_seconds = np.round(seconds / hours_in_secs) * hours_in_secs
+            tbin = rounded_seconds.astype('datetime64[s]')
+            bin = self.bins.get(tbin, [])
+            bin.append(i)
+            self.bins[tbin] = bin
+
+        return self.bins.keys()
+
+    def bin(self, inchrs):
+
+        hours_in_secs = inchrs * 3600
+        sort_indices = self.times.argsort()
+        self.lats = self.lats[sort_indices]
+        self.lons = self.lons[sort_indices]
+        self.times = self.times[sort_indices]
+
+        tbins = (np.round(self.times.astype(int) / hours_in_secs) * hours_in_secs).astype('datetime64[s]')
+
+        sorted_idx = np.argsort(tbins, kind='stable')
+        vals, first_positions = np.unique(tbins, return_index=True)
+        grouped_indices = np.split(sorted_idx, first_positions[1:])
+        self.bins = dict(zip(vals, grouped_indices))
+
+        return self.bins.keys()
+
+    def get(self, time_dt):
+
+        obs = copy.copy(self)
+        tbin = np.datetime64(time_dt)
+        indices = self.bins.get(tbin, [])
+        obs.lats = self.lats[indices]
+        obs.lons = self.lons[indices]
+        obs.times = self.times[indices]
+
+        return obs
+      
     def grid_map_fastest(self, lons, lats, resolution):
 
         nobs = lons.size
@@ -131,13 +175,10 @@ class Observation(object):
         return indices_array
 
     def __iadd__(self, other):
-        return mapping
 
         self.lats = np.concatenate((self.lats, other.lats))
         self.lons = np.concatenate((self.lons, other.lons))
         self.times = np.concatenate((self.times, other.times))
-
-        print(self.lats.size, other.lats.size)
 
         return self
 

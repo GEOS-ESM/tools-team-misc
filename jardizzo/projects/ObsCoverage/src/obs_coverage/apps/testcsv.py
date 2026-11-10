@@ -1,6 +1,7 @@
 import sys
+import datetime as dt
 from obs_coverage.observations.registry import OBS_TYPES
-from obs_coverage.observations.obs_writer import ObsWriter
+from obs_coverage.observations.obs_writer import write_csv
 
 obtype = OBS_TYPES["viirs_snpp"]
 
@@ -9,9 +10,9 @@ obstot = obtype()
 for filename in sys.argv[1:]:
     obs.read(filename)
     obstot += obs
+    print(obstot.lons.size)
 
-print(obstot.lats.size)
-obstot.thin(4.0, 4.0)
-
-writer = ObsWriter(obstot, 6)
-writer.write_csv('%Y%m%d%H')
+for tbin in obstot.bin(6):
+    obs = obstot.get(tbin)
+    obs.thin()
+    write_csv(tbin, obs, '%Y%m%d%H')
