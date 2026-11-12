@@ -21,6 +21,7 @@ class Observation(object):
 
         self.set_grid('fastest', (2.0, 2.0))
 
+        self.bins = {}
         self.lons = np.array([])
         self.lats = np.array([])
         self.times = np.array([], dtype='datetime64[s]')
@@ -41,33 +42,17 @@ class Observation(object):
 
     def thin(self):
 
-        nobs = self.lons.size
+        nobs = len(self)
 
         mapper = self.grid_map(self.lons, self.lats, self.resolution)
         self.lons = self.lons[mapper]
         self.lats = self.lats[mapper]
         self.times = self.times[mapper]
 
-        n = self.lons.size
+        n = len(self)
 
         if not self.quiet:
             print(f'{nobs} observations thinned down to {n}')
-
-    def bin1(self, inchrs):
-
-        self.bins = {}
-        sort_indices = self.times.argsort()
-
-        for i in sort_indices:
-            hours_in_secs = inchrs * 3600
-            seconds = self.times[i].astype(int)
-            rounded_seconds = np.round(seconds / hours_in_secs) * hours_in_secs
-            tbin = rounded_seconds.astype('datetime64[s]')
-            bin = self.bins.get(tbin, [])
-            bin.append(i)
-            self.bins[tbin] = bin
-
-        return self.bins.keys()
 
     def bin(self, inchrs):
 
@@ -84,7 +69,7 @@ class Observation(object):
         grouped_indices = np.split(sorted_idx, first_positions[1:])
         self.bins = dict(zip(vals, grouped_indices))
 
-        return self.bins.keys()
+        return sorted(self.bins)
 
     def get(self, time_dt):
 
@@ -96,6 +81,28 @@ class Observation(object):
         obs.times = self.times[indices]
 
         return obs
+
+    def purge(self, flush=False):
+
+        if flush:
+            self.bins = {}
+            self.lats = type(self.lats)()
+            self.lons = type(self.lons)()
+            self.times = type(self.times)()
+
+            return
+
+        if not self.bins:
+            return
+
+        tbin = sorted(self.bins)[-2] # Preserve the last bin
+
+        i = self.bins[tbin][-1]
+        self.lats = self.lats[i+1:]
+        self.lons = self.lons[i+1:]
+        self.times = self.times[i+1:]
+
+        self.bins = {}
       
     def grid_map_fastest(self, lons, lats, resolution):
 
@@ -187,3 +194,7 @@ class Observation(object):
         result = copy.deepcopy(self)
         result += other
         return result
+
+    def __len__(self):
+
+        return self.times.size
