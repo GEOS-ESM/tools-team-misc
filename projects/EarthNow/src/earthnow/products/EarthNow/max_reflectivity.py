@@ -98,16 +98,16 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
     # Plot fields
     # ------------------------------------------------------------
     # Plot Radar Reflectivity
-    radar_plot = ax.pcolormesh(
+    lats, lons, data, uphl_data = plotter.crop_data_to_view(lats, lons, data, uphl_data)
+    radar_plot = ax.contourf(
         lons,
         lats,
         data,
         cmap=cmap,
         norm=norm,
+        levels=REFL_LEVELS,
         transform=ccrs.PlateCarree(),
-        shading="nearest",
         zorder=4,
-        rasterized=True,
     )
     # fig.colorbar(radar_plot) # Confirm plot colorbar matches
 

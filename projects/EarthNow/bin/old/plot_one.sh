@@ -85,8 +85,8 @@ if [[ "$FRAMES" == "single" ]]; then
     fi
 
     # PDATE defines the frame/timestamp
-    if [[ ! $PDATE =~ ^[0-9]{8}_[0-9]{2}z$ ]]; then
-        echo "Error: Invalid PDATE format. Must be YYYYMMDD_HHz"
+    if [[ ! $PDATE =~ ^[0-9]{8}_[0-9]{4}z$ ]]; then
+        echo "Error: Invalid PDATE format. Must be YYYYMMDD_HHHHz"
     exit 1
     fi
 elif [[ "$FRAMES" == "all" ]]; then 

@@ -45,6 +45,13 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
 
     norm = BoundaryNorm(vLEVELS, ncolors=cmap.N)
 
+    # Smooth before cropping so the visible contours retain their full-grid values.
+    window_size = int(3840 * 0.025)
+    hgts_smoothed = boxcar_smooth_2D(hgts, window_size=window_size)
+    lats, lons, vort, hgts_smoothed = plotter.crop_data_to_view(
+        lats, lons, vort, hgts_smoothed
+    )
+
     # ------------------------------------------------------------
     # Plot vorticity field (cyclonic)
     # ------------------------------------------------------------
@@ -86,14 +93,6 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot height contours
     # ------------------------------------------------------------
-
-    # Smooth heights
-    # 4k dimensions
-    pngImgIdim = 3840
-    pngImgJdim = 2160
-    window_size = int(pngImgIdim * 0.025)  # This is the window size Bill's IDL uses
-
-    hgts_smoothed = boxcar_smooth_2D(hgts, window_size=window_size)
 
     hlevs = np.arange(4500, 6300, 30)  # 4800m to 6240m every 30m
 

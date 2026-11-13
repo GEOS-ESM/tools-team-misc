@@ -69,6 +69,7 @@ def plot_aerosols(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot fields
     # ------------------------------------------------------------
+    lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
     plot = ax.pcolormesh(
         lons,
         lats,
