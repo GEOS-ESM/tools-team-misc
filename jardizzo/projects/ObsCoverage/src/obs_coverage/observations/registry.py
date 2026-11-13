@@ -2,7 +2,7 @@
 Registry for observation readers
 """
 
-OBS_READERS = {}
+OBS_TYPES = {}
 
 
 def register(name):
@@ -16,7 +16,7 @@ def register(name):
     """
 
     def decorator(cls):
-        OBS_READERS[name] = cls
+        OBS_TYPES[name] = cls
         return cls
 
     return decorator
