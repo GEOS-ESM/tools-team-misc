@@ -10,7 +10,7 @@ from obs_coverage.writers.registry import OBS_WRITERS
 MAXBUF = 5000000
 
 
-def execute(
+def coverage(
     obtype=None,
     format=None,
     bin_size=None,
@@ -73,20 +73,20 @@ def execute(
 
 if __name__ == "__main__":
     """
-    Observation sampling command-line interface.
+    Observation coverage command-line interface.
 
-    Retrieves command-line arguments and execute the sampler.
+    Retrieves command-line arguments and execute.
 
     Usage
     -----
-    Type "obs_sample.py" -h for a list of command-line options.
+    Type "obscover.py" -h for a list of command-line options.
 
     """
 
     # Retrieve command-line arguments.
     # ================================
 
-    description = "Production driver for observation sampler"
+    description = "Production driver for observation coverage"
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         "-t",
         metavar="obtype",
         choices=OBS_TYPES.keys(),
-        help=f"Input observation type",
+        help=f"Input observation type: {list(OBS_TYPES.keys())}",
         type=str,
         required=True,
     )
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         "-f",
         metavar="format",
         choices=OBS_WRITERS.keys(),
-        help="Output data format (default: %(default)s)",
+        help=f"Output data format: {list(OBS_WRITERS.keys())} (default: %(default)s)",
         type=str,
         default="csv",
     )
@@ -177,6 +177,6 @@ if __name__ == "__main__":
     args_dict = vars(args)
     args_dict.update({"start_dt": start_dt, "end_dt": end_dt})
 
-    execute(**args_dict)
+    coverage(**args_dict)
 
     sys.exit(0)
