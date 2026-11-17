@@ -143,15 +143,16 @@ def plot_blended_LWIR_veg(fig, ax, plotter, reader, args):
     # ------------------------------------------------------------
     # Plot on native grid: one color per cell, carrying the blended RGBA
     # ------------------------------------------------------------
-    ny, nx = rgba.shape[:2]
+    lats_c, lons_c, rgba_c = plotter.crop_data_to_view(lats, lons, rgba)
+    ny, nx = rgba_c.shape[:2]
     n_colors = ny * nx
-    cmap = ListedColormap(rgba.reshape(-1, 4))
+    cmap = ListedColormap(rgba_c.reshape(-1, 4))
     norm = Normalize(vmin=-0.5, vmax=n_colors - 0.5)
-    cell_index = np.arange(n_colors, dtype=np.float32).reshape(ny, nx)
+    cell_index = np.arange(n_colors, dtype=np.float64).reshape(ny, nx)
 
     ax.pcolormesh(
-        lons,
-        lats,
+        lons_c,
+        lats_c,
         cell_index,
         cmap=cmap,
         norm=norm,
