@@ -496,6 +496,7 @@ def build_and_save_colorbars(
     subtitles=False,  # If true print labels to the side of bars
     title=None,  # This would add an *additional* title on top of all colorbars
     share_xaxis=False,  # If true only the bottommost colorbar shows ticks; bars are packed closer
+    **kwargs,
 ):
     """
     Dynamically generates a colorbar figure with single or multiple rows of colorbars and saves it. This function completely replaces the build_colorbar + save_colorbar_single.
