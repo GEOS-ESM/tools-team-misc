@@ -36,7 +36,15 @@ plot_global:
   streams: [conus2km]
   regions: [global]
 plot_conus_LCC:
-  products: [cape, band16, band14, band09, winds, t2m, radar]
+  products:
+    - cape
+    - band16
+    - band14
+    - band09
+    - sandwich
+    - winds
+    - t2m
+    - radar
   streams: [conus2km_lcc]
   regions: [conus]
 plot_conus_latlon:
