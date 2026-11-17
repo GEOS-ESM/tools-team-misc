@@ -496,6 +496,7 @@ def build_and_save_colorbars(
     subtitles=False,  # If true print labels to the side of bars
     title=None,  # This would add an *additional* title on top of all colorbars
     share_xaxis=False,  # If true only the bottommost colorbar shows ticks; bars are packed closer
+    invert_x=False,  # If true flip the x-axis so the low end of the range is on the left
     **kwargs,
 ):
     """
@@ -679,6 +680,12 @@ def build_and_save_colorbars(
                 for txt, dflt in zip(texts, default_text)
             ]
             cb.set_ticks(positions, labels=final_text)
+
+        if invert_x:
+            # Colors follow the data norm, so the low end (-93 for the LWIR bar)
+            # starts on the left. Flipping the axis instead of reversing the norm
+            # puts the high end on the left while keeping colors matched to the data.
+            cb.ax.invert_xaxis()
 
         if share_xaxis and row_idx_from_bottom != 0:
             cb.ax.tick_params(bottom=False, labelbottom=False)
