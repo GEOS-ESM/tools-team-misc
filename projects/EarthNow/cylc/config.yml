@@ -104,7 +104,8 @@ products:
     style: greyblue
   sandwich:
     product: blended_LWIR_veg_EarthNow
-    style: empty
+    style: white_states
+
 # Stream Definitions
 # ==================
 streams:
