@@ -137,8 +137,12 @@ def plot_blended_LWIR_veg(fig, ax, plotter, reader, args):
         lwir_rgb * lwir_alpha[..., None]
         + veg_rgb * (veg_alpha * (1.0 - lwir_alpha))[..., None]
     )
-    out_rgb = out_rgb / np.maximum(out_alpha, 1e-6)[..., None]
-    rgba = np.dstack([out_rgb, out_alpha]).astype(np.float32)
+    # Composite over black so nighttime and out-of-range pixels render black
+    # rather than transparent. The IDL script leaves them transparent over the
+    # basemap; this product uses black as the background instead. out_rgb is
+    # already weighted by its alpha, so black contributes nothing and the
+    # pixel is set fully opaque.
+    rgba = np.dstack([out_rgb, np.ones_like(out_alpha)]).astype(np.float32)
 
     # ------------------------------------------------------------
     # Plot on native grid: one color per cell, carrying the blended RGBA
