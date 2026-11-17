@@ -76,7 +76,7 @@ products:
     product: radar_reflectivity_EarthNow
     style: greyblue
   sandwich:
-    product: blended_LWIR_veg
+    product: blended_LWIR_veg_EarthNow
     style: greytopo_state_coast
 
 # Stream Definitions
