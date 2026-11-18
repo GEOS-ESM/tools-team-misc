@@ -1,3 +1,4 @@
+---
 # Default Settings
 # ================
 nproc: 24
@@ -15,21 +16,47 @@ driver: enow_plot.py
 # Tasks
 # =====
 # Product-specific tasks to define each products conus input grid
-
 plot_all: [plot_global, plot_conus_LCC, plot_conus_latlon]
 plot_global:
-  products: [t2m, vort500, winds, wind250, helicity, cape, aerosols, carbon, geocolor, band16, band09, band14, radar]
+  products:
+    - t2m
+    - vort500
+    - winds
+    - wind250
+    - helicity
+    - cape
+    - aerosols
+    - carbon
+    - geocolor
+    - band16
+    - band09
+    - band14
+    - radar
+    - sandwich
   streams: [conus2km]
   regions: [global]
 plot_conus_LCC:
-  products: [cape, band16, band14, band09, winds, t2m, radar]
+  products:
+    - cape
+    - band16
+    - band14
+    - band09
+    - sandwich
+    - winds
+    - t2m
+    - radar
   streams: [conus2km_lcc]
   regions: [conus]
 plot_conus_latlon:
-  products: [vort500, wind250, helicity, aerosols, carbon, geocolor]
+  products:
+    - vort500
+    - wind250
+    - helicity
+    - aerosols
+    - carbon
+    - geocolor
   streams: [conus2km]
   regions: [conus]
-
 # Product Definitions
 # ===================
 products:
@@ -75,6 +102,9 @@ products:
   radar:
     product: radar_reflectivity_EarthNow
     style: greyblue
+  sandwich:
+    product: blended_LWIR_veg_EarthNow
+    style: white_states
 
 # Stream Definitions
 # ==================
