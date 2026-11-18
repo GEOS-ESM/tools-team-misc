@@ -33,6 +33,7 @@ plot_global:
     - band14
     - radar
     - sandwich
+    - precip
   streams: [conus2km]
   regions: [global]
 plot_conus_LCC:
@@ -55,6 +56,7 @@ plot_conus_latlon:
     - aerosols
     - carbon
     - geocolor
+    - precip
   streams: [conus2km]
   regions: [conus]
 # Product Definitions

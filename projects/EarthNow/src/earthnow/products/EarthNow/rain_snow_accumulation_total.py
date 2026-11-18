@@ -11,9 +11,14 @@ from earthnow import paths
 import logging
 import sys
 
-variable = "rain_snow_accumulation_total_EarthNow"
+variable = "precip"
 create_colorbar = False
 
+# Create mappable dict for multi-variable colorbar
+mappables = []
+levels = []
+labels = []
+ticks = []
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
@@ -96,14 +101,6 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     """
     Plot total rain & snow accumulation (inches)
     """
-    if create_colorbar:
-        import matplotlib.cm as cm
-
-        # Create mappable dict for multi-variable colorbar
-        mappables = []
-        levels = []
-        labels = []
-        ticks = []
     # ============
     # SNOW FIRST
     # ============
@@ -144,11 +141,6 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
-    if create_colorbar:
-        mappables.append(cm.ScalarMappable(norm=snowplot.norm, cmap=snowplot.cmap))
-        levels.append(snowLEVELS[::3])
-        labels.append("Accumulated Snow [mm]")
-
     # ============
     # RAIN NEXT
     # ============
@@ -186,21 +178,24 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
-    if create_colorbar:
-        from earthnow.wxmaps_utils import build_and_save_colorbars
+    if args.colorbar:
+        import matplotlib.cm as cm
 
-        mappables.append(cm.ScalarMappable(norm=rainplot.norm, cmap=rainplot.cmap))
+        # mappables.append(cm.ScalarMappable(norm=snowplot.norm, cmap=snowplot.cmap))
+        mappables.append(rainplot)
+        levels.append(snowLEVELS[::3])
+        labels.append("Accumulated Snow [mm]")
+
+        # mappables.append(cm.ScalarMappable(norm=rainplot.norm, cmap=rainplot.cmap))
+        mappables.append(rainplot)
         levels.append(rainLEVELS)
         labels.append("Accumulated Rain [mm]")
-        ticks.append(rainLEVELS)
 
-        colorbar_output = (
-            f"/discover/nobackup/eibell/Earthnow/plots/{variable}_colorbar.png"
-        )
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
         build_and_save_colorbars(
             mappables,
             levels,
-            colorbar_output,
+            variable,
             labels,
         )
