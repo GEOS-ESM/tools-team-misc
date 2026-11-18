@@ -477,8 +477,9 @@ def save_colorbar_single(
 def build_and_save_colorbars(
     mappables,
     ticks,
-    output_path,
+    varname,
     labels,
+    output_path="/discover/nobackup/$USER/EarthNow/MOVIES_EIC_NOW/ColorBars/",
     formats=None,
     label_fontsize=96,
     tick_labelsize=48,
@@ -551,7 +552,8 @@ def build_and_save_colorbars(
 
     #  Validate lenghts
     if not (n_bars == len(mappables) == len(ticks) == len(labels) == len(formats)):
-        logger.debug(
+        # There is no logger in this module so I made it print?
+        print(
             f"Axes len: {n_bars}\n"
             f"Mappables len: {len(mappables)}\n"
             f"Ticks len: {len(ticks)}\n"
@@ -701,10 +703,12 @@ def build_and_save_colorbars(
             ha="left",
         )
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    cbar_name = f"ploteic_{varname}-cbar-{text_color}.png"
+    output_filename = Path(os.path.expandvars(output_path)) / cbar_name
+    os.makedirs(os.path.dirname(output_filename), exist_ok=True)
     fig.savefig(
-        output_path, dpi=dpi, bbox_inches="tight", pad_inches=0.2, transparent=True
+        output_filename, dpi=dpi, bbox_inches="tight", pad_inches=0.2, transparent=True
     )
     plt.close(fig)
 
-    print(f"Saved colorbar to: {output_path}")
+    print(f"Saved colorbar to: {output_filename}")

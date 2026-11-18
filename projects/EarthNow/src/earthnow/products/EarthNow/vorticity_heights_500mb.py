@@ -11,9 +11,8 @@ from wxvis import colors
 from matplotlib import colormaps
 from earthnow.wxmaps_utils import colorbar_alpha_fade, boxcar_smooth_2D
 
-variable = "vorticity"
+variable = "vort500"
 vLEVELS = 60.0 * np.arange(256) / 255.0  # seconds^-1
-create_colorbar = False
 
 
 # ------------------------------------------------------------------
@@ -116,21 +115,14 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
         inline_spacing=5,
     )
 
-    if create_colorbar == True:
-        generate_colorbar(plot)
+    if args.colorbar:
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
+        levels = np.arange(0, 65, 5)
 
-def generate_colorbar(plot):
-    from earthnow.wxmaps_utils import build_and_save_colorbars
-
-    colorbar_output = (
-        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
-    )
-    levels = np.arange(0, 65, 5)
-
-    build_and_save_colorbars(
-        plot,
-        levels,
-        colorbar_output,
-        "500mb Cyclonic Relative Vorticity (×10⁻⁵ s⁻¹) and Height (m)",
-    )
+        build_and_save_colorbars(
+            plot,
+            levels,
+            variable,
+            "500mb cyclonic relative vorticity (×10⁻⁵ s⁻¹) and height (m)",
+        )

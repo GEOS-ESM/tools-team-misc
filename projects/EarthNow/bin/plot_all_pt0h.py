@@ -82,6 +82,7 @@ def main():
                 resolution,
                 "--output",
                 str(output),
+                "--colorbar",
             ]
             print(shlex.join(command), flush=True)
             if not args.dry_run:

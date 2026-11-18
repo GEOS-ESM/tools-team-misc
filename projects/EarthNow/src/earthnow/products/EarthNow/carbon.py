@@ -19,8 +19,6 @@ from matplotlib import colormaps
 
 variable = "carbon"
 
-create_colorbar = False
-
 
 # ------------------------------------------------------------------
 # Main product function
@@ -84,15 +82,12 @@ def plot_aerosols(fig, ax, plotter, reader, args):
     #     plot, orientation="horizontal", shrink=0.2, aspect=15, pad=0.01
     # )  # Testing the colorbar matches
 
-    if create_colorbar == True:
+    if args.colorbar:
         from earthnow.wxmaps_utils import build_and_save_colorbars
 
-        colorbar_output = (
-            f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
-        )
         build_and_save_colorbars(
             plot,
             levels,
-            colorbar_output,
+            variable,
             "Carbon Aerosol Optical Thickness",
         )

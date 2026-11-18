@@ -16,7 +16,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-create_colorbar = False
 variable = "helicity"
 
 # Level generation for Updraft Helicity
@@ -143,7 +142,7 @@ def plot_max_reflectivity(fig, ax, plotter, reader, args):
         f"  Pixel ratio (image/data): {(img_height_px * img_width_px) / (data_shape[0] * data_shape[1]):.2f}x"
     )
 
-    if create_colorbar == True:
+    if args.colorbar:
         generate_colorbars(
             [radar_plot, uphl_plot],
             [REFL_LEVELS, UPHL_LEVELS[1::2]],
@@ -156,12 +155,9 @@ def generate_colorbars(mappables: list, levels: list, labels: list):
 
     from earthnow.wxmaps_utils import build_and_save_colorbars
 
-    colorbar_output = (
-        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
-    )
     build_and_save_colorbars(
         mappables,
         levels,
-        colorbar_output,
+        variable,
         labels,
     )

@@ -10,6 +10,7 @@ from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 
+variable = "band14"
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
@@ -45,7 +46,7 @@ def plot_longwave_window_ir(fig, ax, plotter, reader, args):
     # Plot field
     # ------------------------------------------------------------
     lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
-    ax.pcolormesh(
+    plot = ax.pcolormesh(
         lons,
         lats,
         data,
@@ -56,19 +57,16 @@ def plot_longwave_window_ir(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
+    if args.colorbar:
+        """Generate colorbar for longwave window IR"""
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
-def generate_colorbar():
-    """Generate colorbar for longwave window IR"""
-    from earthnow.wxmaps_utils import save_colorbar_single
+        # Use representative tick levels instead of all 256
+        tick_levels = np.array([-110, -80, -50, -20, 0, 20, 40, 57])
 
-    # Use representative tick levels instead of all 256
-    tick_levels = np.array([-110, -80, -50, -20, 0, 20, 40, 57])
-
-    output = paths.colorbar_output("longwave_window_ir.png")
-    save_colorbar_single(
-        COLORS,
-        LEVELS,
-        output,
-        label="11.2 μm Longwave Window Brightness Temperature (°C)",
-        extend="both",
-    )
+        build_and_save_colorbars(
+            plot,
+            tick_levels,
+            variable,
+            "11.2 μm Longwave Window Brightness Temperature (°C)",
+        )

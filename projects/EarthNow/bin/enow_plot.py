@@ -196,6 +196,7 @@ def parse_args():
         "--nws-shapefile-base",
         default=paths.NWS_SHAPEFILE_DIR,
     )
+    parser.add_argument("--colorbar", action="store_true", help="Generate colorbar png")
     parser.add_argument(
         "--logger",
         choices=[
