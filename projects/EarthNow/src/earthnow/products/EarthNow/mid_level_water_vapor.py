@@ -63,9 +63,12 @@ def plot_mid_level_water_vapor(fig, ax, plotter, reader, args):
         """Generate colorbar for mid-level water vapor"""
         from earthnow.wxmaps_utils import build_and_save_colorbars
 
+        tick_labels = [(min(clevs), "Wet"), (max(clevs), "Dry")]
+
         build_and_save_colorbars(
             plot,
-            clevs,
+            tick_labels,
             variable,
             "6.9 micron - Mid-Level Water Vapor - IR",
+            invert_x=True,
         )
