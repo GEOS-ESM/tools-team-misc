@@ -65,9 +65,9 @@ products:
   t2m:
     product: temperature_2m_EarthNow
     style: t2m
-  rainsnow:
+  precip:
     product: rain_snow_accumulation_total_EarthNow
-    style: light
+    style: greytopo
   vort500:
     product: vorticity_heights_500mb_EarthNow
     style: greytopo

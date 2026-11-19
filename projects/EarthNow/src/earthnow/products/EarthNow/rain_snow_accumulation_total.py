@@ -179,14 +179,10 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     )
 
     if args.colorbar:
-        import matplotlib.cm as cm
-
-        # mappables.append(cm.ScalarMappable(norm=snowplot.norm, cmap=snowplot.cmap))
-        mappables.append(rainplot)
+        mappables.append(snowplot)
         levels.append(snowLEVELS[::3])
         labels.append("Accumulated Snow [mm]")
 
-        # mappables.append(cm.ScalarMappable(norm=rainplot.norm, cmap=rainplot.cmap))
         mappables.append(rainplot)
         levels.append(rainLEVELS)
         labels.append("Accumulated Rain [mm]")
