@@ -59,6 +59,7 @@ class StyleConfig:
 
     # Base image options
     use_base_image: bool = False
+    base_image_ocean: bool = False
     base_image_type: str = "natural_earth_greyblue"
     base_image_path: Optional[str] = None
     base_image_month: Optional[int] = None
