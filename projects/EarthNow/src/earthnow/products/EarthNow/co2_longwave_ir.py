@@ -63,9 +63,11 @@ def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
         """Generate colorbar for CO2 longwave IR"""
         from earthnow.wxmaps_utils import build_and_save_colorbars
 
+        tick_labels = [(min(clevs), "Cold"), (max(clevs), "Warm")]
+
         build_and_save_colorbars(
             plot,
-            clevs,
+            tick_labels,
             variable,
             "13.3 micron -  CO2 Longwave Band - IR",
         )

@@ -24,72 +24,53 @@ ticks = []
 # ------------------------------------------------------------------
 
 snowLEVELS = [
-    0.1,
-    0.25,
-    0.5,
-    0.75,
-    1,
-    1.5,
-    2,
-    2.5,
-    3,
-    3.5,
-    4,
-    4.5,
-    5,
-    5.5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    14,
-    16,
-    18,
-    20,
-    22,
-    24,
-    26,
-    28,
-    30,
-    32,
-    34,
-    36,
-    40,
+    0,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    120,
+    140,
+    150,
+    160,
+    180,
+    200,
+    250,
+    300,
+    350,
+    400,
+    500,
+    600,
+    700,
+    800,
+    1000,
+    1200,
+    1500,
 ]
-#    44,
-#    48,
-#    52,
-#    56,
-#    60,
-# ]
 
 rainLEVELS = [
-    0.01,
-    0.1,
-    0.25,
-    0.5,
-    1,
-    1.5,
-    2,
-    3,
-    4,
-    5,
-    6,
-    8,
-    10,
-    12,
-    14,
-    16,
-    18,
-    20,
+    0,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    120,
+    140,
+    150,
+    160,
+    180,
+    200,
+    250,
+    300,
+    350,
+    400,
 ]
-#    22,
-#    24,
-#    30,
-# ]
+
+MIN_ACCUM_MM = 5.0  # matches IDL alpha ramp: values <= 5 mm are transparent
 
 # ------------------------------------------------------------------
 # Main product function
@@ -99,7 +80,7 @@ rainLEVELS = [
 @register("rain_snow_accumulation_total_EarthNow")
 def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     """
-    Plot total rain & snow accumulation (inches)
+    Plot total rain & snow accumulation (mm)
     """
     # ============
     # SNOW FIRST
@@ -115,10 +96,10 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
 
         return False  # Signal to skip this plot
 
-    data = data.astype(np.float32) / 25.4
+    data = data.astype(np.float32)
 
     # Mask low values
-    data = np.ma.masked_where(data < 0.1, data)
+    data = np.ma.masked_where(data <= MIN_ACCUM_MM, data)
 
     # ------------------------------------------------------------
     # Colormap + normalization
@@ -153,10 +134,10 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
 
     if data is None:
         return False  # Signal to skip this plot
-    data = data.astype(np.float32) / 25.4
+    data = data.astype(np.float32)
 
     # Mask low values
-    data = np.ma.masked_where(data < 0.1, data)
+    data = np.ma.masked_where(data <= MIN_ACCUM_MM, data)
 
     # ------------------------------------------------------------
     # Colormap + normalization
@@ -179,8 +160,10 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     )
 
     if args.colorbar:
+        # Custom ticks to match Bill's
+        snow_ticks = [0, 60, 80, 100, 140, 160, 200, 300, 400, 600, 800, 1200]
         mappables.append(snowplot)
-        levels.append(snowLEVELS[::3])
+        levels.append(snow_ticks)
         labels.append("Accumulated Snow [mm]")
 
         mappables.append(rainplot)
