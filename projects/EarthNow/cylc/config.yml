@@ -100,7 +100,7 @@ products:
     style: red_state_coast
   band14:
     product: longwave_window_ir_EarthNow
-    style: greytopo_state_coast
+    style: state_coasts_white
   radar:
     product: radar_reflectivity_EarthNow
     style: greyblue

@@ -94,7 +94,7 @@ class StyleConfig:
 
     boundaries: list[str] = field(default_factory=list)  # Defaults to empty I think
     coastline_color: str = "#333333"
-    coastline_width: float = 1.0
+    coastline_width: float = 0.5
     coastline_alpha: float = 1.0
 
     lake_color: str = "#333333"
@@ -160,7 +160,6 @@ class StyleConfig:
             use_gshhs=True,
             ocean_color="#EEEEEE",
             coastline_color="black",
-            coastline_width=0.5,
             coastline_alpha=0.6,
             country_color="black",
             country_width=0.5,
@@ -178,7 +177,6 @@ class StyleConfig:
         return StyleConfig(
             ocean_color="#EEEEEE",
             coastline_color="black",
-            coastline_width=0.5,
             coastline_alpha=0.8,
             country_color="black",
             country_width=0.5,
@@ -198,7 +196,6 @@ class StyleConfig:
             ocean_color="#454545",
             land_color="#6e6e6e",
             coastline_color="#FFFFFF",
-            coastline_width=0.5,
             coastline_alpha=0.8,
             country_color="#FFFFFF",
             country_width=0.5,
@@ -217,7 +214,6 @@ class StyleConfig:
             use_base_shapefiles=False,
             boundaries=["coastlines", "states"],
             coastline_color="white",
-            coastline_width=0.5,
             coastline_alpha=0.8,
             lake_color="white",
             state_color="white",
@@ -233,7 +229,6 @@ class StyleConfig:
             use_base_image=True,
             base_image_type="dnb_nightlights",
             coastline_color="#FFFFFF",
-            coastline_width=0.5,
             coastline_alpha=0.8,
             country_color="#FFFFFF",
             country_width=0.5,
@@ -291,15 +286,28 @@ class StyleConfig:
     @staticmethod
     @register_style("greytopo")
     def greytopo() -> "StyleConfig":
-        """Testing to create grey topo style"""
+        """Grey topo natural earth imagery"""
         return StyleConfig(
+            background_color="None",
+            text_color="white",
             use_base_image=True,
-            base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # custom imagery
+            base_image_type="natural_earth_grey_ice",
+            base_image_ocean=True,
+            ocean_color="#d7d7d7",
         )
 
+    # @staticmethod
+    # @register_style("greytopo")
+    # def greytopo() -> "StyleConfig":
+    #     """Testing to create grey topo style"""
+    #     return StyleConfig(
+    #         use_base_image=True,
+    #         base_image_path="/discover/nobackup/jardizzo/maps/basemaps/shadedrelief_grayscale.21600x10800.png",  # custom imagery
+    #     )
+
     @staticmethod
-    @register_style("greytopo_state_coast")
-    def greytopo_state_coast() -> "StyleConfig":
+    @register_style("state_coasts_white")
+    def state_coasts_white() -> "StyleConfig":
         """Grey topo with coastlines and states for conus"""
         return StyleConfig(
             use_base_shapefiles=False,
