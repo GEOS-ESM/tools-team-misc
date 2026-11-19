@@ -38,6 +38,17 @@ def main():
         help="Specific product to plot (default: all products)",
     )
     parser.add_argument("--resolution", choices=["hd", "4k", "8k"], default=None)
+    parser.add_argument(
+        "--region",
+        choices=["conus", "global"],
+        default=None,
+        help="Specific region to plot (default: both conus and global)",
+    )
+    parser.add_argument(
+        "--colorbar",
+        action="store_true",
+        help="Pass --colorbar through to enow_plot.py",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print commands only")
     args = parser.parse_args()
     date_tag = args.date.strftime("%Y%m%d")
@@ -54,7 +65,8 @@ def main():
     for product, options in config["products"].items():
         if specific_product and product != specific_product:
             continue
-        for region in ("conus", "global"):
+        regions = (args.region,) if args.region else ("conus", "global")
+        for region in regions:
             reader = (
                 "conus2kmfc_lcc"
                 if region == "conus" and product in lcc_products
@@ -82,8 +94,9 @@ def main():
                 resolution,
                 "--output",
                 str(output),
-                "--colorbar",
             ]
+            if args.colorbar:
+                command.append("--colorbar")
             print(shlex.join(command), flush=True)
             if not args.dry_run:
                 subprocess.run(command, cwd=project_dir, check=True)
