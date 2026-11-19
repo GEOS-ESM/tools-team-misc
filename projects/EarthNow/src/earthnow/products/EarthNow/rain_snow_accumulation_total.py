@@ -160,8 +160,10 @@ def plot_rain_snow_accumulation_total(fig, ax, plotter, reader, args):
     )
 
     if args.colorbar:
+        # Custom ticks to match Bill's
+        snow_ticks = [0, 60, 80, 100, 140, 160, 200, 300, 400, 600, 800, 1200]
         mappables.append(snowplot)
-        levels.append(snowLEVELS[::3])
+        levels.append(snow_ticks)
         labels.append("Accumulated Snow [mm]")
 
         mappables.append(rainplot)
