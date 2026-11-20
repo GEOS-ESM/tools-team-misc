@@ -297,6 +297,23 @@ class StyleConfig:
             ocean_color="#d7d7d7",
         )
 
+    @staticmethod
+    @register_style("greytopo_states")
+    def greytopo_states() -> "StyleConfig":
+        """Grey topo natural earth imagery"""
+        return StyleConfig(
+            background_color="None",
+            text_color="white",
+            use_base_image=True,
+            base_image_type="natural_earth_grey_ice",
+            base_image_ocean=True,
+            ocean_color="#d7d7d7",
+            boundaries=["coastlines", "countries", "states"],
+            coastline_width=0.2,
+            country_width=0.3,
+            state_width=0.2,
+        )
+
     # @staticmethod
     # @register_style("greytopo")
     # def greytopo() -> "StyleConfig":

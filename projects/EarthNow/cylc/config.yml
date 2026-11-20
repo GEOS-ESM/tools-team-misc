@@ -67,7 +67,7 @@ products:
     style: t2m
   precip:
     product: rain_snow_accumulation_total_EarthNow
-    style: greytopo
+    style: greytopo_states
   vort500:
     product: vorticity_heights_500mb_EarthNow
     style: greytopo
