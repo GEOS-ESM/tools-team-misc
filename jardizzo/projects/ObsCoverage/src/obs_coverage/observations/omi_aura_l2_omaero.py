@@ -20,7 +20,6 @@ class OMI_Aura_L2_OMAERO(Observation):
 
     def read(self, filename):
 
-        print(filename)
         base_epoch = np.datetime64("1993-01-01T00:00:00", "s")
 
         with h5py.File(filename, "r") as fh:

@@ -25,10 +25,6 @@ class Observation(object):
     def open(self, filename):
 
         fh = xr.open_dataset(filename)
-
-        if not self.quiet:
-            print(f"Reading: {filename}")
-
         return fh
 
     def set_grid_method(self, method, resolution):

@@ -39,6 +39,7 @@ def coverage(
 
     for filename in files:
 
+        print(filename)
         obs.read(filename)
         obstot += obs
 
