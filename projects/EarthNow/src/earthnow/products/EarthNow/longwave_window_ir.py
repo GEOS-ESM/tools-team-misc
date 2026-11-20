@@ -5,6 +5,7 @@ Maximum Composite Reflectivity (DBZ_MAX / REFC)
 
 import numpy as np
 import cartopy.crs as ccrs
+from matplotlib.cm import ScalarMappable
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
@@ -19,6 +20,10 @@ COLORS = load_color_table(paths.colortable("NESDIS_IR_10p3micron.txt"))
 
 clevs = [-110.0, -59, -20, 6, 31, 57]  # Celcius
 LEVELS = np.interp(5 * np.arange(256) / 255.0, np.arange(len(clevs)), clevs)
+
+cmap = ListedColormap(COLORS)
+norm = BoundaryNorm(LEVELS, ncolors=cmap.N, clip=True)
+mappable = ScalarMappable(norm=norm, cmap=cmap)
 
 # ------------------------------------------------------------------
 # Main product function
@@ -62,7 +67,7 @@ def plot_longwave_window_ir(fig, ax, plotter, reader, args):
         from earthnow.wxmaps_utils import build_and_save_colorbars
 
         # Use representative tick levels instead of all 256
-        tick_levels = np.array([-110, -80, -50, -20, 0, 20, 40, 57])
+        tick_levels = [-110, -59, -20, 6, 31, 57]
 
         build_and_save_colorbars(
             plot,
