@@ -132,10 +132,13 @@ class WxMapPlotter:
 
         # Create figure with high DPI
         self.fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
-        self.fig.patch.set_facecolor("white")
 
         # Create axes with projection - no margins for wxmaps look
-        self.ax = self.fig.add_axes([0, 0, 1, 1], projection=self.config.projection)
+        self.ax = self.fig.add_axes(
+            [0, 0, 1, 1],
+            projection=self.config.projection,
+            facecolor=self.style.background_color,
+        )
 
         # Set extent - handle geostationary projections differently
         if self.config.native_extent is not None:
@@ -1693,9 +1696,6 @@ class WxMapPlotter:
 
         if optimize and filename.endswith(".png"):
             save_kwargs["pil_kwargs"] = {"compress_level": 6, "optimize": True}
-
-        if self.style.background_color == "None":
-            save_kwargs["transparent"] = True
 
         # Ensure output directory exists
         os.makedirs(os.path.dirname(filename), exist_ok=True)

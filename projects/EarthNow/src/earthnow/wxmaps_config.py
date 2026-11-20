@@ -211,7 +211,7 @@ class StyleConfig:
     def white_states() -> "StyleConfig":
         """White state and coastlines style"""
         return StyleConfig(
-            background_color="None",
+            background_color="black",
             use_base_shapefiles=False,
             boundaries=["coastlines", "states"],
             coastline_color="white",
@@ -289,7 +289,6 @@ class StyleConfig:
     def greytopo() -> "StyleConfig":
         """Grey topo natural earth imagery"""
         return StyleConfig(
-            background_color="None",
             text_color="white",
             use_base_image=True,
             base_image_type="natural_earth_grey_ice",
@@ -302,7 +301,6 @@ class StyleConfig:
     def greytopo_states() -> "StyleConfig":
         """Grey topo natural earth imagery"""
         return StyleConfig(
-            background_color="None",
             text_color="white",
             use_base_image=True,
             base_image_type="natural_earth_grey_ice",
@@ -329,7 +327,7 @@ class StyleConfig:
         """Grey topo with coastlines and states for conus"""
         return StyleConfig(
             use_base_shapefiles=False,
-            background_color="None",
+            background_color="black",
             use_gshhs=False,
             boundaries=["coastlines", "states"],
             state_color="white",
@@ -379,7 +377,7 @@ class StyleConfig:
     @register_style("red_state_coast")
     def red_state_coast() -> "StyleConfig":
         return StyleConfig(
-            background_color="None",
+            background_color="black",
             use_base_shapefiles=False,
             boundaries=["coastlines", "states", "rivers"],
             state_color="#FF0000",
@@ -395,7 +393,7 @@ class StyleConfig:
     @register_style("white_state_coast")
     def white_state_coast() -> "StyleConfig":
         return StyleConfig(
-            background_color="None",
+            background_color="black",
             use_base_shapefiles=False,
             boundaries=["coastlines", "states"],
             state_color="white",
@@ -410,7 +408,7 @@ class StyleConfig:
     def t2m() -> "StyleConfig":
         """Style for 2 Meter Temperature product plots"""
         return StyleConfig(
-            background_color="None",
+            background_color="black",
             use_base_shapefiles=False,
             boundaries=["coastlines", "countries", "states"],
             coastline_width=0.1,
