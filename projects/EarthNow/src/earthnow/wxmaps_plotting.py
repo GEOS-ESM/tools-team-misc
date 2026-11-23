@@ -133,11 +133,14 @@ class WxMapPlotter:
 
         self.feature_resolution = feature_resolution
 
-        # Turn off boundaries for all global views
+        # Global view: no boundaries
         if self.config.name == "global":
             boundaries = []
-        else:
+        # Conus: no sea ice
+        if self.config.name == "conus":
             boundaries = self.style.boundaries
+            self.style.show_seaice = False
+
         logger.debug(
             f"Boundaries plotting: {boundaries}\nNote that boundaries defined in style may be overridden by runtime args or optional function call"
         )
