@@ -73,5 +73,5 @@ def plot_longwave_window_ir(fig, ax, plotter, reader, args):
             plot,
             tick_levels,
             variable,
-            "11.2 μm Longwave Window Brightness Temperature (°C)",
+            "11.2 micron Longwave Window Brightness Temperature (°C)",
         )

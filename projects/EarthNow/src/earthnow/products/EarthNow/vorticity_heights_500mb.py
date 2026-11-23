@@ -124,5 +124,5 @@ def plot_vorticity_heights_500mb(fig, ax, plotter, reader, args):
             plot,
             levels,
             variable,
-            "500mb cyclonic relative vorticity (×10⁻⁵ s⁻¹) and height (m)",
+            "500mb Cyclonic Relative Vorticity (×10⁻⁵ s⁻¹) and Height (m)",
         )
