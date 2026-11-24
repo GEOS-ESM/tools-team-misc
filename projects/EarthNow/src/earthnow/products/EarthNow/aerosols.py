@@ -42,7 +42,6 @@ aerosols = {
 }
 
 nvars = len(aerosols.keys())
-create_colorbar = False
 mappables = []
 levels = []
 labels = []
@@ -113,7 +112,7 @@ def plot_aerosols(fig, ax, plotter, reader, args):
         #     fraction=0.05,
         # )  # Testing the colorbar matches
 
-        if create_colorbar == True:
+        if args.colorbar:
             # Store vars for generation of cbars out of loop
             import matplotlib.cm as cm
 
@@ -121,7 +120,7 @@ def plot_aerosols(fig, ax, plotter, reader, args):
             levels.append(np.linspace(0, float(values["max_val"]), 11))
             labels.append(f"{name} Aerosol Optical Thickness")
 
-    if create_colorbar == True:
+    if args.colorbar:
         generate_colorbars(mappables[::-1], levels[::-1], labels[::-1])
 
 
@@ -130,12 +129,9 @@ def generate_colorbars(mappables: list, levels: list, labels: list):
 
     from earthnow.wxmaps_utils import build_and_save_colorbars
 
-    colorbar_output = (
-        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
-    )
     build_and_save_colorbars(
         mappables,
         levels,
-        colorbar_output,
+        variable,
         labels,
     )

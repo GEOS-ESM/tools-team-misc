@@ -10,8 +10,12 @@ from matplotlib.colors import LinearSegmentedColormap
 from earthnow.products.registry import register
 import logging
 
-variable = "radar_reflectivity_EarthNow"
-colorbar_only = False
+variable = "radar"
+colorbar_only = True
+
+labels = []
+mappables = []
+ticks = []
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -70,59 +74,23 @@ MIX_COLORS = (
     / 255.0
 )
 
-if colorbar_only:
-    import matplotlib.cm as cm
-
-    mappables = []
-    ticks = []
-    labels = []
 
 # Generate colormaps
 # Rain reflectivity
 rain_cmap = ListedColormap(REFL_COLORS)
 rain_norm = BoundaryNorm(REFL_LEVELS, ncolors=rain_cmap.N, clip=True)
-if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=rain_norm, cmap=rain_cmap))
-    ticks.append(
-        [
-            (REFL_LEVELS.min(), "Light"),
-            (np.median(REFL_LEVELS), "Moderate"),
-            (REFL_LEVELS.max(), "Heavy"),
-        ]
-    )
-    labels.append("Rain")
 
 # Snow Reflectivity
 snow_cmap = LinearSegmentedColormap.from_list(
     "snow_cmap", SNOW_COLORS, N=len(REFL_LEVELS) - 1
 )
 snow_norm = BoundaryNorm(REFL_LEVELS, ncolors=snow_cmap.N, clip=True)
-if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=snow_norm, cmap=snow_cmap))
-    ticks.append(
-        [
-            (REFL_LEVELS.min(), "Light"),
-            (np.median(REFL_LEVELS), "Moderate"),
-            (REFL_LEVELS.max(), "Heavy"),
-        ]
-    )
-    labels.append("Snow")
 
 # Ice reflectivity
 ice_cmap = LinearSegmentedColormap.from_list(
     "ice_cmap", ICE_COLORS, N=len(REFL_LEVELS) - 1
 )
 ice_norm = BoundaryNorm(REFL_LEVELS, ncolors=ice_cmap.N, clip=True)
-if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=ice_norm, cmap=ice_cmap))
-    ticks.append(
-        [
-            (REFL_LEVELS.min(), "Light"),
-            (np.median(REFL_LEVELS), "Moderate"),
-            (REFL_LEVELS.max(), "Heavy"),
-        ]
-    )
-    labels.append("Ice")
 
 # Frzr reflectivity
 frzr_cmap = LinearSegmentedColormap.from_list(
@@ -130,16 +98,29 @@ frzr_cmap = LinearSegmentedColormap.from_list(
 )
 frzr_norm = BoundaryNorm(REFL_LEVELS, ncolors=frzr_cmap.N, clip=True)
 if colorbar_only:
-    mappables.append(cm.ScalarMappable(norm=frzr_norm, cmap=frzr_cmap))
-    ticks.append(
-        [
-            (REFL_LEVELS.min(), "Light"),
-            (np.median(REFL_LEVELS), "Moderate"),
-            (REFL_LEVELS.max(), "Heavy"),
-        ]
-    )
-    labels.append("Mix")
+    import matplotlib.cm as cm
 
+    ticks_extents = [
+        (REFL_LEVELS.min(), "Light"),
+        (np.median(REFL_LEVELS), "Moderate"),
+        (REFL_LEVELS.max(), "Heavy"),
+    ]
+
+    labels.append("Mix")
+    mappables.append(cm.ScalarMappable(norm=frzr_norm, cmap=frzr_cmap))
+    ticks.append(ticks_extents)
+
+    labels.append("Snow")
+    mappables.append(cm.ScalarMappable(norm=snow_norm, cmap=snow_cmap))
+    ticks.append(ticks_extents)
+
+    labels.append("Rain")
+    mappables.append(cm.ScalarMappable(norm=rain_norm, cmap=rain_cmap))
+    ticks.append(ticks_extents)
+
+    labels.append("Ice")  # I don't see ice on the EarthNow cbar
+    mappables.append(cm.ScalarMappable(norm=ice_norm, cmap=ice_cmap))
+    ticks.append(ticks_extents)
 # ------------------------------------------------------------------
 # Main product function
 # ------------------------------------------------------------------
@@ -153,7 +134,7 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
     # Initialize logger
     logger = logging.getLogger(__name__)
 
-    if colorbar_only:
+    if args.colorbar:
         colorbar_creation()
     else:
         noise_floor = 1e-7
@@ -388,14 +369,10 @@ def plot_radar_reflectivity(fig, ax, plotter, reader, args):
 def colorbar_creation():
     from earthnow.wxmaps_utils import build_and_save_colorbars
 
-    colorbar_output = (
-        f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
-    )
-
     build_and_save_colorbars(
         mappables,
         ticks,
-        colorbar_output,
+        variable,
         labels,
         subtitles=True,
         title="Radar Reflectivity [dBZ]",

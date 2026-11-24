@@ -10,8 +10,7 @@ from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 
-variable = "mid_level_water_vapor_EarthNow"
-create_colorbar = False
+variable = "band09"
 
 # ------------------------------------------------------------------
 # Colormap + levels
@@ -60,17 +59,16 @@ def plot_mid_level_water_vapor(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
-    if create_colorbar == True:
+    if args.colorbar:
         """Generate colorbar for mid-level water vapor"""
-        from earthnow.wxmaps_utils import save_colorbar_single
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
-        colorbar_output = (
-            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
-        )
+        tick_labels = [(min(clevs), "Wet"), (max(clevs), "Dry")]
 
-        save_colorbar_single(
+        build_and_save_colorbars(
             plot,
-            colorbar_output,
-            label="6.9 micron - Mid-Level Water Vapor - IR",
-            ticks=clevs,
+            tick_labels,
+            variable,
+            "6.9 micron - Mid-Level Water Vapor - IR",
+            invert_x=True,
         )

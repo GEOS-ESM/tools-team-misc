@@ -33,6 +33,7 @@ plot_global:
     - band14
     - radar
     - sandwich
+    - precip
   streams: [conus2km]
   regions: [global]
 plot_conus_LCC:
@@ -45,6 +46,7 @@ plot_conus_LCC:
     - winds
     - t2m
     - radar
+    - precip
   streams: [conus2km_lcc]
   regions: [conus]
 plot_conus_latlon:
@@ -63,9 +65,9 @@ products:
   t2m:
     product: temperature_2m_EarthNow
     style: t2m
-  rainsnow:
+  precip:
     product: rain_snow_accumulation_total_EarthNow
-    style: light
+    style: greytopo_states
   vort500:
     product: vorticity_heights_500mb_EarthNow
     style: greytopo
@@ -98,7 +100,7 @@ products:
     style: red_state_coast
   band14:
     product: longwave_window_ir_EarthNow
-    style: greytopo_state_coast
+    style: state_coasts_white
   radar:
     product: radar_reflectivity_EarthNow
     style: greyblue

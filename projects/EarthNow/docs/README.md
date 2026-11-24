@@ -13,6 +13,24 @@ BASIC EARTHNOW INFORMATION (EXISTING IDL WORKFLOW)
 **Movies**: `/discover/nobackup/projects/gmao/g6dev/pub/MOVIES_EIC_NOW`
 
 **ColorBars**: `/discover/nobackup/projects/gmao/g6dev/pub/MOVIES_EIC_NOW/ColorBars`
+    *list of all png's in this folder:*
+        ploteic_aerosols-cbar-black.png
+        ploteic_aerosols-cbar-white.png
+        ploteic_band09-cbar-white.png
+        ploteic_band14-cbar-white.png
+        ploteic_band16-cbar-white.png
+        ploteic_cape-cbar-white.png
+        ploteic_carbon-cbar-white.png
+        ploteic_geocolor-cbar-white.png
+        ploteic_helicity-cbar-white.png
+        ploteic_precip-cbar-white.png
+        ploteic_radar-cbar-white.png
+        ploteic_sandwich-cbar-white.png
+        ploteic_t2m-cbar-white.png
+        ploteic_tanom-cbar-white.png
+        ploteic_vort500-cbar-white.png
+        ploteic_wind250-cbar-white.png
+        ploteic_winds-cbar-white.png
 
 **Timestamps**: `/discover/nobackup/projects/gmao/g6dev/pub/WebGL/geos_earth/include/geos/`
 

@@ -31,6 +31,7 @@ WARPED_CACHE_VERSION = 1
 class BaseImageType(Enum):
     """Predefined base image types"""
 
+    NATURAL_EARTH_GREY_ICE = "natural_earth_grey_ice"
     NATURAL_EARTH_GREY = "natural_earth_grey"
     NATURAL_EARTH_GREYBLUE = "natural_earth_greyblue"
     NATURAL_EARTH_LIGHT = "natural_earth_light"
@@ -48,6 +49,12 @@ class BaseImageConfig:
 
     # Predefined image paths
     IMAGES = {
+        "natural_earth_grey_ice": {
+            "path": "natural_earth_grey_16200x8100.jpeg",
+            "extent": [-180, 180, -90, 90],
+            "description": "Natural Earth Greyscale (with ice)",
+            "projection": "platecarree",
+        },
         "natural_earth_grey": {
             "path": "natural_earth_grey_noice_16200x8100.jpg",
             "extent": [-180, 180, -90, 90],

@@ -10,8 +10,7 @@ from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 
-variable = "co2_longwave_ir_EarthNow"
-create_colorbar = False
+variable = "band16"
 
 # ------------------------------------------------------------------
 # Colormap + levels
@@ -60,16 +59,15 @@ def plot_co2_longwave_ir(fig, ax, plotter, reader, args):
         zorder=4,
     )
 
-    if create_colorbar == True:
+    if args.colorbar:
         """Generate colorbar for CO2 longwave IR"""
-        from earthnow.wxmaps_utils import save_colorbar_single
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
-        colorbar_output = (
-            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
-        )
-        save_colorbar_single(
+        tick_labels = [(min(clevs), "Cold"), (max(clevs), "Warm")]
+
+        build_and_save_colorbars(
             plot,
-            colorbar_output,
-            label="13.3 micron -  CO2 Longwave Band - IR",
-            ticks=clevs,
+            tick_labels,
+            variable,
+            "13.3 micron -  CO2 Longwave Band - IR",
         )

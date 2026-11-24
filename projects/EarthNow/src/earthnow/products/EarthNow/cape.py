@@ -14,7 +14,6 @@ from wxvis import colors
 from matplotlib import colormaps
 
 variable = "cape"
-create_colorbar = False
 
 # ------------------------------------------------------------------
 # CAPE colormap + levels
@@ -98,19 +97,16 @@ def plot_cape(fig, ax, plotter, reader, args):
         transform=ccrs.PlateCarree(),
     )
 
-    if create_colorbar == True:
+    if args.colorbar:
         generate_colorbar(plot)
 
 
 def generate_colorbar(plot):
     from earthnow.wxmaps_utils import build_and_save_colorbars
 
-    colorbar_output = (
-        f"/discover/nobackup/hzafar/EarthNow/plots/{variable}_colorbar.png"
-    )
     build_and_save_colorbars(
         plot,
         CAPE_LEVELS[::4],
-        colorbar_output,
+        variable,
         "Surface-Based CAPE [J/kg]",
     )

@@ -77,9 +77,6 @@ _CARTOPY_CONFIG = env_path("CARTOPY_CONFIG", "/discover/swdev/gmao-tools/Visuali
 # Derived constants
 # ---------------------------------------------------------------------------
 COLORTABLE_DIR = env_path("EARTHNOW_COLORTABLE_DIR", _G6DEV_PUB / "ColorTables")
-COLORBAR_OUT_DIR = env_path(
-    "EARTHNOW_COLORBAR_OUT_DIR", _G6DEV_PUB / "WxMaps" / "ColorBars"
-)
 BASE_IMAGE_DIR = env_path("EARTHNOW_BASE_IMAGE_DIR", _G6DEV_PUB / "BMNG")
 GSHHS_DIR = env_path("EARTHNOW_GSHHS_DIR", _OSSE2_ROOT / "GSHHG" / "v2.3.7")
 NWS_SHAPEFILE_DIR = env_path(
@@ -133,10 +130,6 @@ ROADS_MAJOR_10M = env_path(
 
 def colortable(filename: str) -> Path:
     return COLORTABLE_DIR / filename
-
-
-def colorbar_output(filename: str) -> Path:
-    return COLORBAR_OUT_DIR / filename
 
 
 def city_file(filename: str) -> Path:

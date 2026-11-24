@@ -11,11 +11,10 @@ from earthnow.products.registry import register
 from earthnow.wxmaps_utils import load_color_table
 from earthnow import paths
 
+variable = "band14"
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
 # ------------------------------------------------------------------
-
-colorbar_only = False
 
 COLORS = load_color_table(paths.colortable("NESDIS_IR_10p3micron.txt"))
 
@@ -36,45 +35,43 @@ def plot_longwave_window_ir(fig, ax, plotter, reader, args):
     """
     Plot longwave window IR (C)
     """
-    if colorbar_only:
-        generate_colorbar(mappable)
-    else:
-        # Read from reader (reader decides the collection)
-        data, lats, lons, meta = reader.read_variable(
-            args.fdate, args.pdate, variables=["TBRB06RG"]
-        )
-        data = data.astype(np.float32) - 273.15  # Celcius
-
-        # ------------------------------------------------------------
-        # Plot field
-        # ------------------------------------------------------------
-        lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
-        ax.pcolormesh(
-            lons,
-            lats,
-            data,
-            cmap=cmap,
-            norm=norm,
-            transform=ccrs.PlateCarree(),
-            shading="nearest",
-            zorder=4,
-        )
-
-
-def generate_colorbar(mappable):
-    """Generate colorbar for longwave window IR"""
-    from earthnow.wxmaps_utils import build_and_save_colorbars
-
-    # Use representative tick levels instead of all 256
-    tick_levels = [-110, -59, -20, 6, 31, 57]
-
-    # output = paths.colorbar_output("longwave_window_ir.png")
-    output = (
-        "/discover/nobackup/eibell/EarthNow/colorbars/longwave_window_ir_EarthNow.png"
+    # Read from reader (reader decides the collection)
+    data, lats, lons, meta = reader.read_variable(
+        args.fdate, args.pdate, variables=["TBRB06RG"]
     )
-    build_and_save_colorbars(
-        mappable,
-        tick_levels,
-        output,
-        labels="11.2 micron - Longwave Band - IR [C]",
+    data = data.astype(np.float32) - 273.15  # Celcius
+
+    # ------------------------------------------------------------
+    # Colormap + normalization
+    # ------------------------------------------------------------
+    cmap = ListedColormap(COLORS)
+    norm = BoundaryNorm(LEVELS, ncolors=cmap.N, clip=True)
+
+    # ------------------------------------------------------------
+    # Plot field
+    # ------------------------------------------------------------
+    lats, lons, data = plotter.crop_data_to_view(lats, lons, data)
+    plot = ax.pcolormesh(
+        lons,
+        lats,
+        data,
+        cmap=cmap,
+        norm=norm,
+        transform=ccrs.PlateCarree(),
+        shading="nearest",
+        zorder=4,
     )
+
+    if args.colorbar:
+        """Generate colorbar for longwave window IR"""
+        from earthnow.wxmaps_utils import build_and_save_colorbars
+
+        # Use representative tick levels instead of all 256
+        tick_levels = [-110, -59, -20, 6, 31, 57]
+
+        build_and_save_colorbars(
+            plot,
+            tick_levels,
+            variable,
+            "11.2 micron Longwave Window Brightness Temperature (°C)",
+        )

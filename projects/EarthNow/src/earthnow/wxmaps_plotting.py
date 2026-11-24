@@ -29,6 +29,7 @@ from earthnow.wxmaps_config import (
     StyleConfig,
 )
 from earthnow.paths import (
+    _CARTOPY_CONFIG,
     COUNTRY_BORDERS,
     STATE_BORDERS_5M,
     COUNTY_BORDERS_5M,
@@ -37,6 +38,9 @@ from earthnow.paths import (
     city_file,
 )
 
+import cartopy
+
+cartopy.config["data_dir"] = _CARTOPY_CONFIG  # use naturalearth in shared dir
 import logging
 
 logger = logging.getLogger(__name__)
@@ -112,6 +116,7 @@ class WxMapPlotter:
     def create_basemap(
         self, boundaries: Optional[list[str]] = None, feature_resolution: str = "50m"
     ) -> Tuple[plt.Figure, plt.Axes]:
+        # Future enhancement: dynamic feature resolution based on map extent?
         """Create base map with specified boundaries"""
 
         self.feature_resolution = feature_resolution
@@ -127,10 +132,13 @@ class WxMapPlotter:
 
         # Create figure with high DPI
         self.fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
-        self.fig.patch.set_facecolor("white")
 
         # Create axes with projection - no margins for wxmaps look
-        self.ax = self.fig.add_axes([0, 0, 1, 1], projection=self.config.projection)
+        self.ax = self.fig.add_axes(
+            [0, 0, 1, 1],
+            projection=self.config.projection,
+            facecolor=self.style.background_color,
+        )
 
         # Set extent - handle geostationary projections differently
         if self.config.native_extent is not None:
@@ -158,6 +166,33 @@ class WxMapPlotter:
             # Use base earth image
             print("Plotting base image...")
             self._add_base_image()
+            if self.style.base_image_ocean:
+                print(
+                    "   Base image ocean enabled: adding high res ocean/lake color fill..."
+                )
+                # High res for fill for total coverage of image
+                self.ax.add_feature(
+                    cfeature.OCEAN.with_scale("10m"),
+                    facecolor=self.style.ocean_color,
+                    zorder=0,
+                )
+                self.ax.add_feature(
+                    cfeature.LAKES.with_scale("10m"),
+                    edgecolor="none",
+                    facecolor=self.style.ocean_color,
+                    zorder=0,
+                )
+                historic_lakes = cfeature.NaturalEarthFeature(
+                    category="physical",
+                    name="lakes_historic",
+                    scale="10m",
+                )
+                self.ax.add_feature(
+                    historic_lakes,
+                    edgecolor="none",
+                    facecolor=self.style.ocean_color,
+                    zorder=0,
+                )
         elif self.style.use_gshhs:
             # Use GSHHS for high-resolution land/water
             self._add_gshhs_background()
@@ -1661,9 +1696,6 @@ class WxMapPlotter:
 
         if optimize and filename.endswith(".png"):
             save_kwargs["pil_kwargs"] = {"compress_level": 6, "optimize": True}
-
-        if self.style.background_color == "None":
-            save_kwargs["transparent"] = True
 
         # Ensure output directory exists
         os.makedirs(os.path.dirname(filename), exist_ok=True)

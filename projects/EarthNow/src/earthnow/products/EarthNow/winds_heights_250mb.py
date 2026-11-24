@@ -17,8 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 # logger.info('====> Starting plotting script')
 
-variable = "winds_heights_250mb_EarthNow"
-create_colorbar = False
+variable = "wind250"
 
 # ------------------------------------------------------------------
 # Windspeed colormap + levels (wxmaps-style)
@@ -174,29 +173,12 @@ def plot_winds_heights_250mb(fig, ax, plotter, reader, args):
     # for label in clabels:
     #    label.set_fontweight("bold")
 
-    if create_colorbar == True:
-        from earthnow.wxmaps_utils import save_colorbar_single
+    if args.colorbar:
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
-        colorbar_output = (
-            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
-        )
-        save_colorbar_single(
+        build_and_save_colorbars(
             plot,
-            colorbar_output,
-            label="250mb Wind Speed [m/s] and Mean Sea Level Pressure [hPa]",
-            ticks=wLEVELS,
+            wLEVELS,
+            variable,
+            "250mb Wind Speed [m/s] and Mean Sea Level Pressure [hPa]",
         )
-
-
-def generate_colorbar():
-    """Generate colorbar for 250mb winds/heights"""
-    from earthnow.wxmaps_utils import save_colorbar_single
-
-    output = paths.colorbar_output("winds_heights_250mb_EarthNow.png")
-    save_colorbar_single(
-        wCOLORS,
-        wLEVELS,
-        output,
-        label="250mb Wind Speed (m/s) with Sea Level Pressure (mb)",
-        extend="max",
-    )

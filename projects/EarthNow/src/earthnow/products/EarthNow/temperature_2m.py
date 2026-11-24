@@ -9,8 +9,7 @@ from matplotlib.colors import LinearSegmentedColormap, Normalize
 from earthnow.products.registry import register
 from earthnow import paths
 
-variable = "temperature_2m_EarthNow"
-create_colorbar = False
+variable = "t2m"
 
 # ------------------------------------------------------------------
 # Reflectivity colormap + levels (wxmaps-style)
@@ -140,16 +139,14 @@ def plot_temperature_2m(fig, ax, plotter, reader, args):
         # Add city temperature labels
         plotter.add_city_temperatures(data, lons, lats)
 
-    if create_colorbar == True:
+    if args.colorbar:
         """Generate colorbar for 2m temperature"""
-        from earthnow.wxmaps_utils import save_colorbar_single
+        from earthnow.wxmaps_utils import build_and_save_colorbars
 
-        colorbar_output = (
-            f"/discover/nobackup/eibell/EarthNow/plots/{variable}_colorbar.png"
-        )
-        save_colorbar_single(
+        build_and_save_colorbars(
             plot,
-            colorbar_output,
-            label="2-Meter Temperature (°F)",
-            ticks=LEVELS[1:-1],
+            LEVELS[1:-1],
+            variable,
+            "2-Meter Temperature (°F)",
+            tick_labelsize=42,
         )
