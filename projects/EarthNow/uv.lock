@@ -399,6 +399,7 @@ dependencies = [
     { name = "astropy" },
     { name = "cartopy" },
     { name = "geopandas" },
+    { name = "global-land-mask" },
     { name = "matplotlib" },
     { name = "netcdf4" },
     { name = "numpy" },
@@ -430,6 +431,7 @@ requires-dist = [
     { name = "astropy" },
     { name = "cartopy", specifier = ">=0.22" },
     { name = "geopandas" },
+    { name = "global-land-mask", specifier = ">=1.0.0" },
     { name = "matplotlib", specifier = ">=3.7" },
     { name = "netcdf4", specifier = ">=1.6.0" },
     { name = "numpy", specifier = ">=1.23" },
@@ -538,6 +540,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/85/ba/8e6b2091878e99e86a36a814dcaeff652ed48bdb03d53e78e15aaa63a914/geopandas-1.1.3.tar.gz", hash = "sha256:91a31989b6f566012838d21d5f8033f37dce882079ccb7cfdc40d5ccce7f284f", size = 336718, upload-time = "2026-03-09T21:49:09.545Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3c/78/6a04792ace63a93e162f1305392d500ae8ddcb620e7eb88a22fd622b35bb/geopandas-1.1.3-py3-none-any.whl", hash = "sha256:90d62a64f95eaa3be2ccc115c5f3d6e24208bb11983b390fdc0621a3eccd0230", size = 342514, upload-time = "2026-03-09T21:49:07.973Z" },
+]
+
+[[package]]
+name = "global-land-mask"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6e/cd/d06fe252cbe41b85c7a1a54e4d4214c79b770eb5d6c6fa3b03e56371a6da/global-land-mask-1.0.0.tar.gz", hash = "sha256:956bf02e8b05bfc9f3a29cbc6e97d5ba4151c0732504acc73c2db9ea325ecff3", size = 1825546, upload-time = "2020-10-05T13:15:30.119Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e6/e9/eaac67e39b68f64828a164f8dbfcf13baccd7382704ea120152af475f520/global_land_mask-1.0.0-py3-none-any.whl", hash = "sha256:07751fbb4e3834ee508a84ea64d9bd5340fbd0a8c951e24b43c323fcc670bb62", size = 1836944, upload-time = "2020-10-05T13:15:20.322Z" },
 ]
 
 [[package]]

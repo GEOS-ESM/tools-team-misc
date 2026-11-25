@@ -338,6 +338,7 @@ def plot_single_pdate(pdate, args, style, map_config):
     )
 
     fig, ax = plotter.create_basemap(
+        pdate=local_args.pdate,
         feature_resolution=local_args.feature_resolution,
     )
     # Create reader for this worker
@@ -362,8 +363,7 @@ def plot_single_pdate(pdate, args, style, map_config):
 
         # Add NWS warnings if requested (BEFORE timestamp so warnings are below text)
         if style.show_nws_warnings:
-            pdate_dt = parse_date_string(local_args.pdate)
-            plotter.add_nws_warnings(pdate_dt)
+            plotter.add_nws_warnings(pdate)
 
     if style.show_timestamp:
         plotter.add_forecast_timestamp(
