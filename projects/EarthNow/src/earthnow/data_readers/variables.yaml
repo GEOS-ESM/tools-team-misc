@@ -206,3 +206,7 @@ TBRB05RG:
     inst1_2d_asm_Nx: TBRB05RG
     hwt_15mn_slv_LCC: TBRB05RG
     hwt_30mn_slv_LCC: TBRB05RG
+PHIS:
+  description: XXXXX
+  collection:
+    "const_2d_asm_Nx": PHIS

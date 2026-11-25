@@ -4,6 +4,7 @@ Product package for EarthNow
 
 # import modules so they self-register
 from . import temperature_2m
+from . import temperature_2m_anomaly
 from . import winds_10m_EarthNow
 from . import vorticity_heights_500mb
 from . import winds_heights_250mb

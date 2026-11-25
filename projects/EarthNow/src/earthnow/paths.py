@@ -8,6 +8,7 @@ environment variables to adapt to a different HPC cluster or local install:
     EARTHNOW_OSSE2_ROOT  — OSSE2 project data root
     EARTHNOW_GMAO_OPS    — GMAO ops published data root
     EARTHNOW_CITIES_DIR  — city data files directory
+    EARTHNOW_CLIMATOLOGY_DIR — climatology data files directory
 """
 
 import os
@@ -95,6 +96,12 @@ DEFAULT_GEOS_FP_BASE = env_path("EARTHNOW_DEFAULT_GEOS_FP_BASE", _GMAO_OPS)
 
 # Mapping objects
 CITIES_DIR = env_path("EARTHNOW_CITIES_DIR", _CARTOPY_CONFIG / "cities")
+
+# Climatology data
+CLIMATOLOGY_FILE = env_path(
+    "EARTHNOW_CLIMATOLOGY_FILE",
+    "/discover/nobackup/npthomas/MERRA2/dailyavgs/daily_climatology/temperature_climatology_19912020.nc"
+)
 
 SHAPEFILES_PATH = env_path("SHAPEFILES_PATH", _CARTOPY_CONFIG / "shapefiles")
 

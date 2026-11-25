@@ -34,6 +34,7 @@ plot_global:
     - radar
     - sandwich
     - precip
+    - t2m_anom
   streams: [conus2km]
   regions: [global]
 plot_conus_LCC:
@@ -64,6 +65,9 @@ plot_conus_latlon:
 products:
   t2m:
     product: temperature_2m_EarthNow
+    style: t2m
+  t2m_anom:
+    product: temperature_2m_anomaly_EarthNow
     style: t2m
   precip:
     product: rain_snow_accumulation_total_EarthNow
