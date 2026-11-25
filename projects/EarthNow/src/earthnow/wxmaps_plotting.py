@@ -6,19 +6,20 @@ wxmaps design with full style control
 """
 
 import gc
-import time
 import matplotlib
 
 matplotlib.use("Agg")  # Use non-interactive backend for high-res rendering
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 from matplotlib import colormaps
 from matplotlib.colors import Normalize
 from wxvis import colors
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from cartopy.mpl.geoaxes import GeoAxes
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.ticker as mticker
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, cast
 import numpy as np
 import pandas as pd
 import warnings
@@ -31,7 +32,6 @@ from global_land_mask import globe
 from earthnow.wxmaps_config import (
     MapConfig,
     WxMapsConfig,
-    ResolutionConfig,
     StyleConfig,
 )
 
@@ -127,17 +127,20 @@ class WxMapPlotter:
         pdate: str,  # Required arg for plotting sea ice
         boundaries: Optional[list[str]] = None,
         feature_resolution: str = "50m",
-    ) -> Tuple[plt.Figure, plt.Axes]:
+    ) -> Tuple[Figure, GeoAxes]:
         # Future enhancement: dynamic feature resolution based on map extent?
         """Create base map with specified boundaries"""
 
         self.feature_resolution = feature_resolution
 
-        # Turn off boundaries for all global views
+        # Global view: no boundaries
         if self.config.name == "global":
-            boundaries = []
-        else:
+            boundaries = None
+        # Conus: no sea ice
+        if self.config.name == "conus":
             boundaries = self.style.boundaries
+            self.style.show_seaice = False
+
         logger.debug(
             f"Boundaries plotting: {boundaries}\nNote that boundaries defined in style may be overridden by runtime args or optional function call"
         )
@@ -146,10 +149,14 @@ class WxMapPlotter:
         self.fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
 
         # Create axes with projection - no margins for wxmaps look
-        self.ax = self.fig.add_axes(
-            [0, 0, 1, 1],
-            projection=self.config.projection,
-            facecolor=self.style.background_color,
+        # cast just to keep type checker axes type correct
+        self.ax = cast(
+            GeoAxes,
+            self.fig.add_axes(
+                (0, 0, 1, 1),
+                projection=self.config.projection,
+                facecolor=self.style.background_color,
+            ),
         )
 
         # Set extent - handle geostationary projections differently
@@ -179,51 +186,14 @@ class WxMapPlotter:
             print("Plotting base image...")
             self._add_base_image()
             if self.style.base_image_ocean:
-                print(
-                    "   Base image ocean enabled: adding high res ocean/lake color fill..."
-                )
-                # High res for fill for total coverage of image
-                self.ax.add_feature(
-                    cfeature.OCEAN.with_scale("10m"),
-                    facecolor=self.style.ocean_color,
-                    zorder=0,
-                )
-                self.ax.add_feature(
-                    cfeature.LAKES.with_scale("10m"),
-                    edgecolor="none",
-                    facecolor=self.style.ocean_color,
-                    zorder=0,
-                )
-                historic_lakes = cfeature.NaturalEarthFeature(
-                    category="physical",
-                    name="lakes_historic",
-                    scale="10m",
-                )
-                self.ax.add_feature(
-                    historic_lakes,
-                    edgecolor="none",
-                    facecolor=self.style.ocean_color,
-                    zorder=0,
-                )
+                self._add_base_image_ocean_fill()
         elif self.style.use_gshhs:
             # Use GSHHS for high-resolution land/water
             self._add_gshhs_background()
             print("Added GSHHS for land/water boundaries...")
         elif self.style.use_base_shapefiles:
             # Use default Cartopy features
-            self.ax.add_feature(
-                cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
-            )
-            self.ax.add_feature(
-                cfeature.LAND, facecolor=self.style.land_color, zorder=0
-            )
-            self.ax.add_feature(
-                cfeature.LAKES.with_scale(feature_resolution),
-                edgecolor="none",
-                facecolor=self.style.ocean_color,
-                zorder=0,
-            )
-            print("Added Cartopy land/water boundaries")
+            self.add_default_cartopy(feature_resolution=self.feature_resolution)
 
         # ===================================================================
         # Add sea ice overlay if requested
@@ -236,123 +206,26 @@ class WxMapPlotter:
 
         # ===================================================================
         # Add boundary features (countries, states, etc.)
-        # Skip coastlines if using GSHHS (already included)
         # ===================================================================
-        if "coastlines" in boundaries:
-            self.ax.coastlines(
-                resolution=feature_resolution,
-                linewidth=self.style.coastline_width,
-                color=self.style.coastline_color,
-                alpha=self.style.coastline_alpha,
-                zorder=6,
-            )
-            # lakes included with coastlines
-            self.ax.add_feature(
-                cfeature.LAKES.with_scale(feature_resolution),
-                linewidth=self.style.lake_width,
-                edgecolor=self.style.lake_color,
-                facecolor="none",
-                alpha=self.style.lake_alpha,
-                zorder=6,
-            )
-            print("  Added Cartopy coastline+lake borders")
+        if boundaries is not None:
+            if "coastlines" in boundaries:
+                self.draw_coastlines(feature_resolution=feature_resolution)
 
-        # Using US gov compliant shape files
-        if "countries" in boundaries:
-            try:
-                from cartopy.io.shapereader import Reader
-                from cartopy.feature import ShapelyFeature
+            # Using US gov compliant shape files
+            if "countries" in boundaries:
+                self.draw_countries(feature_resolution=feature_resolution)
 
-                countries_feature = ShapelyFeature(
-                    Reader(COUNTRY_BORDERS).geometries(),
-                    crs=ccrs.PlateCarree(),
-                    linewidth=self.style.country_width,
-                    edgecolor=self.style.country_color,
-                    alpha=self.style.country_alpha,
-                    facecolor="none",
-                    zorder=5,
-                )
+            if "states" in boundaries:
+                self.draw_states(feature_resolution=feature_resolution)
 
-                self.ax.add_feature(countries_feature)
-                print("  Added US State dept country borders")
+            if "counties" in boundaries:
+                self.draw_counties()
 
-            # Fall back to cartopy if fails
-            except Exception:
-                self.ax.add_feature(
-                    cfeature.BORDERS.with_scale(feature_resolution),
-                    linewidth=self.style.country_width,
-                    edgecolor=self.style.country_color,
-                    alpha=self.style.country_alpha,
-                    facecolor="none",
-                    zorder=5,
-                )
-                print("  Added Cartopy country borders")
-
-        if "states" in boundaries:
-            try:
-                from cartopy.io.shapereader import Reader
-                from cartopy.feature import ShapelyFeature
-
-                states_feature = ShapelyFeature(
-                    Reader(STATE_BORDERS_5M).geometries(),
-                    crs=ccrs.PlateCarree(),
-                    linewidth=self.style.state_width,
-                    edgecolor=self.style.state_color,
-                    alpha=self.style.state_alpha,
-                    facecolor="none",
-                    zorder=5,
-                )
-
-                self.ax.add_feature(states_feature)
-                print("  Added US Census state borders")
-
-            # Fall back to Cartopy if failing
-            except Exception:
-                print("  Adding Cartopy state borders")
-                self.ax.add_feature(
-                    cfeature.STATES.with_scale(feature_resolution),
-                    linewidth=self.style.state_width,
-                    edgecolor=self.style.state_color,
-                    alpha=self.style.state_alpha,
-                    facecolor="none",
-                    zorder=5,
-                )
-
-        if "counties" in boundaries:
-            # Use US census counties
-            try:
-                from cartopy.io.shapereader import Reader
-                from cartopy.feature import ShapelyFeature
-
-                counties_feature = ShapelyFeature(
-                    Reader(COUNTY_BORDERS_5M).geometries(),
-                    crs=ccrs.PlateCarree(),
-                    linewidth=self.style.county_width,
-                    edgecolor=self.style.county_color,
-                    alpha=self.style.county_alpha,
-                    facecolor="none",
-                    zorder=5,
-                )
-                self.ax.add_feature(counties_feature)
-                print("  Adding US Census counties")
-
-            except Exception as e:
-                print("WARNING: Could not load county boundaries")
-                print(f"Error: {e}")
-
-        if "rivers" in boundaries:
-            print("  Adding Cartopy rivers")
-            self.ax.add_feature(
-                cfeature.RIVERS.with_scale(feature_resolution),
-                linewidth=self.style.river_width,
-                edgecolor=self.style.river_color,
-                alpha=self.style.river_alpha,
-                zorder=4,
-            )
+            if "rivers" in boundaries:
+                self.draw_rivers(feature_resolution=feature_resolution)
 
         # Add gridlines if requested
         if self.style.show_gridlines:
-            print("  Adding grid lines")
             self._add_gridlines()
 
         return self.fig, self.ax
@@ -496,21 +369,33 @@ class WxMapPlotter:
 
             traceback.print_exc()
             print("  Falling back to solid color background")
-            # Fallback to solid colors
-            self.ax.add_feature(
-                cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
-            )
-            self.ax.add_feature(
-                cfeature.LAND, facecolor=self.style.land_color, zorder=0
-            )
-            self.ax.add_feature(
-                cfeature.LAKES.with_scale(
-                    self.feature_resolution
-                ),  # Fixed: was undefined variable
-                edgecolor="none",
-                facecolor=self.style.ocean_color,
-                zorder=0,
-            )
+            self.add_default_cartopy(feature_resolution=self.feature_resolution)
+
+    def _add_base_image_ocean_fill(self):
+        print("   Base image ocean enabled: adding high res ocean/lake color fill...")
+        # High res for fill for total coverage of image
+        self.ax.add_feature(
+            cfeature.OCEAN.with_scale("10m"),
+            facecolor=self.style.ocean_color,
+            zorder=0,
+        )
+        self.ax.add_feature(
+            cfeature.LAKES.with_scale("10m"),
+            edgecolor="none",
+            facecolor=self.style.ocean_color,
+            zorder=0,
+        )
+        historic_lakes = cfeature.NaturalEarthFeature(
+            category="physical",
+            name="lakes_historic",
+            scale="10m",
+        )
+        self.ax.add_feature(
+            historic_lakes,
+            edgecolor="none",
+            facecolor=self.style.ocean_color,
+            zorder=0,
+        )
 
     def _add_seaice_overlay(self, pdate_str: str):
         """
@@ -779,18 +664,7 @@ class WxMapPlotter:
                 print(
                     "  WARNING: No GSHHS polygons found in map extent! Falling back to Cartopy."
                 )
-                self.ax.add_feature(
-                    cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
-                )
-                self.ax.add_feature(
-                    cfeature.LAND, facecolor=self.style.land_color, zorder=0
-                )
-                self.ax.add_feature(
-                    cfeature.LAKES.with_scale(feature_resolution),
-                    edgecolor="none",
-                    facecolor=self.style.ocean_color,
-                    zorder=0,
-                )
+                self.add_default_cartopy(feature_resolution=self.feature_resolution)
                 return
 
             # Show polygon level distribution
@@ -847,12 +721,7 @@ class WxMapPlotter:
             traceback.print_exc()
             print("  Falling back to standard Cartopy features")
             # Fallback to cartopy features
-            self.ax.add_feature(
-                cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0
-            )
-            self.ax.add_feature(
-                cfeature.LAND, facecolor=self.style.land_color, zorder=0
-            )
+            self.add_default_cartopy(feature_resolution=self.feature_resolution)
 
     def _add_gridlines(self):
         """Add gridlines to the map with resolution-appropriate styling"""
@@ -873,6 +742,7 @@ class WxMapPlotter:
             linestyle=self.style.gridline_style,
             zorder=7,
         )
+        print("  Added grid lines")
 
         if self.style.show_grid_labels:
             # Configure gridline labels
@@ -912,6 +782,130 @@ class WxMapPlotter:
     # ===================================================================
     # Boundary drawing primitives
     # ===================================================================
+    def draw_coastlines(self, feature_resolution: str = "50m"):
+        """Draw coastlines (including lake boundaries)"""
+        self.ax.coastlines(
+            resolution=feature_resolution,
+            color=self.style.coastline_color,
+            linewidth=self.style.coastline_width,
+            alpha=self.style.coastline_alpha,
+            zorder=6,
+        )
+
+        self.ax.add_feature(
+            cfeature.LAKES.with_scale(feature_resolution),
+            linewidth=self.style.coastline_width,
+            edgecolor=self.style.coastline_color,
+            facecolor="none",
+            alpha=self.style.coastline_alpha,
+            zorder=6,
+        )
+        print("  Added Cartopy coastline+lake borders")
+
+    def draw_countries(self, feature_resolution: str = "50m"):
+        """Draw country boundaries via state department files"""
+        try:
+            from cartopy.io.shapereader import Reader
+            from cartopy.feature import ShapelyFeature
+
+            countries_feature = ShapelyFeature(
+                Reader(COUNTRY_BORDERS).geometries(),
+                crs=ccrs.PlateCarree(),
+                linewidth=self.style.country_width,
+                edgecolor=self.style.country_color,
+                alpha=self.style.country_alpha,
+                facecolor="none",
+                zorder=5,
+            )
+
+            self.ax.add_feature(countries_feature)
+            print("  Added US State dept country borders")
+
+        # Fall back to cartopy if fails
+        except Exception:
+            self.ax.add_feature(
+                cfeature.BORDERS.with_scale(feature_resolution),
+                linewidth=self.style.country_width,
+                edgecolor=self.style.country_color,
+                alpha=self.style.country_alpha,
+                facecolor="none",
+                zorder=5,
+            )
+            print("  Added Cartopy country borders")
+
+    def draw_states(self, feature_resolution: str = "50m"):
+        """Draw state boundaries"""
+        try:
+            from cartopy.io.shapereader import Reader
+            from cartopy.feature import ShapelyFeature
+
+            states_feature = ShapelyFeature(
+                Reader(STATE_BORDERS_5M).geometries(),
+                crs=ccrs.PlateCarree(),
+                linewidth=self.style.state_width,
+                edgecolor=self.style.state_color,
+                alpha=self.style.state_alpha,
+                facecolor="none",
+                zorder=5,
+            )
+
+            self.ax.add_feature(states_feature)
+            print("  Added US Census state borders")
+
+        # Fall back to Cartopy if failing
+        except Exception:
+            self.ax.add_feature(
+                cfeature.STATES.with_scale(feature_resolution),
+                linewidth=self.style.state_width,
+                edgecolor=self.style.state_color,
+                alpha=self.style.state_alpha,
+                facecolor="none",
+                zorder=5,
+            )
+            print("  Added Cartopy state borders")
+
+    def draw_counties(self):  # Currently only one resolution available, 5m
+        # Use US census counties
+        try:
+            from cartopy.io.shapereader import Reader
+            from cartopy.feature import ShapelyFeature
+
+            counties_feature = ShapelyFeature(
+                Reader(COUNTY_BORDERS_5M).geometries(),
+                crs=ccrs.PlateCarree(),
+                linewidth=self.style.county_width,
+                edgecolor=self.style.county_color,
+                alpha=self.style.county_alpha,
+                facecolor="none",
+                zorder=5,
+            )
+            self.ax.add_feature(counties_feature)
+            print("  Added US Census counties")
+
+        except Exception as e:
+            print(f"WARNING: Could not load county boundaries\n.Error: {e}")
+
+    def draw_rivers(self, feature_resolution: str = "50m"):
+        self.ax.add_feature(
+            cfeature.RIVERS.with_scale(feature_resolution),
+            linewidth=self.style.river_width,
+            edgecolor=self.style.river_color,
+            alpha=self.style.river_alpha,
+            zorder=4,
+        )
+        print("  Added Cartopy rivers")
+
+    def add_default_cartopy(self, feature_resolution: str = "50m"):
+        # Use default Cartopy features
+        self.ax.add_feature(cfeature.OCEAN, facecolor=self.style.ocean_color, zorder=0)
+        self.ax.add_feature(cfeature.LAND, facecolor=self.style.land_color, zorder=0)
+        self.ax.add_feature(
+            cfeature.LAKES.with_scale(feature_resolution),
+            edgecolor="none",
+            facecolor=self.style.ocean_color,
+            zorder=0,
+        )
+        print("Added Cartopy land/water default fill")
 
     def draw_gshhs_coastlines(self):
         """Draw coastline outlines from GSHHS (no fill)"""
@@ -955,79 +949,6 @@ class WxMapPlotter:
 
         except Exception as e:
             print(f"Warning: GSHHS coastline outlines failed: {e}")
-
-    # ------------------------------ Note ----------------------------------
-    # I commented out these functions as they are disjointed from the boundaries under create_basemap. If we want to be able to call them individual, we can bring them back but we should move the create_basemap setting with boundaries out to here and then refer to those functions in create_basemap() so we don't have duplicate/conflicting methods
-    # -------------------------------------------------------------------
-    #
-    # def draw_coastlines(self, feature_resolution: str = "50m"):
-    #     self.ax.coastlines(
-    #         resolution=feature_resolution,
-    #         color=self.style.coastline_color,
-    #         linewidth=self.style.coastline_width,
-    #         alpha=self.style.coastline_alpha,
-    #         zorder=6,
-    #     )
-    #
-    # def draw_countries(self, feature_resolution: str = "50m"):
-    #     """Draw country boundaries"""
-    #     self.ax.add_feature(
-    #         cfeature.BORDERS.with_scale(feature_resolution),
-    #         linewidth=self.style.country_width,
-    #         edgecolor=self.style.country_color,
-    #         alpha=self.style.country_alpha,
-    #         facecolor="none",
-    #         zorder=5,
-    #     )
-    #
-    # def draw_states(self, feature_resolution: str = "50m"):
-    #     """Draw state boundaries"""
-    #     self.ax.add_feature(
-    #         cfeature.STATES.with_scale(feature_resolution),
-    #         linewidth=self.style.state_width,
-    #         edgecolor=self.style.state_color,
-    #         alpha=self.style.state_alpha,
-    #         facecolor="none",
-    #         zorder=5,
-    #     )
-    #
-    # def draw_counties(self, feature_resolution: str = "50m"):
-    #     """Draw county boundaries (requires external Natural Earth data)"""
-    #     print("Warning: County boundaries are not yet implemented")
-
-    # def draw_rivers(self, feature_resolution: str = "50m"):
-    #     """Draw rivers"""
-    #     self.ax.add_feature(
-    #         cfeature.RIVERS.with_scale(feature_resolution),
-    #         linewidth=self.style.river_width,
-    #         edgecolor=self.style.river_color,
-    #         alpha=self.style.river_alpha,
-    #         zorder=4,
-    #     )
-    #
-    # def add_boundaries(self, boundaries):
-    #     """
-    #     Draw requested map boundaries in a deterministic order.
-    #     """
-    #     if not boundaries:
-    #         return
-    #
-    #     requested = set(boundaries)
-    #
-    #     for b in BOUNDARY_ORDER:
-    #         if b not in requested:
-    #             continue
-    #
-    #         if b == "coastlines":
-    #             self.draw_coastlines()
-    #         elif b == "rivers":
-    #             self.draw_rivers()
-    #         elif b == "countries":
-    #             self.draw_countries()
-    #         elif b == "states":
-    #             self.draw_states()
-    #         elif b == "counties":
-    #             self.draw_counties()
 
     def add_cities(
         self, city_list: Optional[List[dict]] = None, min_population: int = 1000000
@@ -1201,7 +1122,7 @@ class WxMapPlotter:
 
         import geopandas as gpd
 
-        if self.style.major_only:
+        if major_only:
             roads_shp = load_roads_shapefile(
                 ROADS_MAJOR_10M
             )  # try to load major roads shapefile
@@ -1215,7 +1136,7 @@ class WxMapPlotter:
                     (roads_shp["type"] == "Major Highway")
                     | (roads_shp["type"] == "Beltway")
                 ]
-            print(f"Adding {len(roads_shp)} major roads")
+            print(f"Added {len(roads_shp)} US major roads")
         else:
             roads_shp = load_us_roads(ROADS_10M)
             print(f"Adding all US roads ({len(roads_shp)} total roads)")
@@ -1542,7 +1463,6 @@ class WxMapPlotter:
             'F' for Fahrenheit or 'C' for Celsius (affects color thresholds)
         """
         import os
-        from scipy.interpolate import RegularGridInterpolator
 
         # Temperature-based color scheme (Fahrenheit thresholds)
         if temperature_unit == "F":
